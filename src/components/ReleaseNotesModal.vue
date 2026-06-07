@@ -1,0 +1,74 @@
+<script setup lang="ts">
+import { computed, ref } from 'vue'
+
+import { appConfig } from '@/config/app'
+import { latestReleaseNote } from '@/features/release-notes/data'
+import { openExternalUrl } from '@/services/tauri/app'
+
+const groupUrl = 'https://qm.qq.com/q/QRlMlc1h2E'
+const storageKey = `${appConfig.projectId}.release-notes-seen`
+const openMessage = ref('')
+const visible = ref(window.localStorage.getItem(storageKey) !== appConfig.appVersion)
+
+const title = computed(() => `${appConfig.appName} v${appConfig.appVersion} 更新内容`)
+
+function closeModal() {
+  window.localStorage.setItem(storageKey, appConfig.appVersion)
+  visible.value = false
+}
+
+async function joinGroup() {
+  try {
+    await openExternalUrl(groupUrl)
+    openMessage.value = ''
+  } catch {
+    openMessage.value = '打开群链接失败，请到“使用帮助”页复制链接后手动打开。'
+  }
+}
+
+async function openReleaseLink(url: string) {
+  try {
+    await openExternalUrl(url)
+    openMessage.value = ''
+  } catch {
+    openMessage.value = '打开 GitHub 链接失败，请稍后手动访问。'
+  }
+}
+</script>
+
+<template>
+  <div v-if="visible" class="modal-backdrop" role="dialog" aria-modal="true" :aria-label="title">
+    <article class="release-modal">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">更新说明</p>
+          <h3>{{ title }}</h3>
+        </div>
+      </div>
+
+      <div class="release-list">
+        <p v-for="item in latestReleaseNote.items" :key="item.text">
+          <span>{{ item.text }}</span>
+          <template v-if="item.links">
+            <button
+              v-for="link in item.links"
+              :key="link.url"
+              class="inline-link-button"
+              type="button"
+              @click="openReleaseLink(link.url)"
+            >
+              {{ link.label }}
+            </button>
+          </template>
+        </p>
+      </div>
+
+      <p v-if="openMessage" class="message-line">{{ openMessage }}</p>
+
+      <div class="actions-row release-actions">
+        <button class="ghost-button" @click="joinGroup">加入交流群</button>
+        <button class="primary-button" @click="closeModal">我知道了</button>
+      </div>
+    </article>
+  </div>
+</template>
