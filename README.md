@@ -17,15 +17,17 @@
 
 ## 截图
 
-截图建议放在 GitHub 仓库的 `docs/screenshots/` 或 Release 说明里。
+下面截图覆盖安装检查、游戏设置、常用指令、启动弹窗、更新提示和辅助工具等主要界面。
 
-建议至少补充：
-
-- 安装检查页
-- 游戏设置页
-- 常用指令页
-- 启动游戏弹窗
-- 更新提示弹窗
+| | |
+|---|---|
+| ![CS2人机增强助手截图 1](docs/screenshots/screenshot-01.png) | ![CS2人机增强助手截图 2](docs/screenshots/screenshot-02.png) |
+| ![CS2人机增强助手截图 3](docs/screenshots/screenshot-03.png) | ![CS2人机增强助手截图 4](docs/screenshots/screenshot-04.png) |
+| ![CS2人机增强助手截图 5](docs/screenshots/screenshot-05.png) | ![CS2人机增强助手截图 6](docs/screenshots/screenshot-06.png) |
+| ![CS2人机增强助手截图 7](docs/screenshots/screenshot-07.png) | ![CS2人机增强助手截图 8](docs/screenshots/screenshot-08.png) |
+| ![CS2人机增强助手截图 9](docs/screenshots/screenshot-09.png) | ![CS2人机增强助手截图 10](docs/screenshots/screenshot-10.png) |
+| ![CS2人机增强助手截图 11](docs/screenshots/screenshot-11.png) | ![CS2人机增强助手截图 12](docs/screenshots/screenshot-12.png) |
+| ![CS2人机增强助手截图 13](docs/screenshots/screenshot-13.png) | |
 
 ## 下载安装
 
