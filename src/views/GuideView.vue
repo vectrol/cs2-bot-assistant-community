@@ -1,51 +1,40 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import ActionModal from '@/components/ActionModal.vue'
-import CollapsiblePanel from '@/components/CollapsiblePanel.vue'
+import CopyButton from '@/components/CopyButton.vue'
+import DiagnosticsPanel from '@/components/DiagnosticsPanel.vue'
+import StatusHero from '@/components/StatusHero.vue'
 import SummaryStrip from '@/components/SummaryStrip.vue'
+import wechatRewardImage from '@/assets/images/wechat-reward.png'
 import { guideSections } from '@/features/cs2/data'
+import { openDiagnosticsLogDirectory } from '@/services/tauri/cs2'
 import { openExternalUrl } from '@/services/tauri/app'
 import { useCs2Store } from '@/stores/cs2'
+import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const store = useCs2Store()
-const statusCopied = ref(false)
-const groupCopied = ref(false)
+const preferences = useUiPreferencesStore()
 const groupMessage = ref('')
 const uninstallModalOpen = ref(false)
+const rewardVisible = ref(false)
 const groupUrl = 'https://qm.qq.com/q/QRlMlc1h2E'
-let copiedTimer: ReturnType<typeof setTimeout> | null = null
-let groupCopiedTimer: ReturnType<typeof setTimeout> | null = null
 
 const summaryItems = computed(() => [
   { label: '交流群', value: '可打开或复制', state: 'ready' as const },
   { label: '当前目录', value: store.selectedRoot || '未选择', state: store.selectedRoot ? 'ready' as const : 'warn' as const },
-  { label: '帮助条目', value: `${guideSections.length} 条`, state: 'ready' as const },
+  { label: 'FAQ', value: `${guideSections.length} 条`, state: 'ready' as const },
 ])
 
-function copy(text: string) {
-  const normalized = text.trim().endsWith(';') ? text.trim() : `${text.trim()};`
-  navigator.clipboard.writeText(normalized)
-  statusCopied.value = true
-  if (copiedTimer) {
-    clearTimeout(copiedTimer)
-  }
-  copiedTimer = setTimeout(() => {
-    statusCopied.value = false
-    copiedTimer = null
-  }, 1000)
-}
+const heroBadges = computed(() => [
+  {
+    label: store.selectedRoot ? '目录已选择' : '目录未选择',
+    state: store.selectedRoot ? 'ready' as const : 'warn' as const,
+  },
+])
 
-function copyGroupUrl() {
-  navigator.clipboard.writeText(groupUrl)
-  groupCopied.value = true
-  if (groupCopiedTimer) {
-    clearTimeout(groupCopiedTimer)
-  }
-  groupCopiedTimer = setTimeout(() => {
-    groupCopied.value = false
-    groupCopiedTimer = null
-  }, 1000)
+function handleGroupCopied() {
+  groupMessage.value = '群链接已复制。'
 }
 
 async function openGroupUrl() {
@@ -59,100 +48,154 @@ async function openGroupUrl() {
 
 async function uninstallBotPackage() {
   try {
+    preferences.createRestorePoint('卸载插件包', store.selectedRoot, '删除已知插件目录和部分插件配置目录', false)
     await store.uninstall()
     uninstallModalOpen.value = false
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '卸载插件包')
+    store.setMessage(`${message} 可以重新检查目录，或复制诊断信息继续排查。`)
   }
 }
 
-onBeforeUnmount(() => {
-  if (copiedTimer) {
-    clearTimeout(copiedTimer)
+async function refreshDiagnosticsPanel() {
+  try {
+    await store.refreshCs2Running()
+    if (store.selectedRoot) {
+      await store.refreshEnvironment()
+    }
+    await store.refreshDiagnostics()
+    preferences.recordAction('刷新诊断', store.selectedRoot || '未选择目录')
+  } catch (error) {
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '刷新诊断')
+    store.setMessage(`${message} 可以返回安装页重新选择目录后再读取。`)
   }
-  if (groupCopiedTimer) {
-    clearTimeout(groupCopiedTimer)
+}
+
+async function openLogs() {
+  try {
+    const result = await openDiagnosticsLogDirectory()
+    store.setMessage(result.message)
+    preferences.recordAction('打开日志位置', store.diagnostics?.logPath || '日志目录')
+  } catch (error) {
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '打开日志位置')
+    store.setMessage(`${message} 可以先复制诊断信息，把日志路径发给维护者。`)
   }
+}
+
+onMounted(async () => {
+  preferences.load()
+  await refreshDiagnosticsPanel()
 })
+
 </script>
 
 <template>
   <section class="page-grid">
-    <article class="hero-banner">
-      <div>
-        <p class="eyebrow">使用帮助</p>
-        <h2>安装 CS2 Bot 包后常用的补充操作。</h2>
-      </div>
-      <div class="hero-status">
+    <StatusHero
+      eyebrow="帮助中心"
+      title="卡住时先看这里"
+      description="按安装、运行、联机、卸载和保留内容来找答案。"
+      :badges="heroBadges"
+    >
+      <template #actions>
         <button class="ghost-button" @click="openGroupUrl">打开交流群</button>
-        <button class="ghost-button" @click="copyGroupUrl">
-          {{ groupCopied ? '已复制' : '复制群链接' }}
-        </button>
-      </div>
-    </article>
+        <CopyButton :text="groupUrl" label="复制群链接" copied-label="已复制群链接" @copied="handleGroupCopied" />
+      </template>
+    </StatusHero>
+    <p v-if="groupMessage" class="message-line">{{ groupMessage }}</p>
 
     <SummaryStrip :items="summaryItems" />
 
-    <div class="content-grid two-column">
-      <article class="card">
-        <p class="eyebrow">和朋友一起玩</p>
-        <h3>复制并分享连接命令</h3>
-        <p class="muted">
-          在 CS2 控制台输入 <code>status</code>，找到 <code>steamid</code> 那一行，把后面的地址加上 <code>connect </code> 后发给朋友。
-        </p>
-        <button class="ghost-button" @click="copy('status')">
-          {{ statusCopied ? '已复制' : '复制 status' }}
-        </button>
-      </article>
+    <DiagnosticsPanel
+      :root-path="store.selectedRoot"
+      :environment="store.environment"
+      :cs2-running="store.cs2Running"
+      :diagnostics="store.diagnostics"
+      :last-error="preferences.lastError"
+      :restore-points="preferences.restorePoints"
+      :busy="store.busy"
+      @refresh="refreshDiagnosticsPanel"
+      @open-logs="openLogs"
+    />
 
-      <article class="card">
-        <p class="eyebrow">交流反馈</p>
-        <h3>加入反馈群</h3>
-        <p class="muted">使用问题、资源包反馈和后续更新都可以在这里交流。</p>
-        <div class="actions-row">
-          <button class="ghost-button" @click="openGroupUrl">打开群链接</button>
-          <button class="ghost-button" @click="copyGroupUrl">
-            {{ groupCopied ? '已复制' : '复制链接' }}
+    <section class="faq-grid">
+      <article v-for="section in guideSections" :key="section.title" class="card faq-item">
+        <p class="eyebrow">场景帮助</p>
+        <h3>{{ section.title }}</h3>
+        <p class="muted">{{ section.body }}</p>
+      </article>
+    </section>
+
+    <section class="support-maintenance card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">自愿支持</p>
+          <h3>支持维护</h3>
+        </div>
+        <button v-if="rewardVisible" class="ghost-button" type="button" @click="rewardVisible = false">收起</button>
+      </div>
+      <div class="support-maintenance__content">
+        <div class="support-maintenance__copy">
+          <p class="muted">
+            这个助手壳软件由我独立开发和长期维护；插件内容来自社区协作，我也参与了其中一小部分开发。
+            过去一段时间我也一直免费提供相关 AI 服务和维护支持。
+          </p>
+          <p class="muted">
+            如果它确实帮你省了时间，可以自愿给一点小额赞赏，帮我继续承担维护和 AI 服务成本。
+          </p>
+          <p class="muted">
+            赞赏完全自愿，不赞赏也不会影响插件、助手软件、AI 服务或任何功能使用。
+          </p>
+          <p class="support-maintenance__note">请按自己的情况决定，感谢理解。</p>
+          <button
+            v-if="!rewardVisible"
+            class="ghost-button"
+            type="button"
+            @click="rewardVisible = true"
+          >
+            查看赞赏码
           </button>
         </div>
-        <p v-if="groupMessage" class="message-line">{{ groupMessage }}</p>
-      </article>
-    </div>
+        <div v-if="rewardVisible" class="support-maintenance__reward">
+          <img :src="wechatRewardImage" alt="微信赞赏码" />
+        </div>
+      </div>
+    </section>
 
-    <div class="content-grid">
-      <CollapsiblePanel
-        v-for="section in guideSections"
-        :key="section.title"
-        :title="section.title"
-        subtitle="帮助说明"
-        badge="帮助"
-      >
-        <p class="muted">{{ section.body }}</p>
-      </CollapsiblePanel>
-
-      <CollapsiblePanel title="卸载插件包" subtitle="移除已知插件目录和部分配置目录" badge="危险操作" badge-state="danger">
-        <p v-if="store.selectedRoot" class="inline-path">
-          当前目录：<code>{{ store.selectedRoot }}</code>
-        </p>
-        <p v-else class="muted">请先在安装检查页选择 CS2 目录。</p>
-        <button class="ghost-button danger-button" :disabled="!store.selectedRoot || store.busy" @click="uninstallModalOpen = true">
-          卸载插件包
-        </button>
-      </CollapsiblePanel>
-    </div>
+    <section class="danger-zone card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">危险操作</p>
+          <h3>卸载插件包</h3>
+        </div>
+      </div>
+      <p v-if="store.selectedRoot" class="inline-path">
+        当前目录：<code>{{ store.selectedRoot }}</code>
+      </p>
+      <p v-else class="muted">请先在安装检查页选择 CS2 目录。</p>
+      <p class="muted">这里只删除已知插件目录、对应配置目录和旧版 BotHider 0.1.9 残留，不会动 CS2 本体。</p>
+      <button class="ghost-button danger-button" :disabled="!store.selectedRoot || store.busy" @click="uninstallModalOpen = true">
+        卸载插件包
+      </button>
+    </section>
 
     <ActionModal
       :open="uninstallModalOpen"
       title="确认卸载插件包"
-      subtitle="这个操作只删除已知的 CS2-Bot-Improver 插件目录和配置目录。"
+      subtitle="这个操作会删除已知插件目录、配置目录，并清理旧版 BotHider 0.1.9 残留。"
       confirm-label="确认卸载"
       danger
+      :loading="store.busy"
       @close="uninstallModalOpen = false"
       @confirm="uninstallBotPackage"
     >
       <p class="muted">
-        将删除 BotAI、BotAimImprover、BotBuy、BotRandomizer、BotState、NadeSystem、BotTaunt、RoundDamageRecap 等插件目录，
-        以及 BotTaunt 和 NadeSystem 配置目录。它不会删除或恢复 <code>gameinfo.gi</code> 与 <code>pak01_*.vpk</code>。
+        将删除 BotAI、BotAimImprover、BotBuy、BotRandomizer、BotState、NadeSystem、BotTaunt、RoundDamageRecap、MapRotation 等插件目录，
+        以及 BotTaunt 和 NadeSystem 配置目录。也会清理旧版 BotHider 0.1.9 残留的 <code>BotHider.vdf</code>、<code>0Harmony</code> 和 <code>BotHiderApi</code>。
+        它不会删除或恢复 <code>gameinfo.gi</code> 与 <code>pak01_*.vpk</code>。
       </p>
       <p v-if="store.selectedRoot" class="inline-path">
         当前目录：<code>{{ store.selectedRoot }}</code>

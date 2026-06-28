@@ -8,16 +8,22 @@
 
 - 选择并检查 CS2 游戏目录。
 - 安装内置 Bot 增强资源包，并在写入前检查 CS2 是否正在运行。
+- 0.4.1 内置包对齐 `E:\LBTVCS2BotEnhancer` / `ed0ard/CS2-Bot-Improver`，恢复 0.4.0 缺失的 MapRotation 地图轮换插件，不附带也不调用旧版外部启动工具。
+- 通过 Quick Control 页面集中操作 Bot / Online 模式、难度、Aim、Nades、刀具模板、Teams 预设和打开 CS2。
 - 切换 Bot 难度和在线 / Bot 模式。
-- 查看并复制常用 CS2 控制台指令。
+- 在指令中心搜索、分类查看并复制常用 CS2 控制台指令，也可以复制 40 支职业队伍 CT / T 阵营预设或保存自己的常用命令。
 - 编辑 BotTaunt AI API、嘲讽文本和 NadeSystem 恢复时间。
 - 查找最近录制的 Demo，复制路径或打开所在文件夹。
+- 记住最近目录、最近页面、最近命令、最近 Demo、主题和已关闭提示，方便回头继续。
+- 固定常用命令，并在指令中心顶部快速复制。
+- 在写入类操作前记录本地恢复点，并在帮助中心复制诊断信息。
 - 通过 Steam 协议 `steam://rungameid/730` 打开 CS2。
 - 从远端更新接口读取普通、推荐和强制更新提示。
+- 使用统一的弹窗、复制反馈、空状态和阻塞提示，减少安装和配置时的不确定感。
 
 ## 截图
 
-下面截图覆盖安装检查、游戏设置、常用指令、启动弹窗、更新提示和辅助工具等主要界面。
+下面截图覆盖开始使用、游戏配置、指令中心、帮助中心、启动弹窗、更新提示和辅助工具等主要界面。
 
 | | |
 |---|---|
@@ -87,6 +93,39 @@ src-tauri/resources/CS2BotImprover.zip
 ```
 
 为了保持源码仓库轻量，这个二进制资源包默认不提交。需要构建桌面安装包时，请从项目 Release assets 或可信来源取得资源包，并放到上述路径。
+
+0.4.1 构建使用的资源包来自：
+
+```text
+E:\LBTVCS2BotEnhancer\dist\LBTVCS2BotEnhancer.zip
+```
+
+资源包 SHA256：
+
+```text
+1A082DEBFD7419FA3EAB305D74F399E6670D20C0E2B7B90AB28E84CCE1DF6DE9
+```
+
+0.4.1 相比 0.4.0 的唯一重点是恢复地图轮换资源，继续使用现有指令中心命令 `lbtv_map_rotation 1/0` 和 `lbtv_map_next`。地图轮换默认关闭，不改变用户现有服务器行为。
+
+安装检查和卸载清单已纳入 0.4.1 资源对象：
+
+- `addons/BotHider`
+- `addons/RayTrace`
+- `addons/counterstrikesharp/configs/core.json`
+- `addons/counterstrikesharp/plugins/BotHiderImpl`
+- `addons/counterstrikesharp/plugins/MapRotation`
+- `addons/counterstrikesharp/plugins/RayTraceImpl`
+- `addons/counterstrikesharp/plugins/RoundDamageRecap`
+
+当前助手把高频功能整合进桌面端，不复刻外部工具 UI，也不把额外启动程序写入 CS2 目录。Aim、Nades、Knife 和 Teams 走 0.4.0 `Commands.txt` 命令复制；地图轮换沿用 `lbtv_map_rotation` / `lbtv_map_next`；模式、难度、安装、卸载、配置编辑和诊断继续走 Tauri 原生文件操作。
+
+0.4.1 构建验收项：
+
+- `src-tauri/resources/CS2BotImprover.zip` 的 SHA256 必须等于 `1A082DEBFD7419FA3EAB305D74F399E6670D20C0E2B7B90AB28E84CCE1DF6DE9`。
+- ZIP 内必须存在 `addons/counterstrikesharp/plugins/MapRotation/MapRotation.dll`、`MapRotation.deps.json`、`MapRotation.pdb` 和 `Commands.txt`。
+- ZIP 内继续保留 `BotHiderImpl`、`RayTraceImpl` 和 `RoundDamageRecap`。
+- 构建后记录 NSIS 安装包路径、写入时间、大小和 SHA256。
 
 同理，以下内容不应进入主分支：
 
@@ -170,12 +209,56 @@ workspace/projects/             # 项目源码工作区
 
 - `cs2-bot-improver`：CS2 Bot 增强安装、配置和命令助手。
 
+## 发布级验收
+
+发布或交付测试包前建议至少完成：
+
+- 逐页检查 `/install`、`/config`、`/commands`、`/custom-commands`、`/guide`、`/release-notes` 和 `/major`。
+- 确认未选择目录、CS2 正在运行、尚未安装三种状态都有明确提示。
+- 确认复制、保存、恢复默认、卸载确认、查看 Commands.txt 等弹窗和反馈一致。
+- 运行 `npm run verify`。
+- 如果需要安装包，再运行 `npm run bundle:desktop`，并记录 NSIS 安装包路径、写入时间、大小和 SHA256。
+
 ## 使用注意
 
 - 在写入 CS2 目录、安装资源包、切换模式或修改配置前，请先退出 CS2。
 - Bot 模式通常需要在 Steam 启动项加入 `-insecure`。
 - 需要恢复在线比赛环境时，请移除 `-insecure`，并在助手中切回在线模式。
 - “打开 CS2”使用 Steam 协议启动，不直接运行 `cs2.exe`。
+- 最近状态、固定命令、恢复点和已关闭提示只保存在本机 `localStorage`，不需要后端服务。
+- 遇到失败时，优先到帮助中心复制诊断信息；需要查看原始日志时，使用诊断面板里的“打开日志位置”。
+
+## 维护边界
+
+这些路径属于用户配置或用户习惯，不能在清理、升级和重装时轻易删除：
+
+- `game/csgo/addons/counterstrikesharp/configs/plugins/`
+- `game/csgo/addons/counterstrikesharp/configs/plugins/BotTaunt/BotTaunt.json`
+- `game/csgo/addons/counterstrikesharp/configs/plugins/BotTaunt/Taunts.json`
+- `game/csgo/addons/counterstrikesharp/configs/plugins/NadeSystem/NadeSystem.json`
+- 应用本地偏好：最近目录、最近页面、固定命令、恢复点、最近错误和已关闭提示。
+
+这些操作必须先退出 CS2：
+
+- 安装或重做安装。
+- 切换在线模式 / Bot 模式。
+- 切换 Bot 难度。
+- 保存 AI API、嘲讽文本或投掷物恢复时间。
+- 卸载插件包。
+
+适合直接重试的情况：
+
+- Steam 目录自动扫描没有结果，可以手动选择 CS2 根目录后重试。
+- Demo 目录不存在，可以让应用创建默认 `game/csgo/replays` 后再打开。
+- Commands.txt 或诊断信息临时读取失败，可以重新读取。
+
+需要先修复目录或权限的情况：
+
+- 选择的目录不是 `Counter-Strike Global Offensive` 根目录。
+- `game/csgo` 不存在或不可写。
+- 安装所需顶层目录被同名文件占用。
+- 资源包 `CS2BotImprover.zip` 缺失或无法读取。
+- JSON 配置被写坏，需要先恢复为合法 JSON 再保存。
 
 ## 更新发布
 
@@ -188,6 +271,13 @@ workspace/projects/             # 项目源码工作区
 5. 在 GitHub 创建版本 Release，例如 `v0.3.11`。
 6. 上传 NSIS 安装包和必要资源包到 Release assets。
 7. 如需客户端自动提示更新，在远端更新服务写入对应版本记录。
+
+正式包和测试包要分清楚：
+
+- 正式包使用版本号对应的标准安装包名称，作为 Release asset 发布。
+- 同版本测试包需要在文件名里加入 `test` 或时间戳，避免覆盖正式包。
+- 同版本重打包前先备份旧安装包，完成后记录新安装包路径、写入时间、大小和 SHA256。
+- 发布材料需要同步更新应用内更新日志、README 截图、版本号检查结果、安装包校验结果和运行路径说明。
 
 ## 授权
 

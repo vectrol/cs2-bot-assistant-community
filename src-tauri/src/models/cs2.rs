@@ -22,6 +22,12 @@ pub struct Cs2EnvironmentStatus {
     pub low_profile_exists: bool,
     pub medium_profile_exists: bool,
     pub high_profile_exists: bool,
+    pub bot_hider_exists: bool,
+    pub ray_trace_exists: bool,
+    pub core_config_exists: bool,
+    pub bot_hider_impl_exists: bool,
+    pub ray_trace_impl_exists: bool,
+    pub round_damage_recap_exists: bool,
     pub base_environment_ready: bool,
 }
 

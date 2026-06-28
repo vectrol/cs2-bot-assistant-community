@@ -5,24 +5,47 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 
 import { appConfig } from '@/config/app'
 import LaunchGameModal from '@/components/LaunchGameModal.vue'
+import ReadinessPanel from '@/components/ReadinessPanel.vue'
 import WindowControls from '@/components/layout/WindowControls.vue'
+import { useCs2Store } from '@/stores/cs2'
+import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const THEME_STORAGE_KEY = appConfig.themeStorageKey
 
 const route = useRoute()
+const store = useCs2Store()
+const preferences = useUiPreferencesStore()
 const launchGameModalOpen = ref(false)
 const theme = ref<'dark' | 'light'>('dark')
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
-const navItems = [
-  { label: '安装检查', to: '/install', description: '选择 CS2 目录并完成安装前检查' },
-  { label: '游戏设置', to: '/config', description: '切换 Bot 难度、游戏模式和插件配置' },
-  { label: '常用指令', to: '/commands', description: '查看并复制常用控制台命令' },
-  { label: '我的指令', to: '/custom-commands', description: '保存自己的常用控制台命令' },
-  { label: 'Major 预测', to: '/major', description: '记录队伍、瑞士轮和淘汰赛预测结果' },
-  { label: '使用帮助', to: '/guide', description: '查看补充说明和手动操作提示' },
-  { label: '更新日志', to: '/release-notes', description: '查看每个版本的主要变化' },
+const navGroups = [
+  {
+    label: '主要流程',
+    items: [
+      { label: '开始使用', to: '/install', description: '选择目录、安装并确认启动项' },
+      { label: '快速控制', to: '/quick-control', description: '模式、难度、预设和队伍' },
+      { label: '游戏配置', to: '/config', description: '难度、模式和插件设置' },
+      { label: '指令中心', to: '/commands', description: '搜索、分类和自定义命令' },
+    ],
+  },
+  {
+    label: '辅助功能',
+    items: [
+      { label: '我的指令', to: '/custom-commands', description: '打开指令中心的自定义分类' },
+      { label: '使用帮助', to: '/guide', description: '常见问题和手动操作' },
+      { label: '更新日志', to: '/release-notes', description: '版本变化记录' },
+    ],
+  },
+  {
+    label: '更多玩法',
+    items: [
+      { label: 'Major 预测', to: '/major', description: '记录赛程预测' },
+    ],
+  },
 ]
+
+const navItems = navGroups.flatMap((group) => group.items)
 
 const pageDescription = computed(
   () => navItems.find((item) => item.to === route.path)?.description ?? appConfig.appName,
@@ -71,20 +94,39 @@ async function toggleWindowMaximize() {
   }
 }
 
+async function refreshGlobalStatus() {
+  try {
+    await store.refreshCs2Running()
+    await store.refreshEnvironment()
+  } catch (error) {
+    store.setMessage(store.normalizeError(error))
+  }
+}
+
 onMounted(() => {
+  preferences.load()
   const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
   if (savedTheme === 'dark' || savedTheme === 'light') {
     applyTheme(savedTheme)
-    return
+  } else {
+    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
+    applyTheme(prefersLight ? 'light' : 'dark')
   }
 
-  const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
-  applyTheme(prefersLight ? 'light' : 'dark')
+  void refreshGlobalStatus()
 })
 
 watch(theme, (nextTheme) => {
   document.documentElement.style.colorScheme = nextTheme
 })
+
+watch(
+  () => route.fullPath,
+  (routePath) => {
+    preferences.setLastRoute(routePath)
+  },
+  { immediate: true },
+)
 </script>
 
 <template>
@@ -109,20 +151,25 @@ watch(theme, (nextTheme) => {
             <span class="version-badge">v{{ appConfig.appVersion }}</span>
           </div>
           <p class="muted">
-            集中完成安装、环境检查、模式切换、常用指令和帮助说明。所有写入游戏目录的操作都会先检查 CS2 是否正在运行。
+            安装、配置和启动 CS2 人机增强包。
           </p>
         </div>
 
+        <ReadinessPanel />
+
         <nav class="nav">
-          <RouterLink
-            v-for="item in navItems"
-            :key="item.to"
-            :to="item.to"
-            class="nav-link"
-          >
-            <span>{{ item.label }}</span>
-            <small>{{ item.description }}</small>
-          </RouterLink>
+          <section v-for="group in navGroups" :key="group.label" class="nav-group">
+            <p class="nav-group__label">{{ group.label }}</p>
+            <RouterLink
+              v-for="item in group.items"
+              :key="item.to"
+              :to="item.to"
+              class="nav-link"
+            >
+              <span>{{ item.label }}</span>
+              <small>{{ item.description }}</small>
+            </RouterLink>
+          </section>
         </nav>
 
         <div class="sidebar-card">
@@ -130,12 +177,13 @@ watch(theme, (nextTheme) => {
           <strong>不向正在运行的游戏进程写入内容</strong>
           <p class="muted">程序只负责检查、安装、配置和复制命令，避免把风险带进正在运行的 CS2。</p>
         </div>
+
       </aside>
 
       <main class="content">
         <header class="titlebar">
           <div class="titlebar-main">
-            <p class="eyebrow">当前页面</p>
+            <p class="eyebrow">当前任务</p>
             <h2>{{ pageTitle }}</h2>
           </div>
 

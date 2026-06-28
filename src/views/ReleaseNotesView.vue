@@ -11,7 +11,28 @@ import { openExternalUrl } from '@/services/tauri/app'
 
 const openMessage = ref('')
 const cloudEntries = ref<ReleaseNoteEntry[] | null>(null)
-const entries = computed(() => (cloudEntries.value?.length ? cloudEntries.value : releaseNoteEntries))
+const localEntriesByVersion = computed(() => new Map(releaseNoteEntries.map((entry) => [entry.version, entry])))
+const entries = computed(() => {
+  if (!cloudEntries.value?.length) {
+    return releaseNoteEntries
+  }
+
+  const mergedEntries = cloudEntries.value.map((cloudEntry) => {
+    const localEntry = localEntriesByVersion.value.get(cloudEntry.version)
+    if (!localEntry) {
+      return cloudEntry
+    }
+
+    return {
+      ...localEntry,
+      source: cloudEntry.source ?? localEntry.source,
+    }
+  })
+
+  const cloudVersions = new Set(cloudEntries.value.map((entry) => entry.version))
+  const localOnlyEntries = releaseNoteEntries.filter((entry) => !cloudVersions.has(entry.version))
+  return [...mergedEntries, ...localOnlyEntries]
+})
 const latestEntry = computed(() => entries.value[0] ?? null)
 const historyEntries = computed(() => entries.value.slice(1))
 const summaryItems = computed(() => [

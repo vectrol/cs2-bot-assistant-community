@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 
 import ActionModal from '@/components/ActionModal.vue'
-import CollapsiblePanel from '@/components/CollapsiblePanel.vue'
-import SummaryStrip from '@/components/SummaryStrip.vue'
+import ConfigActionGroup from '@/components/config/ConfigActionGroup.vue'
+import ConfigEditorModal from '@/components/config/ConfigEditorModal.vue'
+import ConfigSection from '@/components/config/ConfigSection.vue'
+import ConfigStatusStrip from '@/components/config/ConfigStatusStrip.vue'
+import CopyButton from '@/components/CopyButton.vue'
+import StatusHero from '@/components/StatusHero.vue'
 import { useCs2Store } from '@/stores/cs2'
+import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
 
 const store = useCs2Store()
-const workshopCopied = ref(false)
-const demoCommandCopied = ref(false)
-const demoPathCopied = ref(false)
+const preferences = useUiPreferencesStore()
 const aiApiModalOpen = ref(false)
 const botTauntModalOpen = ref(false)
 const nadeRecoveryModalOpen = ref(false)
@@ -19,6 +22,8 @@ const aiApiUrl = ref('')
 const aiApiKey = ref('')
 const botRivalryEnabled = ref(false)
 const aiApiLoadedPath = ref('')
+const freeAiApiKey = 'mmc_5d75635d51839386a23758f8129bf4a095c319f8f1506927'
+const freeAiApiMessage = ref('')
 type BotTauntTextKey =
   | 'normalTaunts'
   | 'headshotTaunts'
@@ -50,10 +55,6 @@ const nadeRecovery = ref({
 })
 const nadeRecoveryLoadedPath = ref('')
 
-let workshopCopiedTimer: ReturnType<typeof setTimeout> | null = null
-let demoCommandCopiedTimer: ReturnType<typeof setTimeout> | null = null
-let demoPathCopiedTimer: ReturnType<typeof setTimeout> | null = null
-
 const difficultyCards: Array<{ title: string; preset: DifficultyPreset; description: string }> = [
   { title: '简单', preset: 'low', description: '适合刚开始练习，Bot 更容易应对。' },
   { title: '标准', preset: 'medium', description: '更接近日常对局，推荐大多数玩家使用。' },
@@ -61,8 +62,8 @@ const difficultyCards: Array<{ title: string; preset: DifficultyPreset; descript
 ]
 
 const modeCards: Array<{ title: string; preset: GameModePreset; description: string }> = [
-  { title: '切到在线模式', preset: 'online', description: '准备正常进入线上比赛时使用。' },
-  { title: '切回 Bot 模式', preset: 'withBots', description: '继续打人机或练习地图时使用。' },
+  { title: '在线模式', preset: 'online', description: '准备正常进入线上比赛时使用。' },
+  { title: 'Bot 模式', preset: 'withBots', description: '继续打人机或练习地图时使用。' },
 ]
 
 const botTauntTextFields: Array<{ key: BotTauntTextKey; label: string; hint: string }> = [
@@ -105,7 +106,7 @@ const aiConfigStatus = computed(() => {
 
 const botTauntStatus = computed(() => {
   if (!store.botTauntsConfig) {
-    return '选择并安装 CS2 目录后，可以在这里修改 BotTaunt 嘲讽文本。'
+    return '选择并安装 CS2 目录后，可以在这里设置击杀嘲讽内容。'
   }
   if (!store.botTauntsConfig.exists) {
     return '尚未找到 Taunts.json，保存后会自动创建。'
@@ -134,21 +135,21 @@ const nadeRecoveryStatus = computed(() => {
 
 const recentDemo = computed(() => store.demoDiscovery?.recentDemo ?? null)
 
-const summaryItems = computed(() => [
+const statusItems = computed(() => [
   {
-    label: 'CS2 目录',
-    value: store.selectedRoot || '未选择',
+    label: '目录',
+    value: store.selectedRoot ? '已选择' : '未选择',
     state: store.selectedRoot ? 'ready' as const : 'warn' as const,
   },
   {
-    label: '游戏运行状态',
-    value: store.cs2Running ? '正在运行' : '未运行',
-    state: store.cs2Running ? 'danger' as const : 'ready' as const,
-  },
-  {
-    label: '安装状态',
+    label: '环境',
     value: store.readyForConfig ? '可配置' : '未就绪',
     state: store.readyForConfig ? 'ready' as const : 'warn' as const,
+  },
+  {
+    label: 'CS2',
+    value: store.cs2Running ? '正在运行' : '未运行',
+    state: store.cs2Running ? 'danger' as const : 'ready' as const,
   },
 ])
 
@@ -165,19 +166,52 @@ const demoStatus = computed(() => {
   return `最近 Demo：${store.demoDiscovery.recentDemo.fileName}`
 })
 
+const heroBadges = computed(() => [
+  {
+    label: blockedReason.value || '当前可以配置',
+    state: blockedReason.value ? 'warn' as const : 'ready' as const,
+  },
+])
+
+const recentConfigItems = computed(() => preferences.recentActions
+  .filter((item) => ['设置难度', '切换模式', '保存 AI 聊天', '保存嘲讽内容', '保存投掷物恢复'].includes(item.label))
+  .slice(0, 4))
+
+function canWriteConfig() {
+  if (!blockedReason.value) {
+    return true
+  }
+  store.setMessage(blockedReason.value)
+  return false
+}
+
 async function applyDifficulty(preset: DifficultyPreset) {
+  if (!canWriteConfig()) {
+    return
+  }
   try {
+    preferences.createRestorePoint('设置 Bot 难度', store.selectedRoot, `应用难度预设：${preset}`, false)
     await store.applyDifficulty(preset)
+    preferences.recordAction('设置难度', preset)
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '设置 Bot 难度')
+    store.setMessage(`${message} 请先重新检查目录，并确认 CS2 已退出。`)
   }
 }
 
 async function switchMode(preset: GameModePreset) {
+  if (!canWriteConfig()) {
+    return
+  }
   try {
+    preferences.createRestorePoint('切换游戏模式', store.selectedRoot, `模式切换：${preset}`, false)
     await store.switchGameMode(preset)
+    preferences.recordAction('切换模式', preset === 'online' ? '在线模式' : 'Bot 模式')
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '切换游戏模式')
+    store.setMessage(`${message} 请先退出 CS2，再返回安装页重新检查。`)
   }
 }
 
@@ -188,26 +222,66 @@ async function refreshAiApiConfig() {
     aiApiKey.value = config?.aiApiKey ?? ''
     botRivalryEnabled.value = config?.botRivalryEnabled ?? false
     aiApiLoadedPath.value = config?.configPath ?? ''
+    freeAiApiMessage.value = ''
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '读取 AI 聊天配置')
+    store.setMessage(`${message} 可以重新读取，或到帮助页复制诊断信息。`)
   }
 }
 
+function enableFreeAiApiKey() {
+  if (aiApiKey.value.trim()) {
+    freeAiApiMessage.value = '当前已经填写了 API Key。为了避免覆盖你的自定义 Key，请先手动清空后再启用免费 Key。'
+    return
+  }
+
+  aiApiKey.value = freeAiApiKey
+  freeAiApiMessage.value = '免费 Key 已填入当前表单。点击“保存 AI 聊天设置”后才会写入配置文件。'
+}
+
 async function saveAiApi() {
+  if (!canWriteConfig()) {
+    return false
+  }
   try {
+    preferences.createRestorePoint('保存 AI 聊天设置', store.selectedRoot, '写入 BotTaunt.json 的 AI API 配置', false)
     await store.saveAiApi({
       aiApiUrl: aiApiUrl.value,
       aiApiKey: aiApiKey.value,
       botRivalryEnabled: botRivalryEnabled.value,
     })
+    preferences.recordAction('保存 AI 聊天', aiApiLoadedPath.value || store.selectedRoot)
+    return true
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '保存 AI 聊天设置')
+    store.setMessage(`${message} 请确认目录可写；仍失败时复制诊断信息。`)
+    return false
   }
 }
 
 async function saveAiApiAndClose() {
-  await saveAiApi()
-  aiApiModalOpen.value = false
+  if (await saveAiApi()) {
+    aiApiModalOpen.value = false
+  }
+}
+
+async function resetAiApi() {
+  if (!canWriteConfig()) {
+    return
+  }
+  try {
+    const config = await store.resetAiApi()
+    aiApiUrl.value = config?.aiApiUrl ?? ''
+    aiApiKey.value = config?.aiApiKey ?? ''
+    botRivalryEnabled.value = config?.botRivalryEnabled ?? false
+    aiApiLoadedPath.value = config?.configPath ?? ''
+  } catch (error) {
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '恢复 AI 默认配置')
+    store.setMessage(`${message} 可以重新读取配置后再试。`)
+  }
 }
 
 function tauntsToText(items: string[]) {
@@ -245,12 +319,18 @@ async function refreshBotTauntsConfig() {
       applyBotTauntsConfig(config)
     }
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '读取嘲讽文本')
+    store.setMessage(`${message} 可以重新读取，或检查 Taunts.json 是否能正常解析。`)
   }
 }
 
 async function saveBotTaunts() {
+  if (!canWriteConfig()) {
+    return false
+  }
   try {
+    preferences.createRestorePoint('保存嘲讽内容', store.selectedRoot, '写入 Taunts.json 文本配置', false)
     await store.saveBotTaunts({
       normalTaunts: textToTaunts(botTauntLines.value.normalTaunts),
       headshotTaunts: textToTaunts(botTauntLines.value.headshotTaunts),
@@ -263,24 +343,35 @@ async function saveBotTaunts() {
       saveTaunt: botTauntSingleLines.value.saveTaunt,
     })
     await refreshBotTauntsConfig()
+    preferences.recordAction('保存嘲讽内容', botTauntLoadedPath.value || store.selectedRoot)
+    return true
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '保存嘲讽内容')
+    store.setMessage(`${message} 请检查是否有空文本或 JSON 被占用。`)
+    return false
   }
 }
 
 async function saveBotTauntsAndClose() {
-  await saveBotTaunts()
-  botTauntModalOpen.value = false
+  if (await saveBotTaunts()) {
+    botTauntModalOpen.value = false
+  }
 }
 
 async function resetBotTaunts() {
+  if (!canWriteConfig()) {
+    return
+  }
   try {
     const config = await store.resetBotTaunts()
     if (config) {
       applyBotTauntsConfig(config)
     }
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '恢复嘲讽默认配置')
+    store.setMessage(`${message} 可以重新读取配置后再试。`)
   }
 }
 
@@ -299,54 +390,80 @@ async function refreshNadeRecoveryConfig() {
       nadeRecoveryLoadedPath.value = config.configPath
     }
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '读取投掷物恢复配置')
+    store.setMessage(`${message} 可以重新读取，或到帮助页复制诊断信息。`)
   }
 }
 
 async function saveNadeRecovery() {
+  if (!canWriteConfig()) {
+    return false
+  }
   try {
+    preferences.createRestorePoint('保存投掷物恢复时间', store.selectedRoot, '写入 NadeSystem.json 恢复时间', false)
     await store.saveNadeRecovery(nadeRecovery.value)
+    preferences.recordAction('保存投掷物恢复', nadeRecoveryLoadedPath.value || store.selectedRoot)
+    return true
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '保存投掷物恢复时间')
+    store.setMessage(`${message} 请确认 CS2 已退出，并重新读取配置。`)
+    return false
   }
 }
 
 async function saveNadeRecoveryAndClose() {
-  await saveNadeRecovery()
-  nadeRecoveryModalOpen.value = false
+  if (await saveNadeRecovery()) {
+    nadeRecoveryModalOpen.value = false
+  }
 }
 
-function copyWorkshopFlag() {
-  navigator.clipboard.writeText('-disable_workshop_command_filtering')
-  workshopCopied.value = true
-  if (workshopCopiedTimer) {
-    clearTimeout(workshopCopiedTimer)
+async function resetNadeRecovery() {
+  if (!canWriteConfig()) {
+    return
   }
-  workshopCopiedTimer = setTimeout(() => {
-    workshopCopied.value = false
-    workshopCopiedTimer = null
-  }, 1000)
+  try {
+    const config = await store.resetNadeRecovery()
+    if (config) {
+      nadeRecovery.value = {
+        flash: config.flash,
+        smoke: config.smoke,
+        he: config.he,
+        molotov: config.molotov,
+        incgrenade: config.incgrenade,
+        decoy: config.decoy,
+      }
+      nadeRecoveryLoadedPath.value = config.configPath
+    }
+  } catch (error) {
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '恢复投掷物默认配置')
+    store.setMessage(`${message} 可以重新读取配置后再试。`)
+  }
+}
+
+function handleWorkshopCopied() {
+  preferences.recordAction('复制启动项', '-disable_workshop_command_filtering')
   store.setMessage('启动项已复制：-disable_workshop_command_filtering')
 }
 
-function copyDemoCommand() {
-  navigator.clipboard.writeText('tv_enable 1; tv_autorecord 1')
-  demoCommandCopied.value = true
-  if (demoCommandCopiedTimer) {
-    clearTimeout(demoCommandCopiedTimer)
-  }
-  demoCommandCopiedTimer = setTimeout(() => {
-    demoCommandCopied.value = false
-    demoCommandCopiedTimer = null
-  }, 1000)
+function handleDemoCommandCopied() {
+  preferences.recordAction('复制 Demo 命令', 'tv_enable 1; tv_autorecord 1')
   store.setMessage('控制台命令已复制：tv_enable 1; tv_autorecord 1')
 }
 
 async function refreshRecentDemo() {
   try {
     await store.refreshDemos()
+    if (store.demoDiscovery?.recentDemo) {
+      preferences.setLastDemoPath(store.demoDiscovery.recentDemo.path)
+    }
+    preferences.recordAction('查找最近 Demo', store.demoDiscovery?.recentDemo?.fileName ?? '没有找到 Demo')
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '查找最近 Demo')
+    store.setMessage(`${message} 请确认 Demo 目录存在，或先复制录制命令打一局。`)
   }
 }
 
@@ -355,28 +472,20 @@ async function refreshRecentDemoAndShow() {
   demoDetailModalOpen.value = true
 }
 
-function copyDemoPath() {
-  if (!recentDemo.value) {
-    return
-  }
-
-  navigator.clipboard.writeText(recentDemo.value.path)
-  demoPathCopied.value = true
-  if (demoPathCopiedTimer) {
-    clearTimeout(demoPathCopiedTimer)
-  }
-  demoPathCopiedTimer = setTimeout(() => {
-    demoPathCopied.value = false
-    demoPathCopiedTimer = null
-  }, 1000)
-  store.setMessage(`Demo 路径已复制：${recentDemo.value.path}`)
+function handleDemoPathCopied(text: string) {
+  preferences.setLastDemoPath(text)
+  preferences.recordAction('复制 Demo 路径', text)
+  store.setMessage(`Demo 路径已复制：${text}`)
 }
 
 async function openRecentDemoDirectory() {
   try {
     await store.openReplays()
+    preferences.recordAction('打开 Demo 目录', store.selectedRoot || '未选择目录')
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '打开 Demo 目录')
+    store.setMessage(`${message} 请先返回安装页重新检查目录。`)
   }
 }
 
@@ -389,52 +498,64 @@ async function openRecentDemoFolder() {
   try {
     await store.openDemoFolder(recentDemo.value.directoryPath)
   } catch (error) {
-    store.setMessage(store.normalizeError(error))
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '打开 Demo 所在文件夹')
+    store.setMessage(`${message} 可以先打开 Demo 目录再手动查找。`)
   }
 }
 
 onMounted(async () => {
-  await store.refreshCs2Running()
-  if (store.selectedRoot) {
-    await refreshAiApiConfig()
-    await refreshBotTauntsConfig()
-    await refreshNadeRecoveryConfig()
-    await refreshRecentDemo()
+  preferences.load()
+  try {
+    await store.refreshCs2Running()
+    if (store.selectedRoot) {
+      await refreshAiApiConfig()
+      await refreshBotTauntsConfig()
+      await refreshNadeRecoveryConfig()
+      await refreshRecentDemo()
+    }
+  } catch (error) {
+    const message = store.normalizeError(error)
+    preferences.recordError(message, '进入游戏配置页')
+    store.setMessage(message)
   }
 })
 
-onBeforeUnmount(() => {
-  if (workshopCopiedTimer) {
-    clearTimeout(workshopCopiedTimer)
-  }
-  if (demoCommandCopiedTimer) {
-    clearTimeout(demoCommandCopiedTimer)
-  }
-  if (demoPathCopiedTimer) {
-    clearTimeout(demoPathCopiedTimer)
-  }
-})
 </script>
 
 <template>
   <section class="page-grid">
-    <article class="hero-banner">
-      <div>
-        <p class="eyebrow">游戏设置</p>
-        <h2>切换 Bot 难度、游戏模式和插件配置。</h2>
-      </div>
-      <div class="hero-status">
-        <span class="status-badge" :data-state="blockedReason ? 'warn' : 'ready'">
-          {{ blockedReason || '现在可以修改设置' }}
-        </span>
+    <StatusHero
+      eyebrow="游戏配置"
+      title="先把常用设置调好"
+      description="第一屏只保留最常用的难度、模式和运行状态；更多配置放在下面展开。"
+      :badges="heroBadges"
+    >
+      <template #actions>
         <button class="ghost-button" @click="store.refreshCs2Running()">刷新游戏状态</button>
+      </template>
+    </StatusHero>
+
+    <ConfigStatusStrip :items="statusItems" />
+
+    <article v-if="recentConfigItems.length > 0" class="card recent-config-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">最近改动</p>
+          <h3>回头继续时不用重新找。</h3>
+        </div>
+      </div>
+      <div class="recent-action-grid">
+        <div v-for="item in recentConfigItems" :key="`${item.at}:${item.label}`" class="recent-action-item">
+          <strong>{{ item.label }}</strong>
+          <span>{{ item.detail }}</span>
+          <small>{{ item.at }}</small>
+        </div>
       </div>
     </article>
 
-    <SummaryStrip :items="summaryItems" />
-
-    <div class="content-grid two-column">
-      <article class="card">
+    <div class="config-quick-grid">
+      <article class="card config-quick-card">
         <div class="section-head">
           <div>
             <p class="eyebrow">Bot 难度</p>
@@ -442,12 +563,13 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="tile-grid">
+        <div class="segmented-card-group">
           <button
             v-for="card in difficultyCards"
             :key="card.preset"
-            class="action-tile"
-            :disabled="Boolean(blockedReason)"
+            class="segmented-card"
+            type="button"
+            :disabled="Boolean(blockedReason) || store.busy"
             @click="applyDifficulty(card.preset)"
           >
             <strong>{{ card.title }}</strong>
@@ -456,7 +578,7 @@ onBeforeUnmount(() => {
         </div>
       </article>
 
-      <article class="card">
+      <article class="card config-quick-card">
         <div class="section-head">
           <div>
             <p class="eyebrow">模式切换</p>
@@ -464,12 +586,13 @@ onBeforeUnmount(() => {
           </div>
         </div>
 
-        <div class="tile-grid">
+        <div class="segmented-card-group mode-card-group">
           <button
             v-for="card in modeCards"
             :key="card.preset"
-            class="action-tile"
-            :disabled="Boolean(blockedReason)"
+            class="segmented-card"
+            type="button"
+            :disabled="Boolean(blockedReason) || store.busy"
             @click="switchMode(card.preset)"
           >
             <strong>{{ card.title }}</strong>
@@ -479,57 +602,79 @@ onBeforeUnmount(() => {
       </article>
     </div>
 
-    <CollapsiblePanel title="AI 聊天 API" :subtitle="aiConfigStatus" :badge="store.aiApiConfig?.exists ? '已配置' : '可选'">
-      <div class="actions-row">
-        <button class="primary-button" :disabled="Boolean(blockedReason) || store.busy" @click="aiApiModalOpen = true">
-          编辑 API 配置
-        </button>
-        <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshAiApiConfig">
-          重新读取
-        </button>
-      </div>
+    <ConfigSection
+      title="AI 聊天"
+      :description="aiConfigStatus"
+      :badge="store.aiApiConfig?.exists ? '已配置' : '可选'"
+      :default-open="false"
+    >
+      <ConfigActionGroup
+        primary-label="编辑"
+        reset-label="恢复默认"
+        :primary-disabled="Boolean(blockedReason)"
+        :secondary-disabled="!store.selectedRoot"
+        :reset-disabled="Boolean(blockedReason)"
+        :busy="store.busy"
+        @primary="aiApiModalOpen = true"
+        @secondary="refreshAiApiConfig"
+        @reset="resetAiApi"
+      />
       <p v-if="aiApiLoadedPath && store.aiApiConfig?.exists" class="inline-path">
         配置文件：<code>{{ aiApiLoadedPath }}</code>
       </p>
-    </CollapsiblePanel>
+    </ConfigSection>
 
-    <CollapsiblePanel title="BotTaunt 嘲讽文本" :subtitle="botTauntStatus" :badge="store.botTauntsConfig?.exists ? '已读取' : '可编辑'">
-      <div class="actions-row">
-        <button class="primary-button" :disabled="Boolean(blockedReason) || store.busy" @click="botTauntModalOpen = true">
-          编辑嘲讽文本
-        </button>
-        <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshBotTauntsConfig">
-          重新读取
-        </button>
-      </div>
+    <ConfigSection
+      title="击杀嘲讽内容"
+      :description="botTauntStatus"
+      :badge="store.botTauntsConfig?.exists ? '已读取' : '可编辑'"
+      :default-open="false"
+    >
+      <ConfigActionGroup
+        primary-label="编辑"
+        reset-label="恢复默认"
+        :primary-disabled="Boolean(blockedReason)"
+        :secondary-disabled="!store.selectedRoot"
+        :reset-disabled="Boolean(blockedReason)"
+        :busy="store.busy"
+        @primary="botTauntModalOpen = true"
+        @secondary="refreshBotTauntsConfig"
+        @reset="resetBotTaunts"
+      />
       <p v-if="botTauntLoadedPath && store.botTauntsConfig?.exists" class="inline-path">
         配置文件：<code>{{ botTauntLoadedPath }}</code>
       </p>
-    </CollapsiblePanel>
+    </ConfigSection>
 
-    <CollapsiblePanel title="NadeSystem 恢复时间" :subtitle="nadeRecoveryStatus" :badge="store.nadeRecoveryConfig?.exists ? '已读取' : '可编辑'">
-      <div class="actions-row">
-        <button class="primary-button" :disabled="Boolean(blockedReason) || store.busy" @click="nadeRecoveryModalOpen = true">
-          编辑恢复时间
-        </button>
-        <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshNadeRecoveryConfig">
-          重新读取
-        </button>
-      </div>
+    <ConfigSection
+      title="投掷物恢复时间"
+      :description="nadeRecoveryStatus"
+      :badge="store.nadeRecoveryConfig?.exists ? '已读取' : '可编辑'"
+      :default-open="false"
+    >
+      <ConfigActionGroup
+        primary-label="编辑"
+        reset-label="恢复默认"
+        :primary-disabled="Boolean(blockedReason)"
+        :secondary-disabled="!store.selectedRoot"
+        :reset-disabled="Boolean(blockedReason)"
+        :busy="store.busy"
+        @primary="nadeRecoveryModalOpen = true"
+        @secondary="refreshNadeRecoveryConfig"
+        @reset="resetNadeRecovery"
+      />
       <p v-if="nadeRecoveryLoadedPath && store.nadeRecoveryConfig?.exists" class="inline-path">
         配置文件：<code>{{ nadeRecoveryLoadedPath }}</code>
       </p>
-    </CollapsiblePanel>
+    </ConfigSection>
 
-    <CollapsiblePanel title="Demo 工具和手动步骤" :subtitle="demoStatus" badge="按需使用">
+    <ConfigSection title="辅助操作" :description="demoStatus" badge="按需使用" :default-open="false">
       <div class="manual-grid">
         <div class="manual-item">
           <strong>创意工坊地图启动项</strong>
           <div class="copy-row">
             <code>-disable_workshop_command_filtering</code>
-            <button class="ghost-button" @click="copyWorkshopFlag">
-              {{ workshopCopied ? '已复制' : '复制' }}
-            </button>
+            <CopyButton text="-disable_workshop_command_filtering" @copied="handleWorkshopCopied" />
           </div>
         </div>
 
@@ -542,9 +687,7 @@ onBeforeUnmount(() => {
           <strong>查找最近 Demo</strong>
           <div class="copy-row">
             <code>tv_enable 1; tv_autorecord 1</code>
-            <button class="ghost-button" @click="copyDemoCommand">
-              {{ demoCommandCopied ? '已复制' : '复制命令' }}
-            </button>
+            <CopyButton text="tv_enable 1; tv_autorecord 1" label="复制命令" copied-label="已复制命令" @copied="handleDemoCommandCopied" />
             <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshRecentDemoAndShow">
               查找并查看详情
             </button>
@@ -554,18 +697,39 @@ onBeforeUnmount(() => {
           </div>
         </div>
       </div>
-    </CollapsiblePanel>
+    </ConfigSection>
 
-    <ActionModal
+    <ConfigEditorModal
       :open="aiApiModalOpen"
-      title="编辑 AI API 配置"
-      subtitle="保存后需要重启 CS2 或服务器。"
-      confirm-label="保存配置"
+      title="设置 AI 聊天"
+      description="保存后需要重启 CS2 或服务器。"
+      save-label="保存 AI 聊天设置"
+      :save-disabled="Boolean(blockedReason) || store.busy"
+      :loading="store.busy"
       @close="aiApiModalOpen = false"
-      @confirm="saveAiApiAndClose"
+      @save="saveAiApiAndClose"
     >
       <p class="muted">
-        Bot 默认使用内置 LBTV API。需要换成自己的服务时，填写接口地址和密钥；接口应接收
+        默认不会写入 API Key。你可以使用自己准备的服务，也可以点击下方按钮启用我们免费提供的 AI 聊天 Key；
+        按钮只会填入当前表单，保存后才会写入 BotTaunt.json。
+      </p>
+      <div class="inline-notice" data-state="ready">
+        <strong>免费 AI 聊天 Key</strong>
+        <span>这是我们免费提供给玩家使用的 Key。不会自动启用，也不会覆盖你已经填写的自定义 Key。</span>
+        <div class="actions-row">
+          <button
+            class="ghost-button"
+            type="button"
+            :disabled="Boolean(blockedReason) || store.busy"
+            @click="enableFreeAiApiKey"
+          >
+            启用免费 KEY
+          </button>
+        </div>
+        <span v-if="freeAiApiMessage">{{ freeAiApiMessage }}</span>
+      </div>
+      <p class="muted">
+        如果换成自己的服务，请填写接口地址和密钥；接口应接收
         <code>temperature</code>、<code>messages</code>，并返回 <code>reply</code> 或 OpenAI 兼容结果。
       </p>
       <div class="form-grid ai-api-form">
@@ -589,16 +753,31 @@ onBeforeUnmount(() => {
             :disabled="Boolean(blockedReason) || store.busy"
           />
         </label>
-      </div>
-    </ActionModal>
 
-    <ActionModal
+        <label class="checkbox-field">
+          <input v-model="botRivalryEnabled" type="checkbox" :disabled="Boolean(blockedReason) || store.busy" />
+          <span>
+            <strong>开启 Bot 之间的低频互相嘲讽</strong>
+            <small>开启后，Bot 击杀敌方 Bot 时会偶尔发送互相嘲讽内容。</small>
+          </span>
+        </label>
+      </div>
+      <template #actions>
+        <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetAiApi">
+          恢复默认
+        </button>
+      </template>
+    </ConfigEditorModal>
+
+    <ConfigEditorModal
       :open="botTauntModalOpen"
-      title="编辑 BotTaunt 嘲讽文本"
-      subtitle="多行文本每组至少一条，特殊场景文本不能为空。"
-      confirm-label="保存文本"
+      title="设置击杀嘲讽内容"
+      description="多行文本每组至少一条，特殊场景文本不能为空。"
+      save-label="保存嘲讽内容"
+      :save-disabled="Boolean(blockedReason) || store.busy"
+      :loading="store.busy"
       @close="botTauntModalOpen = false"
-      @confirm="saveBotTauntsAndClose"
+      @save="saveBotTauntsAndClose"
     >
       <div class="form-grid bot-taunts-form">
         <label v-for="field in botTauntTextFields" :key="field.key" class="field">
@@ -626,22 +805,35 @@ onBeforeUnmount(() => {
 
       <template #actions>
         <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetBotTaunts">
-          恢复默认文本
+          恢复默认
         </button>
       </template>
-    </ActionModal>
+    </ConfigEditorModal>
 
-    <ActionModal
+    <ConfigEditorModal
       :open="nadeRecoveryModalOpen"
-      title="编辑 NadeSystem 恢复时间"
-      subtitle="数值单位为秒，插件实际支持 0 到 3 秒。"
-      confirm-label="保存恢复时间"
+      title="设置投掷物恢复时间"
+      description="单位是秒，拖动滑块或直接输入 0 到 3 秒。"
+      save-label="保存恢复时间"
+      :save-disabled="Boolean(blockedReason) || store.busy"
+      :loading="store.busy"
       @close="nadeRecoveryModalOpen = false"
-      @confirm="saveNadeRecoveryAndClose"
+      @save="saveNadeRecoveryAndClose"
     >
       <div class="form-grid nade-recovery-form">
-        <label v-for="field in nadeRecoveryFields" :key="field.key" class="field">
-          <span>{{ field.label }}</span>
+        <div v-for="field in nadeRecoveryFields" :key="field.key" class="field range-field">
+          <div class="range-field__head">
+            <span>{{ field.label }}</span>
+            <strong>{{ nadeRecovery[field.key].toFixed(2) }} 秒</strong>
+          </div>
+          <input
+            v-model.number="nadeRecovery[field.key]"
+            type="range"
+            min="0"
+            max="3"
+            step="0.05"
+            :disabled="Boolean(blockedReason) || store.busy"
+          />
           <input
             v-model.number="nadeRecovery[field.key]"
             type="number"
@@ -651,9 +843,14 @@ onBeforeUnmount(() => {
             :placeholder="field.hint"
             :disabled="Boolean(blockedReason) || store.busy"
           />
-        </label>
+        </div>
       </div>
-    </ActionModal>
+      <template #actions>
+        <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetNadeRecovery">
+          恢复默认
+        </button>
+      </template>
+    </ConfigEditorModal>
 
     <ActionModal
       :open="demoDetailModalOpen"
@@ -685,9 +882,7 @@ onBeforeUnmount(() => {
             </div>
           </dl>
           <div class="copy-row">
-            <button class="ghost-button" @click="copyDemoPath">
-              {{ demoPathCopied ? '已复制路径' : '复制 Demo 路径' }}
-            </button>
+            <CopyButton :text="recentDemo.path" label="复制 Demo 路径" copied-label="已复制路径" @copied="handleDemoPathCopied" />
             <button class="ghost-button" @click="openRecentDemoFolder">
               打开所在文件夹
             </button>

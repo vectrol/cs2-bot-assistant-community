@@ -17,6 +17,8 @@ import {
   openDemoDirectory,
   openRecentDemoDirectory,
   resetBotTauntsConfig,
+  resetAiApiConfig,
+  resetNadeRecoveryConfig,
   saveAiApiConfig,
   saveBotTauntsConfig,
   saveNadeRecoveryConfig,
@@ -278,6 +280,19 @@ export const useCs2Store = defineStore('cs2', () => {
     }
   }
 
+  async function resetAiApi() {
+    requireSelectedRoot(selectedRoot.value)
+
+    busy.value = true
+    try {
+      aiApiConfig.value = await resetAiApiConfig(selectedRoot.value)
+      message.value = 'AI 聊天 API 已恢复默认。重启 CS2 或服务器后生效。'
+      return aiApiConfig.value
+    } finally {
+      busy.value = false
+    }
+  }
+
   async function saveNadeRecovery(nextConfig: Pick<NadeRecoveryConfig, 'flash' | 'smoke' | 'he' | 'molotov' | 'incgrenade' | 'decoy'>) {
     requireSelectedRoot(selectedRoot.value)
 
@@ -297,6 +312,19 @@ export const useCs2Store = defineStore('cs2', () => {
       message.value = result.message
       await refreshNadeRecoveryConfig()
       return result
+    } finally {
+      busy.value = false
+    }
+  }
+
+  async function resetNadeRecovery() {
+    requireSelectedRoot(selectedRoot.value)
+
+    busy.value = true
+    try {
+      nadeRecoveryConfig.value = await resetNadeRecoveryConfig(selectedRoot.value)
+      message.value = '投掷物恢复时间已恢复默认。重启 CS2 或服务器后生效。'
+      return nadeRecoveryConfig.value
     } finally {
       busy.value = false
     }
@@ -436,9 +464,11 @@ export const useCs2Store = defineStore('cs2', () => {
     applyDifficulty,
     switchGameMode,
     saveAiApi,
+    resetAiApi,
     saveBotTaunts,
     resetBotTaunts,
     saveNadeRecovery,
+    resetNadeRecovery,
     openReplays,
     openDemoFolder,
     uninstall,

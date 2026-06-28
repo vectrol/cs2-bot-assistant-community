@@ -16,6 +16,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/ConfigView.vue'),
   },
   {
+    path: '/quick-control',
+    name: 'quick-control',
+    component: () => import('@/views/QuickControlView.vue'),
+  },
+  {
     path: '/commands',
     name: 'commands',
     component: () => import('@/views/CommandsView.vue'),

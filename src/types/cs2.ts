@@ -16,6 +16,12 @@ export interface Cs2EnvironmentStatus {
   lowProfileExists: boolean
   mediumProfileExists: boolean
   highProfileExists: boolean
+  botHiderExists: boolean
+  rayTraceExists: boolean
+  coreConfigExists: boolean
+  botHiderImplExists: boolean
+  rayTraceImplExists: boolean
+  roundDamageRecapExists: boolean
   baseEnvironmentReady: boolean
 }
 

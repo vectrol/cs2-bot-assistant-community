@@ -58,6 +58,11 @@ pub fn save_ai_api_config(
 }
 
 #[tauri::command]
+pub fn reset_ai_api_config(root_path: String) -> Result<AiApiConfig, String> {
+    cs2::reset_ai_api_config(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
 pub fn get_bot_taunts_config(root_path: String) -> Result<BotTauntsConfig, String> {
     cs2::get_bot_taunts_config(&root_path).map_err(AppError::into_string)
 }
@@ -89,6 +94,11 @@ pub fn save_nade_recovery_config(
 }
 
 #[tauri::command]
+pub fn reset_nade_recovery_config(root_path: String) -> Result<NadeRecoveryConfig, String> {
+    cs2::reset_nade_recovery_config(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
 pub fn get_commands_txt(app: AppHandle) -> Result<CommandsTxtPayload, String> {
     cs2::get_commands_txt(&app).map_err(AppError::into_string)
 }
@@ -114,6 +124,11 @@ pub fn open_demo_directory(
 #[tauri::command]
 pub fn open_replays_directory(root_path: String) -> Result<OperationResult, String> {
     cs2::open_replays_directory(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn open_diagnostics_log_directory() -> Result<OperationResult, String> {
+    cs2::open_diagnostics_log_directory().map_err(AppError::into_string)
 }
 
 #[tauri::command]
