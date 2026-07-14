@@ -656,7 +656,7 @@ pub fn save_nade_recovery_config(
     Ok(OperationResult {
         success: true,
         message: format!(
-            "NadeSystem 恢复时间已保存。\n配置文件：{}\n重启 CS2 或服务器后生效。",
+            "道具压制开火时间已保存。\n配置文件：{}\n重启 CS2 或服务器后生效。",
             config_path.display()
         ),
     })
@@ -1324,12 +1324,13 @@ fn read_f64_field(
         .get(key)
         .and_then(serde_json::Value::as_f64)
         .filter(|value| value.is_finite())
+        .map(|value| value.clamp(0.0, 5.0))
         .unwrap_or(default_value)
 }
 
 fn insert_seconds(object: &mut serde_json::Map<String, serde_json::Value>, key: &str, value: f64) {
     let sanitized = if value.is_finite() {
-        value.clamp(0.0, 3.0)
+        value.clamp(0.0, 5.0)
     } else {
         0.0
     };

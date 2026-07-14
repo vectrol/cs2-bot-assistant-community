@@ -5,9 +5,9 @@ import ActionModal from '@/components/ActionModal.vue'
 import ConfigActionGroup from '@/components/config/ConfigActionGroup.vue'
 import ConfigEditorModal from '@/components/config/ConfigEditorModal.vue'
 import ConfigSection from '@/components/config/ConfigSection.vue'
-import ConfigStatusStrip from '@/components/config/ConfigStatusStrip.vue'
+import ConsolePanel from '@/components/layout/ConsolePanel.vue'
 import CopyButton from '@/components/CopyButton.vue'
-import StatusHero from '@/components/StatusHero.vue'
+import MetricTile from '@/components/ui/MetricTile.vue'
 import { useCs2Store } from '@/stores/cs2'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
@@ -18,6 +18,7 @@ const aiApiModalOpen = ref(false)
 const botTauntModalOpen = ref(false)
 const nadeRecoveryModalOpen = ref(false)
 const demoDetailModalOpen = ref(false)
+const activeConfigSection = ref<'base' | 'ai' | 'taunts' | 'nades' | 'demo'>('base')
 const aiApiUrl = ref('')
 const aiApiKey = ref('')
 const botRivalryEnabled = ref(false)
@@ -115,17 +116,16 @@ const botTauntStatus = computed(() => {
 })
 
 const nadeRecoveryFields = [
-  { key: 'flash', label: '闪光弹', hint: 'flash' },
-  { key: 'smoke', label: '烟雾弹', hint: 'smoke' },
-  { key: 'he', label: '高爆雷', hint: 'he' },
-  { key: 'molotov', label: '燃烧瓶', hint: 'molotov' },
-  { key: 'incgrenade', label: '燃烧弹', hint: 'incgrenade' },
-  { key: 'decoy', label: '诱饵弹', hint: 'decoy' },
+  { key: 'flash', label: '闪光弹', hint: 'BOT 丢出闪光后的压制秒数' },
+  { key: 'smoke', label: '烟雾弹', hint: 'BOT 丢出烟雾后的压制秒数' },
+  { key: 'he', label: '高爆雷', hint: 'BOT 丢出高爆后的压制秒数' },
+  { key: 'molotov', label: '燃烧瓶', hint: 'T 方燃烧瓶后的压制秒数' },
+  { key: 'incgrenade', label: '燃烧弹', hint: 'CT 方燃烧弹后的压制秒数' },
 ] as const
 
 const nadeRecoveryStatus = computed(() => {
   if (!store.nadeRecoveryConfig) {
-    return '选择并安装 CS2 目录后，可以在这里编辑 NadeSystem 恢复时间。'
+    return '选择并安装 CS2 目录后，可以在这里编辑 BOT 使用道具后的开火压制时间。'
   }
   if (!store.nadeRecoveryConfig.exists) {
     return '尚未找到 NadeSystem.json，保存后会自动创建。'
@@ -166,16 +166,17 @@ const demoStatus = computed(() => {
   return `最近 Demo：${store.demoDiscovery.recentDemo.fileName}`
 })
 
-const heroBadges = computed(() => [
-  {
-    label: blockedReason.value || '当前可以配置',
-    state: blockedReason.value ? 'warn' as const : 'ready' as const,
-  },
-])
-
 const recentConfigItems = computed(() => preferences.recentActions
-  .filter((item) => ['设置难度', '切换模式', '保存 AI 聊天', '保存嘲讽内容', '保存投掷物恢复'].includes(item.label))
+  .filter((item) => ['设置难度', '切换模式', '保存 AI 聊天', '保存嘲讽内容', '保存道具压制开火'].includes(item.label))
   .slice(0, 4))
+
+const configSections = computed(() => [
+  { key: 'base' as const, label: '基础配置', detail: blockedReason.value || '难度和模式可写入' },
+  { key: 'ai' as const, label: 'AI 聊天', detail: store.aiApiConfig?.exists ? '已读取配置' : '可选配置' },
+  { key: 'taunts' as const, label: 'Bot 嘲讽', detail: store.botTauntsConfig?.exists ? '已读取文本' : '可编辑文本' },
+  { key: 'nades' as const, label: '道具压制开火', detail: store.nadeRecoveryConfig?.exists ? '已读取时间' : '可编辑时间' },
+  { key: 'demo' as const, label: 'Demo / 启动项', detail: recentDemo.value?.fileName ?? '辅助操作' },
+])
 
 function canWriteConfig() {
   if (!blockedReason.value) {
@@ -391,7 +392,7 @@ async function refreshNadeRecoveryConfig() {
     }
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '读取投掷物恢复配置')
+    preferences.recordError(message, '读取道具压制开火配置')
     store.setMessage(`${message} 可以重新读取，或到帮助页复制诊断信息。`)
   }
 }
@@ -401,13 +402,13 @@ async function saveNadeRecovery() {
     return false
   }
   try {
-    preferences.createRestorePoint('保存投掷物恢复时间', store.selectedRoot, '写入 NadeSystem.json 恢复时间', false)
+    preferences.createRestorePoint('保存道具压制开火时间', store.selectedRoot, '写入 NadeSystem.json 道具后开火压制时间', false)
     await store.saveNadeRecovery(nadeRecovery.value)
-    preferences.recordAction('保存投掷物恢复', nadeRecoveryLoadedPath.value || store.selectedRoot)
+    preferences.recordAction('保存道具压制开火', nadeRecoveryLoadedPath.value || store.selectedRoot)
     return true
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '保存投掷物恢复时间')
+    preferences.recordError(message, '保存道具压制开火时间')
     store.setMessage(`${message} 请确认 CS2 已退出，并重新读取配置。`)
     return false
   }
@@ -438,7 +439,7 @@ async function resetNadeRecovery() {
     }
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '恢复投掷物默认配置')
+    preferences.recordError(message, '恢复道具压制开火默认配置')
     store.setMessage(`${message} 可以重新读取配置后再试。`)
   }
 }
@@ -524,19 +525,40 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="page-grid">
-    <StatusHero
-      eyebrow="游戏配置"
-      title="先把常用设置调好"
-      description="第一屏只保留最常用的难度、模式和运行状态；更多配置放在下面展开。"
-      :badges="heroBadges"
+  <section class="page-grid config-console-page">
+    <ConsolePanel
+      eyebrow="Configuration"
+      title="配置控制台"
+      :description="blockedReason || '当前可以配置。写入后会刷新对应配置状态。'"
+      tone="strong"
     >
       <template #actions>
         <button class="ghost-button" @click="store.refreshCs2Running()">刷新游戏状态</button>
       </template>
-    </StatusHero>
+      <div class="metric-grid">
+        <MetricTile
+          v-for="item in statusItems"
+          :key="item.label"
+          :label="item.label"
+          :value="item.value"
+          :state="item.state"
+        />
+      </div>
+    </ConsolePanel>
 
-    <ConfigStatusStrip :items="statusItems" />
+    <article class="card config-section-tabs" aria-label="配置分区">
+      <button
+        v-for="section in configSections"
+        :key="section.key"
+        class="config-section-tab"
+        type="button"
+        :data-active="activeConfigSection === section.key"
+        @click="activeConfigSection = section.key"
+      >
+        <strong>{{ section.label }}</strong>
+        <span>{{ section.detail }}</span>
+      </button>
+    </article>
 
     <article v-if="recentConfigItems.length > 0" class="card recent-config-card">
       <div class="section-head">
@@ -554,7 +576,7 @@ onMounted(async () => {
       </div>
     </article>
 
-    <div class="config-quick-grid">
+    <div v-show="activeConfigSection === 'base'" class="config-quick-grid">
       <article class="card config-quick-card">
         <div class="section-head">
           <div>
@@ -603,6 +625,7 @@ onMounted(async () => {
     </div>
 
     <ConfigSection
+      v-show="activeConfigSection === 'ai'"
       title="AI 聊天"
       :description="aiConfigStatus"
       :badge="store.aiApiConfig?.exists ? '已配置' : '可选'"
@@ -625,6 +648,7 @@ onMounted(async () => {
     </ConfigSection>
 
     <ConfigSection
+      v-show="activeConfigSection === 'taunts'"
       title="击杀嘲讽内容"
       :description="botTauntStatus"
       :badge="store.botTauntsConfig?.exists ? '已读取' : '可编辑'"
@@ -647,7 +671,8 @@ onMounted(async () => {
     </ConfigSection>
 
     <ConfigSection
-      title="投掷物恢复时间"
+      v-show="activeConfigSection === 'nades'"
+      title="道具压制开火"
       :description="nadeRecoveryStatus"
       :badge="store.nadeRecoveryConfig?.exists ? '已读取' : '可编辑'"
       :default-open="false"
@@ -668,7 +693,7 @@ onMounted(async () => {
       </p>
     </ConfigSection>
 
-    <ConfigSection title="辅助操作" :description="demoStatus" badge="按需使用" :default-open="false">
+    <ConfigSection v-show="activeConfigSection === 'demo'" title="辅助操作" :description="demoStatus" badge="按需使用" :default-open="true">
       <div class="manual-grid">
         <div class="manual-item">
           <strong>创意工坊地图启动项</strong>
@@ -812,9 +837,9 @@ onMounted(async () => {
 
     <ConfigEditorModal
       :open="nadeRecoveryModalOpen"
-      title="设置投掷物恢复时间"
-      description="单位是秒，拖动滑块或直接输入 0 到 3 秒。"
-      save-label="保存恢复时间"
+      title="设置道具压制开火时间"
+      description="BOT 使用道具后，会在指定秒数内压制开火和瞄准。范围 0 到 5 秒，0 表示不压制。诱饵弹暂不开放配置。"
+      save-label="保存压制时间"
       :save-disabled="Boolean(blockedReason) || store.busy"
       :loading="store.busy"
       @close="nadeRecoveryModalOpen = false"
@@ -830,7 +855,7 @@ onMounted(async () => {
             v-model.number="nadeRecovery[field.key]"
             type="range"
             min="0"
-            max="3"
+            max="5"
             step="0.05"
             :disabled="Boolean(blockedReason) || store.busy"
           />
@@ -838,7 +863,7 @@ onMounted(async () => {
             v-model.number="nadeRecovery[field.key]"
             type="number"
             min="0"
-            max="3"
+            max="5"
             step="0.05"
             :placeholder="field.hint"
             :disabled="Boolean(blockedReason) || store.busy"

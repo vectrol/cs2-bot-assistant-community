@@ -65,6 +65,9 @@ export const commandGroups = [
       { command: 'bot_nades more', summary: '推荐模式，沿用 normal 的判断逻辑，但允许更多道具。' },
       { command: 'bot_nades max', summary: '限制最少，Bot 会更频繁地使用道具。' },
       { command: 'bot_nades', summary: '查看当前 Bot 投掷物模式。' },
+      { command: 'lbtv_nade_recovery_status', summary: '查看当前 BOT 道具压制开火计时状态。' },
+      { command: 'lbtv_nade_recovery_debug 1', summary: '开启 NadeSystem 道具压制开火调试日志。' },
+      { command: 'lbtv_nade_recovery_test flash 1', summary: '对存活 BOT 测试指定道具类型的压制开火时长。' },
     ] satisfies CommandItem[],
   },
   {

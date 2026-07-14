@@ -18,6 +18,7 @@ const preferences = useUiPreferencesStore()
 const groupMessage = ref('')
 const uninstallModalOpen = ref(false)
 const rewardVisible = ref(false)
+const rewardMessage = ref('')
 const groupUrl = 'https://qm.qq.com/q/QRlMlc1h2E'
 
 const summaryItems = computed(() => [
@@ -48,7 +49,6 @@ async function openGroupUrl() {
 
 async function uninstallBotPackage() {
   try {
-    preferences.createRestorePoint('卸载插件包', store.selectedRoot, '删除已知插件目录和部分插件配置目录', false)
     await store.uninstall()
     uninstallModalOpen.value = false
   } catch (error) {
@@ -85,6 +85,16 @@ async function openLogs() {
   }
 }
 
+function openRewardModal() {
+  rewardMessage.value = ''
+  rewardVisible.value = true
+}
+
+function closeRewardModal() {
+  rewardVisible.value = false
+  rewardMessage.value = '感谢你的支持与理解。'
+}
+
 onMounted(async () => {
   preferences.load()
   await refreshDiagnosticsPanel()
@@ -115,7 +125,6 @@ onMounted(async () => {
       :cs2-running="store.cs2Running"
       :diagnostics="store.diagnostics"
       :last-error="preferences.lastError"
-      :restore-points="preferences.restorePoints"
       :busy="store.busy"
       @refresh="refreshDiagnosticsPanel"
       @open-logs="openLogs"
@@ -135,7 +144,6 @@ onMounted(async () => {
           <p class="eyebrow">自愿支持</p>
           <h3>支持维护</h3>
         </div>
-        <button v-if="rewardVisible" class="ghost-button" type="button" @click="rewardVisible = false">收起</button>
       </div>
       <div class="support-maintenance__content">
         <div class="support-maintenance__copy">
@@ -151,19 +159,29 @@ onMounted(async () => {
           </p>
           <p class="support-maintenance__note">请按自己的情况决定，感谢理解。</p>
           <button
-            v-if="!rewardVisible"
             class="ghost-button"
             type="button"
-            @click="rewardVisible = true"
+            @click="openRewardModal"
           >
             查看赞赏码
           </button>
-        </div>
-        <div v-if="rewardVisible" class="support-maintenance__reward">
-          <img :src="wechatRewardImage" alt="微信赞赏码" />
+          <p v-if="rewardMessage" class="reward-thanks-message">{{ rewardMessage }}</p>
         </div>
       </div>
     </section>
+
+    <div v-if="rewardVisible" class="reward-modal" role="dialog" aria-modal="true" aria-label="微信赞赏码">
+      <div class="reward-modal__backdrop" @click="closeRewardModal"></div>
+      <div class="reward-modal__panel">
+        <button class="reward-modal__close" type="button" aria-label="关闭赞赏码" @click="closeRewardModal">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m7 7 10 10" />
+            <path d="m17 7-10 10" />
+          </svg>
+        </button>
+        <img class="reward-modal__image" :src="wechatRewardImage" alt="微信赞赏码" />
+      </div>
+    </div>
 
     <section class="danger-zone card">
       <div class="section-head">

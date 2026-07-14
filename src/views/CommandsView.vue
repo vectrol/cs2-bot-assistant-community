@@ -2,19 +2,18 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
-import ActionModal from '@/components/ActionModal.vue'
+import ConsolePanel from '@/components/layout/ConsolePanel.vue'
 import CopyButton from '@/components/CopyButton.vue'
-import StatusHero from '@/components/StatusHero.vue'
-import SummaryStrip from '@/components/SummaryStrip.vue'
+import MetricTile from '@/components/ui/MetricTile.vue'
 import EmptyState from '@/components/ui/EmptyState.vue'
 import InlineNotice from '@/components/ui/InlineNotice.vue'
 import { commandCenterTabs, teamPresets, type CommandTabKey } from '@/features/cs2/data'
-import { getCommandsTxt } from '@/services/tauri/cs2'
 import { useCustomCommandsStore } from '@/stores/custom-commands'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import type { CustomCommandItem } from '@/types/custom-command'
 
 const COMMANDS_HINT_STORAGE_KEY = 'cs2-bot-improver.commands-page-hint-seen'
+type CommandPageTabKey = CommandTabKey
 
 const route = useRoute()
 const router = useRouter()
@@ -22,15 +21,9 @@ const customStore = useCustomCommandsStore()
 const preferences = useUiPreferencesStore()
 
 const copiedKey = ref('')
-const commandsTxt = ref('')
-const commandsTxtSource = ref('')
-const commandsTxtError = ref('')
-const commandsTxtLoading = ref(false)
-const commandsTxtModalOpen = ref(false)
 const searchQuery = ref('')
-const activeTab = ref<CommandTabKey>('common')
+const activeTab = ref<CommandPageTabKey>('common')
 const hintVisible = ref(window.localStorage.getItem(COMMANDS_HINT_STORAGE_KEY) !== 'true')
-const commandsTxtTextarea = ref<HTMLTextAreaElement | null>(null)
 const editingId = ref('')
 const localMessage = ref('')
 const form = reactive({
@@ -109,13 +102,10 @@ const summaryItems = computed(() => [
         : `${visibleCommands.value.length} 条`,
     state: 'ready' as const,
   },
-  { label: 'Commands.txt', value: commandsTxt.value ? '已读取' : '待读取', state: commandsTxt.value ? 'ready' as const : 'warn' as const },
-])
-
-const heroBadges = computed(() => [
   {
-    label: isCustomTab.value ? `已保存 ${customStore.items.length} 条自定义指令` : `${visibleCommands.value.length} 条可复制命令`,
-    state: 'ready' as const,
+    label: '完整指令库',
+    value: '官网维护',
+    state: 'info' as const,
   },
 ])
 
@@ -148,9 +138,13 @@ function editCommand(item: CustomCommandItem) {
   form.command = item.command
 }
 
-function setActiveTab(tab: CommandTabKey) {
+function setActiveTab(tab: CommandPageTabKey) {
   activeTab.value = tab
   router.replace({ path: '/commands', query: tab === 'common' ? {} : { tab } })
+}
+
+function openOfficialCommandLibrary() {
+  void router.push({ path: '/official-site', query: { path: '/commands' } })
 }
 
 function markCopied(key: string) {
@@ -252,47 +246,6 @@ async function deleteCommand(id: string) {
   }
 }
 
-async function loadCommandsTxt() {
-  commandsTxtLoading.value = true
-  commandsTxtError.value = ''
-  try {
-    const payload = await getCommandsTxt()
-    commandsTxt.value = payload.content
-    commandsTxtSource.value = payload.sourcePath
-  } catch (error) {
-    commandsTxt.value = ''
-    commandsTxtSource.value = ''
-    commandsTxtError.value = normalizeCommandsError(error)
-  } finally {
-    commandsTxtLoading.value = false
-  }
-}
-
-async function copyCommandsTxtSelection() {
-  const textarea = commandsTxtTextarea.value
-  if (!textarea) {
-    return
-  }
-
-  const selection = textarea.value.slice(textarea.selectionStart, textarea.selectionEnd).trim()
-  const copied = await writeClipboardText(selection || textarea.value)
-  if (!copied) {
-    return
-  }
-  markCommandsFeatureUsed()
-  markCopied('commands-txt-selection')
-}
-
-function normalizeCommandsError(error: unknown) {
-  if (typeof error === 'string') {
-    return error
-  }
-  if (error instanceof Error) {
-    return error.message
-  }
-  return '读取 Commands.txt 失败。'
-}
-
 function normalizeCustomError(error: unknown) {
   if (typeof error === 'string') {
     return error
@@ -308,7 +261,7 @@ watch(
   (tab) => {
     const nextTab = typeof tab === 'string' ? tab : ''
     if (tabs.value.some((item) => item.key === nextTab)) {
-      activeTab.value = nextTab as CommandTabKey
+      activeTab.value = nextTab as CommandPageTabKey
     } else {
       activeTab.value = 'common'
     }
@@ -318,14 +271,11 @@ watch(
 
 onMounted(async () => {
   preferences.load()
-  await Promise.all([
-    loadCommandsTxt(),
-    customStore.initialize().then(() => {
-      if (customStore.storagePath) {
-        localMessage.value = `本地保存位置：${customStore.storagePath}`
-      }
-    }),
-  ])
+  await customStore.initialize().then(() => {
+    if (customStore.storagePath) {
+      localMessage.value = `本地保存位置：${customStore.storagePath}`
+    }
+  })
 })
 
 onBeforeUnmount(() => {
@@ -336,26 +286,33 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="page-grid">
-    <StatusHero
-      eyebrow="指令中心"
-      title="找到命令，复制即用"
+  <section class="page-grid commands-console-page">
+    <ConsolePanel
+      eyebrow="Command Library"
+      title="指令库"
       description="按场景筛选命令，复制后粘贴到 CS2 控制台或 Steam 启动项。"
-      :badges="heroBadges"
+      tone="strong"
     >
       <template #actions>
-        <button class="ghost-button" :disabled="commandsTxtLoading" @click="commandsTxtModalOpen = true">
-          查看完整 Commands.txt
+        <button class="primary-button" type="button" @click="openOfficialCommandLibrary">
+          打开官网完整指令库
         </button>
       </template>
-    </StatusHero>
-
-    <SummaryStrip :items="summaryItems" />
+      <div class="metric-grid">
+        <MetricTile
+          v-for="item in summaryItems"
+          :key="item.label"
+          :label="item.label"
+          :value="item.value"
+          :state="item.state"
+        />
+      </div>
+    </ConsolePanel>
 
     <article class="card command-center-toolbar">
       <label class="field search-field">
         <span>搜索命令或说明</span>
-        <input v-model="searchQuery" type="search" placeholder="例如 bot_nades、联机、启动项、AK" />
+        <input v-model="searchQuery" type="search" placeholder="例如 bot_kick、sv_cheats、cl_crosshair、启动项" />
       </label>
 
       <div class="command-tabs" role="tablist" aria-label="指令分类">
@@ -460,7 +417,9 @@ onBeforeUnmount(() => {
             :aria-label="isPinned(item.command) ? '取消固定命令' : '固定命令'"
             @click="togglePinnedCommand(item.command)"
           >
-            {{ isPinned(item.command) ? '★' : '☆' }}
+            <svg aria-hidden="true" viewBox="0 0 24 24" :data-filled="isPinned(item.command)">
+              <path d="m12 3 2.74 5.55 6.13.89-4.44 4.33 1.05 6.1L12 17l-5.48 2.88 1.05-6.1-4.44-4.33 6.13-.89L12 3Z" />
+            </svg>
           </button>
           <code>{{ item.command }}</code>
           <span>{{ item.summary }}</span>
@@ -557,40 +516,5 @@ onBeforeUnmount(() => {
 
     <InlineNotice v-if="localMessage && isCustomTab" :message="localMessage" :state="localMessage.includes('失败') ? 'danger' : 'info'" />
 
-    <ActionModal
-      :open="commandsTxtModalOpen"
-      title="完整 Commands.txt"
-      subtitle="可以选中某一段后复制；如果没有选中内容，会复制全文。"
-      cancel-label="关闭"
-      hide-confirm
-      @close="commandsTxtModalOpen = false"
-      @confirm="commandsTxtModalOpen = false"
-    >
-      <div class="actions-row">
-        <button class="ghost-button" :disabled="commandsTxtLoading" @click="loadCommandsTxt">
-          {{ commandsTxtLoading ? '读取中' : '重新读取' }}
-        </button>
-        <button class="ghost-button" :disabled="!commandsTxt" @click="copyCommandsTxtSelection">
-          {{ copiedKey === 'commands-txt-selection' ? '已复制' : '复制选中/全文' }}
-        </button>
-      </div>
-
-      <label class="field">
-        <span>完整内容</span>
-        <textarea
-          ref="commandsTxtTextarea"
-          class="commands-txt-area"
-          :value="commandsTxt"
-          readonly
-          spellcheck="false"
-          placeholder="正在读取资源包里的 Commands.txt"
-        />
-      </label>
-
-      <p v-if="commandsTxtSource" class="inline-path">
-        来源：<code>{{ commandsTxtSource }}</code>
-      </p>
-      <p v-if="commandsTxtError" class="message-line">{{ commandsTxtError }}</p>
-    </ActionModal>
   </section>
 </template>

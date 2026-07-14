@@ -1,37 +1,49 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
 import CollapsiblePanel from '@/components/CollapsiblePanel.vue'
 import SummaryStrip from '@/components/SummaryStrip.vue'
 import { releaseNoteEntries } from '@/features/release-notes/data'
 import type { ReleaseNoteEntry } from '@/features/release-notes/data'
 import type { SoftwareRelease } from '@/features/software-updates/types'
-import { fetchSoftwareUpdates } from '@/services/software-updates'
+import { fetchSoftwareReleaseHistory } from '@/services/software-updates'
 import { openExternalUrl } from '@/services/tauri/app'
 
 const openMessage = ref('')
 const cloudEntries = ref<ReleaseNoteEntry[] | null>(null)
-const localEntriesByVersion = computed(() => new Map(releaseNoteEntries.map((entry) => [entry.version, entry])))
+const cloudStatus = ref<'loading' | 'online' | 'builtin' | 'failed' | 'not-configured'>('loading')
 const entries = computed(() => {
   if (!cloudEntries.value?.length) {
-    return releaseNoteEntries
+    return [...releaseNoteEntries].sort(compareReleaseNotes)
   }
 
-  const mergedEntries = cloudEntries.value.map((cloudEntry) => {
-    const localEntry = localEntriesByVersion.value.get(cloudEntry.version)
-    if (!localEntry) {
-      return cloudEntry
-    }
-
-    return {
-      ...localEntry,
-      source: cloudEntry.source ?? localEntry.source,
+  const mergedByVersion = new Map<string, ReleaseNoteEntry>()
+  cloudEntries.value.forEach((cloudEntry) => {
+    mergedByVersion.set(cloudEntry.version, cloudEntry)
+  })
+  releaseNoteEntries.forEach((localEntry) => {
+    if (!mergedByVersion.has(localEntry.version)) {
+      mergedByVersion.set(localEntry.version, localEntry)
     }
   })
 
-  const cloudVersions = new Set(cloudEntries.value.map((entry) => entry.version))
-  const localOnlyEntries = releaseNoteEntries.filter((entry) => !cloudVersions.has(entry.version))
-  return [...mergedEntries, ...localOnlyEntries]
+  return [...mergedByVersion.values()].sort(compareReleaseNotes)
+})
+const entrySourceLabel = computed(() => {
+  if (cloudStatus.value === 'failed') {
+    return '内置日志'
+  }
+  if (cloudStatus.value === 'not-configured') {
+    return '线上源未配置'
+  }
+  if (cloudStatus.value === 'loading') {
+    return '读取中'
+  }
+  if (cloudStatus.value === 'builtin') {
+    return '线上无记录'
+  }
+  return '线上 + 内置'
 })
 const latestEntry = computed(() => entries.value[0] ?? null)
 const historyEntries = computed(() => entries.value.slice(1))
@@ -43,8 +55,8 @@ const summaryItems = computed(() => [
   },
   {
     label: '日志来源',
-    value: cloudEntries.value?.length ? '线上记录' : '内置记录',
-    state: 'ready' as const,
+    value: entrySourceLabel.value,
+    state: cloudStatus.value === 'failed' || cloudStatus.value === 'not-configured' ? 'warn' as const : 'ready' as const,
   },
   {
     label: '历史版本',
@@ -54,11 +66,40 @@ const summaryItems = computed(() => [
 ])
 
 onMounted(async () => {
-  const payload = await fetchSoftwareUpdates()
-  if (payload?.history?.length) {
-    cloudEntries.value = payload.history.map(mapCloudRelease)
+  const result = await fetchSoftwareReleaseHistory()
+  if (result.status === 'online') {
+    cloudEntries.value = result.payload.history.map(mapCloudRelease)
+    cloudStatus.value = 'online'
+    return
   }
+  if (result.status === 'empty') {
+    cloudEntries.value = []
+    cloudStatus.value = 'builtin'
+    return
+  }
+  cloudStatus.value = result.status
 })
+
+function compareReleaseNotes(left: ReleaseNoteEntry, right: ReleaseNoteEntry) {
+  const versionCompare = compareVersions(right.version, left.version)
+  if (versionCompare !== 0) {
+    return versionCompare
+  }
+  return right.date.localeCompare(left.date)
+}
+
+function compareVersions(left: string, right: string) {
+  const leftParts = left.split('.').map((part) => Number.parseInt(part, 10) || 0)
+  const rightParts = right.split('.').map((part) => Number.parseInt(part, 10) || 0)
+  const length = Math.max(leftParts.length, rightParts.length)
+  for (let index = 0; index < length; index += 1) {
+    const diff = (leftParts[index] ?? 0) - (rightParts[index] ?? 0)
+    if (diff !== 0) {
+      return diff
+    }
+  }
+  return 0
+}
 
 function mapCloudRelease(release: SoftwareRelease): ReleaseNoteEntry {
   const entry: ReleaseNoteEntry = {
@@ -99,6 +140,9 @@ async function openLink(url: string) {
         <h2>查看每个版本具体更新了什么。</h2>
       </div>
       <div class="hero-status">
+        <RouterLink class="ghost-button" to="/settings">
+          返回设置
+        </RouterLink>
         <span class="status-badge" data-state="ready">最新版本 v{{ latestEntry?.version }}</span>
       </div>
     </article>

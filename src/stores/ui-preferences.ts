@@ -34,6 +34,14 @@ export interface LastErrorInfo {
   at: string
 }
 
+export type AutoInstallStatus = 'idle' | 'checking' | 'installed' | 'skipped' | 'failed'
+
+export interface AutoInstallState {
+  status: AutoInstallStatus
+  message: string
+  at: string
+}
+
 interface UiPreferencesState {
   lastRoute: string
   lastSelectedRoot: string
@@ -44,6 +52,9 @@ interface UiPreferencesState {
   lastError: LastErrorInfo | null
   lastDemoPath: string
   dismissedHints: string[]
+  autoInstallOnFirstRunEnabled: boolean
+  autoInstallAttemptedVersions: string[]
+  lastAutoInstall: AutoInstallState
 }
 
 function defaultState(): UiPreferencesState {
@@ -57,6 +68,13 @@ function defaultState(): UiPreferencesState {
     lastError: null,
     lastDemoPath: '',
     dismissedHints: [],
+    autoInstallOnFirstRunEnabled: true,
+    autoInstallAttemptedVersions: [],
+    lastAutoInstall: {
+      status: 'idle',
+      message: '还没有进行自动安装检查。',
+      at: '',
+    },
   }
 }
 
@@ -83,6 +101,16 @@ function readState(): UiPreferencesState {
       dismissedHints: Array.isArray(parsed.dismissedHints)
         ? parsed.dismissedHints.filter((item): item is string => typeof item === 'string')
         : [],
+      autoInstallOnFirstRunEnabled:
+        typeof parsed.autoInstallOnFirstRunEnabled === 'boolean'
+          ? parsed.autoInstallOnFirstRunEnabled
+          : fallback.autoInstallOnFirstRunEnabled,
+      autoInstallAttemptedVersions: Array.isArray(parsed.autoInstallAttemptedVersions)
+        ? parsed.autoInstallAttemptedVersions.filter((item): item is string => typeof item === 'string')
+        : [],
+      lastAutoInstall: isAutoInstallState(parsed.lastAutoInstall)
+        ? parsed.lastAutoInstall
+        : fallback.lastAutoInstall,
     }
   } catch {
     return defaultState()
@@ -131,6 +159,16 @@ function isLastError(item: unknown): item is LastErrorInfo {
   )
 }
 
+function isAutoInstallState(item: unknown): item is AutoInstallState {
+  return Boolean(
+    item
+      && typeof item === 'object'
+      && ['idle', 'checking', 'installed', 'skipped', 'failed'].includes(String(Reflect.get(item, 'status')))
+      && typeof Reflect.get(item, 'message') === 'string'
+      && typeof Reflect.get(item, 'at') === 'string',
+  )
+}
+
 function nowIso() {
   return new Date().toISOString()
 }
@@ -151,6 +189,9 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
   const lastSelectedRoot = computed(() => state.value.lastSelectedRoot)
   const lastError = computed(() => state.value.lastError)
   const lastDemoPath = computed(() => state.value.lastDemoPath)
+  const autoInstallOnFirstRunEnabled = computed(() => state.value.autoInstallOnFirstRunEnabled)
+  const autoInstallAttemptedVersions = computed(() => state.value.autoInstallAttemptedVersions)
+  const lastAutoInstall = computed(() => state.value.lastAutoInstall)
 
   function load() {
     if (loaded.value || typeof window === 'undefined') {
@@ -263,6 +304,40 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     }
   }
 
+  function setAutoInstallOnFirstRunEnabled(enabled: boolean) {
+    load()
+    state.value.autoInstallOnFirstRunEnabled = enabled
+    persist()
+  }
+
+  function hasAutoInstallAttempted(version: string) {
+    load()
+    return state.value.autoInstallAttemptedVersions.includes(version)
+  }
+
+  function recordAutoInstallStatus(status: AutoInstallStatus, message: string) {
+    load()
+    state.value.lastAutoInstall = {
+      status,
+      message,
+      at: nowIso(),
+    }
+    persist()
+  }
+
+  function markAutoInstallAttempted(version: string, status: Exclude<AutoInstallStatus, 'idle' | 'checking'>, message: string) {
+    load()
+    if (!state.value.autoInstallAttemptedVersions.includes(version)) {
+      state.value.autoInstallAttemptedVersions = [version, ...state.value.autoInstallAttemptedVersions]
+    }
+    state.value.lastAutoInstall = {
+      status,
+      message,
+      at: nowIso(),
+    }
+    persist()
+  }
+
   return {
     load,
     lastRoute,
@@ -273,6 +348,9 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     restorePoints,
     lastError,
     lastDemoPath,
+    autoInstallOnFirstRunEnabled,
+    autoInstallAttemptedVersions,
+    lastAutoInstall,
     setLastRoute,
     setLastSelectedRoot,
     recordCommand,
@@ -283,5 +361,9 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     setLastDemoPath,
     isHintDismissed,
     dismissHint,
+    setAutoInstallOnFirstRunEnabled,
+    hasAutoInstallAttempted,
+    recordAutoInstallStatus,
+    markAutoInstallAttempted,
   }
 })

@@ -1,6 +1,6 @@
 {
   "name": "cs2-bot-improver-assistant",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "private": true,
   "type": "module",
   "scripts": {
@@ -19,6 +19,8 @@
     "build:web": "vite build",
     "build:desktop": "tauri build --no-bundle",
     "bundle:desktop": "tauri build",
+    "commands:fetch": "node ./scripts/fetch-cs2-cvars.mjs",
+    "commands:build": "node ./scripts/build-cs2-command-library.mjs",
     "workspace:check": "node ./scripts/workspace-check.mjs",
     "verify": "run-s workspace:check typecheck lint test build:web",
     "release:manifest": "node ./scripts/release-manifest.mjs"

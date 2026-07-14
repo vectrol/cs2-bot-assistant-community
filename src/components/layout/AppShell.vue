@@ -4,48 +4,58 @@ import { getCurrentWindow } from '@tauri-apps/api/window'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 
 import { appConfig } from '@/config/app'
+import GlobalStatusBar from '@/components/layout/GlobalStatusBar.vue'
 import LaunchGameModal from '@/components/LaunchGameModal.vue'
-import ReadinessPanel from '@/components/ReadinessPanel.vue'
 import WindowControls from '@/components/layout/WindowControls.vue'
+import { useThemePreference } from '@/composables/useThemePreference'
 import { useCs2Store } from '@/stores/cs2'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
-
-const THEME_STORAGE_KEY = appConfig.themeStorageKey
 
 const route = useRoute()
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
+const { initializeTheme } = useThemePreference()
 const launchGameModalOpen = ref(false)
-const theme = ref<'dark' | 'light'>('dark')
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
 const navGroups = [
   {
-    label: '主要流程',
+    label: '准备',
     items: [
-      { label: '开始使用', to: '/install', description: '选择目录、安装并确认启动项' },
-      { label: '快速控制', to: '/quick-control', description: '模式、难度、预设和队伍' },
-      { label: '游戏配置', to: '/config', description: '难度、模式和插件设置' },
-      { label: '指令中心', to: '/commands', description: '搜索、分类和自定义命令' },
+      { label: '准备环境', to: '/install', description: '目录、安装、安全确认' },
     ],
   },
   {
-    label: '辅助功能',
+    label: '控制',
     items: [
-      { label: '我的指令', to: '/custom-commands', description: '打开指令中心的自定义分类' },
-      { label: '使用帮助', to: '/guide', description: '常见问题和手动操作' },
-      { label: '更新日志', to: '/release-notes', description: '版本变化记录' },
+      { label: '作战总览', to: '/quick-control', description: '模式、难度、启动和常用命令' },
+      { label: '指令库', to: '/commands', description: '搜索、复制和固定命令' },
+      { label: '我的指令', to: '/custom-commands', description: '维护本地自定义命令' },
     ],
   },
   {
-    label: '更多玩法',
+    label: '配置',
     items: [
-      { label: 'Major 预测', to: '/major', description: '记录赛程预测' },
+      { label: '配置控制台', to: '/config', description: 'AI、嘲讽、投掷物和 Demo' },
+    ],
+  },
+  {
+    label: '资料',
+    items: [
+      { label: '使用帮助', to: '/guide', description: '启动项、诊断和常见问题' },
+      { label: '官网意见', to: '/official-site', description: '浏览官网、意见区和更新信息' },
+    ],
+  },
+  {
+    label: '系统',
+    items: [
+      { label: '设置', to: '/settings', description: '外观、启动、官网和储存说明' },
     ],
   },
 ]
 
 const navItems = navGroups.flatMap((group) => group.items)
+const isOfficialSiteRoute = computed(() => route.name === 'official-site')
 
 const pageDescription = computed(
   () => navItems.find((item) => item.to === route.path)?.description ?? appConfig.appName,
@@ -54,18 +64,6 @@ const pageDescription = computed(
 const pageTitle = computed(
   () => navItems.find((item) => item.to === route.path)?.label ?? String(route.name ?? appConfig.appName),
 )
-const themeButtonLabel = computed(() => (theme.value === 'dark' ? '切换亮色' : '切换暗色'))
-
-function applyTheme(nextTheme: 'dark' | 'light') {
-  theme.value = nextTheme
-  document.documentElement.dataset.theme = nextTheme
-  window.localStorage.setItem(THEME_STORAGE_KEY, nextTheme)
-}
-
-function toggleTheme() {
-  applyTheme(theme.value === 'dark' ? 'light' : 'dark')
-}
-
 async function startWindowDrag(event: MouseEvent) {
   if (event.button !== 0 || event.detail > 1) {
     return
@@ -105,19 +103,8 @@ async function refreshGlobalStatus() {
 
 onMounted(() => {
   preferences.load()
-  const savedTheme = window.localStorage.getItem(THEME_STORAGE_KEY)
-  if (savedTheme === 'dark' || savedTheme === 'light') {
-    applyTheme(savedTheme)
-  } else {
-    const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
-    applyTheme(prefersLight ? 'light' : 'dark')
-  }
-
+  initializeTheme()
   void refreshGlobalStatus()
-})
-
-watch(theme, (nextTheme) => {
-  document.documentElement.style.colorScheme = nextTheme
 })
 
 watch(
@@ -130,12 +117,24 @@ watch(
 </script>
 
 <template>
-  <div class="app-chrome">
+  <div class="app-chrome" :class="{ 'app-chrome--official': isOfficialSiteRoute }">
     <header class="app-titlebar">
       <div class="app-titlebar-brand" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize">
         <span>{{ appConfig.appName }}</span>
         <small>v{{ appConfig.appVersion }}</small>
       </div>
+
+      <nav v-if="isOfficialSiteRoute" class="official-app-nav" aria-label="应用页面导航">
+        <RouterLink class="official-app-nav__link official-app-nav__link--primary" to="/install">
+          返回准备环境
+        </RouterLink>
+        <RouterLink class="official-app-nav__link" to="/quick-control">
+          作战总览
+        </RouterLink>
+        <RouterLink class="official-app-nav__link" to="/settings">
+          设置
+        </RouterLink>
+      </nav>
 
       <div class="app-titlebar-drag" aria-hidden="true" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize" />
 
@@ -143,7 +142,7 @@ watch(
     </header>
 
     <div class="shell chrome-shell">
-      <aside class="sidebar">
+      <aside v-if="!isOfficialSiteRoute" class="sidebar">
         <div class="brand-panel">
           <p class="eyebrow">{{ appConfig.appBrandLabel }}</p>
           <div class="brand-title-row">
@@ -151,11 +150,9 @@ watch(
             <span class="version-badge">v{{ appConfig.appVersion }}</span>
           </div>
           <p class="muted">
-            安装、配置和启动 CS2 人机增强包。
+            CS2 人机增强训练控制台
           </p>
         </div>
-
-        <ReadinessPanel />
 
         <nav class="nav">
           <section v-for="group in navGroups" :key="group.label" class="nav-group">
@@ -172,32 +169,33 @@ watch(
           </section>
         </nav>
 
-        <div class="sidebar-card">
-          <p class="eyebrow">使用原则</p>
-          <strong>不向正在运行的游戏进程写入内容</strong>
-          <p class="muted">程序只负责检查、安装、配置和复制命令，避免把风险带进正在运行的 CS2。</p>
+        <div class="sidebar-card sidebar-card--compact">
+          <p class="eyebrow">安全边界</p>
+          <strong>写入前退出 CS2</strong>
+          <p class="muted">安装、模式、难度和插件配置都会先受运行状态约束。</p>
         </div>
 
       </aside>
 
       <main class="content">
-        <header class="titlebar">
+        <header v-if="!isOfficialSiteRoute" class="titlebar console-titlebar">
           <div class="titlebar-main">
-            <p class="eyebrow">当前任务</p>
+            <p class="eyebrow">任务面板</p>
             <h2>{{ pageTitle }}</h2>
+            <p class="muted">{{ pageDescription }}</p>
           </div>
 
           <div class="titlebar-actions">
-            <p class="muted">{{ pageDescription }}</p>
+            <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshGlobalStatus">
+              刷新状态
+            </button>
             <button class="primary-button" type="button" @click="launchGameModalOpen = true">
               打开 CS2
             </button>
-            <button class="theme-toggle" type="button" @click="toggleTheme">
-              <span class="theme-toggle__icon">{{ theme === 'dark' ? '☀' : '☾' }}</span>
-              <span>{{ themeButtonLabel }}</span>
-            </button>
           </div>
         </header>
+
+        <GlobalStatusBar v-if="!isOfficialSiteRoute" />
 
         <RouterView />
       </main>

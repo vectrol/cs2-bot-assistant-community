@@ -179,7 +179,7 @@ export function getNadeRecoveryConfig(rootPath: string) {
 export function saveNadeRecoveryConfig(rootPath: string, config: NadeRecoveryConfig) {
   if (!isTauriRuntime()) {
     void config
-    return webOnlyOperation(`Web 预览不能保存投掷物恢复时间。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web 预览不能保存道具压制开火时间。目标目录：${rootPath}`)
   }
   return invoke<OperationResult>('save_nade_recovery_config', { rootPath, config })
 }

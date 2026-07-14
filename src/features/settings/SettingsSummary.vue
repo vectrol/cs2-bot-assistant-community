@@ -1,22 +1,227 @@
 <script setup lang="ts">
-import { getFrontendContext } from '@/services/tauri/app'
-import { useWorkspaceStore } from '@/stores/workspace'
+import { computed, onMounted, ref } from 'vue'
+import { RouterLink } from 'vue-router'
 
-const frontend = getFrontendContext()
-const workspace = useWorkspaceStore()
+import { appConfig } from '@/config/app'
+import { useThemePreference, type ThemePreference } from '@/composables/useThemePreference'
+import { disableAutostart, enableAutostart, isAutostartEnabled } from '@/services/tauri/autostart'
+import { useUiPreferencesStore } from '@/stores/ui-preferences'
+
+const officialSiteRoute = '/official-site'
+const preferences = useUiPreferencesStore()
+const { theme, themeLabel, applyTheme, initializeTheme } = useThemePreference()
+const themeOptions: ThemePreference[] = ['dark', 'light']
+const autostartEnabled = ref(false)
+const autostartLoading = ref(false)
+const autostartMessage = ref('')
+const isDesktopRuntime = '__TAURI_INTERNALS__' in window
+
+const autoInstallStatusLabel = computed(() => {
+  const status = preferences.lastAutoInstall.status
+  if (status === 'checking') {
+    return '检查中'
+  }
+  if (status === 'installed') {
+    return '已自动安装'
+  }
+  if (status === 'skipped') {
+    return '已跳过'
+  }
+  if (status === 'failed') {
+    return '失败'
+  }
+  return '未检查'
+})
+
+async function syncAutostart() {
+  if (!isDesktopRuntime) {
+    autostartMessage.value = '当前是网页预览环境，开机自启动只在桌面版里可用。'
+    return
+  }
+
+  autostartLoading.value = true
+  try {
+    autostartEnabled.value = await isAutostartEnabled()
+    autostartMessage.value = autostartEnabled.value ? '已读取系统状态：开机自启动已开启。' : '已读取系统状态：开机自启动未开启。'
+  } catch (error) {
+    autostartMessage.value = normalizeError(error)
+  } finally {
+    autostartLoading.value = false
+  }
+}
+
+async function setAutostart(enabled: boolean) {
+  if (!isDesktopRuntime) {
+    autostartMessage.value = '当前是网页预览环境，无法修改开机自启动。'
+    return
+  }
+
+  autostartLoading.value = true
+  try {
+    if (enabled) {
+      await enableAutostart()
+    } else {
+      await disableAutostart()
+    }
+    autostartEnabled.value = await isAutostartEnabled()
+    autostartMessage.value = autostartEnabled.value ? '开机自启动已开启。' : '开机自启动已关闭。'
+  } catch (error) {
+    autostartMessage.value = normalizeError(error)
+    autostartEnabled.value = await isAutostartEnabled().catch(() => autostartEnabled.value)
+  } finally {
+    autostartLoading.value = false
+  }
+}
+
+function normalizeError(error: unknown) {
+  if (typeof error === 'string') {
+    return error
+  }
+  if (error instanceof Error) {
+    return error.message
+  }
+  return '操作失败，请稍后重试。'
+}
+
+onMounted(() => {
+  preferences.load()
+  initializeTheme()
+  void syncAutostart()
+})
 </script>
 
 <template>
-  <section class="panel">
-    <p class="eyebrow">配置来源</p>
-    <ul class="settings-list">
-      <li><code>.env</code> 和模式专用文件定义前端常量。</li>
-      <li><code>config/workspace/projects.json</code> 是工作区项目注册表。</li>
-      <li><code>src/config/workspace/projects.json</code> 是前端壳读取的注册表镜像。</li>
-      <li><code>src-tauri/tauri.conf.json</code> 定义桌面壳基线。</li>
-      <li><code>src-tauri/tauri.*.json</code> 保留给不同通道覆盖配置。</li>
-      <li>当前 API 基地址：<code>{{ frontend.apiBaseUrl }}</code></li>
-      <li>默认项目：<code>{{ workspace.activeProject?.id }}</code></li>
-    </ul>
+  <section class="page-grid settings-page">
+    <article class="hero-banner settings-hero">
+      <div>
+        <p class="eyebrow">系统设置</p>
+        <h3>把外观、启动行为和储存说明集中到这里。</h3>
+        <p class="muted">
+          当前版本 v{{ appConfig.appVersion }}，储存位置暂时不能在程序里修改。
+        </p>
+      </div>
+      <div class="settings-hero__actions">
+        <RouterLink class="primary-button" :to="officialSiteRoute">
+          程序内访问官网
+        </RouterLink>
+      </div>
+    </article>
+
+    <article class="panel settings-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">外观</p>
+          <h3>主题模式</h3>
+        </div>
+        <span class="status-pill" data-state="info">当前 {{ themeLabel }}</span>
+      </div>
+      <div class="segmented-control" aria-label="外观主题">
+        <button
+          v-for="option in themeOptions"
+          :key="option"
+          type="button"
+          :data-active="theme === option"
+          @click="applyTheme(option)"
+        >
+          {{ option === 'dark' ? '深色' : '亮色' }}
+        </button>
+      </div>
+      <p class="muted">主题会保存在浏览器缓存里，下次打开程序会继续使用。</p>
+    </article>
+
+    <article class="panel settings-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">启动</p>
+          <h3>程序行为</h3>
+        </div>
+        <button class="ghost-button" type="button" :disabled="autostartLoading" @click="syncAutostart">
+          重新读取
+        </button>
+      </div>
+
+      <div class="settings-toggle-row">
+        <div>
+          <strong>开机自启动</strong>
+          <p class="muted">默认关闭。开启后，Windows 登录时会自动启动本助手。</p>
+        </div>
+        <button
+          class="switch-button"
+          type="button"
+          role="switch"
+          :aria-checked="autostartEnabled"
+          :disabled="autostartLoading || !isDesktopRuntime"
+          @click="setAutostart(!autostartEnabled)"
+        >
+          <span />
+        </button>
+      </div>
+
+      <div class="settings-toggle-row">
+        <div>
+          <strong>新版本插件包初次安装</strong>
+          <p class="muted">
+            默认开启。每个应用版本最多尝试一次；检测到 CS2 正在运行或没有目录时会跳过。
+          </p>
+          <p class="settings-inline-status">
+            {{ autoInstallStatusLabel }}：{{ preferences.lastAutoInstall.message }}
+          </p>
+        </div>
+        <button
+          class="switch-button"
+          type="button"
+          role="switch"
+          :aria-checked="preferences.autoInstallOnFirstRunEnabled"
+          @click="preferences.setAutoInstallOnFirstRunEnabled(!preferences.autoInstallOnFirstRunEnabled)"
+        >
+          <span />
+        </button>
+      </div>
+
+      <p class="muted">{{ autostartMessage }}</p>
+    </article>
+
+    <article class="panel settings-section settings-storage">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">储存与隐私</p>
+          <h3>储存与隐私说明</h3>
+        </div>
+      </div>
+
+      <div class="storage-list">
+        <section>
+          <strong>浏览器缓存 / localStorage</strong>
+          <p>用于记住你的使用习惯和已选择目录，包括主题、更新日志已读状态、更新提醒忽略状态、固定命令、最近命令、最近选择的 CS2 目录、页面提示是否已关闭，以及本页的新版本初次安装开关。</p>
+        </section>
+        <section>
+          <strong>你选择的 CS2 目录</strong>
+          <p>插件包会安装到游戏目录下，例如 <code>game\csgo\addons\counterstrikesharp\...</code> 和 <code>game\csgo\addons\metamod\...</code>。</p>
+        </section>
+        <section>
+          <strong>插件配置目录</strong>
+          <p>BotTaunt、NadeSystem 等用户配置保存在 CS2 插件配置目录里。升级安装会尽量保留你已经改过的配置文件。</p>
+        </section>
+        <section>
+          <strong>运行日志 / 诊断信息</strong>
+          <p>诊断功能会提供日志位置，并可打开日志目录；设置页只说明位置用途，不修改日志目录。</p>
+        </section>
+      </div>
+
+      <p class="settings-storage__notice">不会上传这些本地偏好；插件配置仍保存在你选择的 CS2 目录里，相关位置暂时不能在程序里修改。</p>
+    </article>
+
+    <article class="panel settings-section">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">版本记录</p>
+          <h3>当前版本 v{{ appConfig.appVersion }}</h3>
+        </div>
+        <RouterLink class="ghost-button" to="/release-notes">
+          查看更新日志
+        </RouterLink>
+      </div>
+      <p class="muted">更新日志会优先展示当前内置版本，并在网络可用时合并线上历史记录和下载入口。</p>
+    </article>
   </section>
 </template>

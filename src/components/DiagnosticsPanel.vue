@@ -4,7 +4,7 @@ import { computed } from 'vue'
 import CopyButton from '@/components/CopyButton.vue'
 import { appConfig } from '@/config/app'
 import type { Cs2EnvironmentStatus, DiagnosticsPayload } from '@/types/cs2'
-import type { LastErrorInfo, RestorePoint } from '@/stores/ui-preferences'
+import type { LastErrorInfo } from '@/stores/ui-preferences'
 
 const props = defineProps<{
   rootPath: string
@@ -12,7 +12,6 @@ const props = defineProps<{
   cs2Running: boolean
   diagnostics: DiagnosticsPayload | null
   lastError: LastErrorInfo | null
-  restorePoints: RestorePoint[]
   busy?: boolean
 }>()
 
@@ -28,7 +27,6 @@ const diagnosticText = computed(() => [
   `CS2 状态：${props.cs2Running ? '正在运行' : '未运行'}`,
   `日志路径：${props.diagnostics?.logPath || '未读取'}`,
   `最近错误：${props.lastError ? `${props.lastError.context} / ${props.lastError.message}` : '无'}`,
-  `恢复点数量：${props.restorePoints.length}`,
 ].join('\n'))
 
 const environmentRows = computed(() => [
@@ -89,17 +87,5 @@ const environmentRows = computed(() => [
       <span>{{ lastError.context }}：{{ lastError.message }}</span>
     </div>
 
-    <div class="restore-list">
-      <p class="eyebrow">最近恢复点</p>
-      <div v-if="restorePoints.length === 0" class="empty-state">
-        <strong>还没有写入恢复点</strong>
-        <p class="muted">执行安装、模式切换或配置保存前会自动记录。</p>
-      </div>
-      <div v-for="point in restorePoints.slice(0, 4)" :key="point.id" class="restore-item">
-        <strong>{{ point.operation }}</strong>
-        <span>{{ point.scope }}</span>
-        <small>{{ point.at }} · {{ point.rollbackAvailable ? '可回滚' : '记录用途' }}</small>
-      </div>
-    </div>
   </article>
 </template>

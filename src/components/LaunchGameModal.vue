@@ -29,7 +29,12 @@ async function launchGame() {
   <Teleport to="body">
     <div v-if="open" class="modal-backdrop launch-game-backdrop" role="dialog" aria-modal="true" aria-label="启动游戏">
       <article class="launch-game-modal">
-        <button class="launch-game-modal__close" type="button" aria-label="关闭" @click="emit('close')">×</button>
+        <button class="launch-game-modal__close" type="button" aria-label="关闭" @click="emit('close')">
+          <svg aria-hidden="true" viewBox="0 0 24 24">
+            <path d="m7 7 10 10" />
+            <path d="m17 7-10 10" />
+          </svg>
+        </button>
         <div class="launch-game-modal__scanline" aria-hidden="true" />
         <div class="launch-game-modal__content">
           <p class="eyebrow">Steam 启动</p>

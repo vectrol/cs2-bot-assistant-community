@@ -5,10 +5,10 @@ import { open } from '@tauri-apps/plugin-dialog'
 
 import ActionModal from '@/components/ActionModal.vue'
 import CollapsiblePanel from '@/components/CollapsiblePanel.vue'
+import ConsolePanel from '@/components/layout/ConsolePanel.vue'
 import CopyButton from '@/components/CopyButton.vue'
+import MetricTile from '@/components/ui/MetricTile.vue'
 import QuickActionsBar from '@/components/QuickActionsBar.vue'
-import StatusHero from '@/components/StatusHero.vue'
-import SummaryStrip from '@/components/SummaryStrip.vue'
 import TaskStepper from '@/components/TaskStepper.vue'
 import { appConfig } from '@/config/app'
 import { useCs2Store } from '@/stores/cs2'
@@ -23,6 +23,7 @@ const installCompleted = ref(false)
 const confirmExited = ref(false)
 const confirmRoot = ref(false)
 const confirmLaunchOption = ref(false)
+const visibleStatusCount = ref(5)
 const currentResourcePackageLabel = computed(() => `当前内置 ${appConfig.appVersion} 包`)
 
 const statusRows = computed(() => {
@@ -42,8 +43,26 @@ const statusRows = computed(() => {
     { label: 'overrides/Low/botprofile.vpk', value: store.environment.lowProfileExists },
     { label: 'overrides/Medium/botprofile.vpk', value: store.environment.mediumProfileExists },
     { label: 'overrides/High/botprofile.vpk', value: store.environment.highProfileExists },
+    { label: 'BotHider', value: store.environment.botHiderExists },
+    { label: 'RayTrace', value: store.environment.rayTraceExists },
+    { label: 'core.json', value: store.environment.coreConfigExists },
+    { label: 'BotHiderImpl', value: store.environment.botHiderImplExists },
+    { label: 'RayTraceImpl', value: store.environment.rayTraceImplExists },
+    { label: 'RoundDamageRecap', value: store.environment.roundDamageRecapExists },
   ]
 })
+
+const visibleStatusRows = computed(() => statusRows.value.slice(0, visibleStatusCount.value))
+
+const hasMoreStatusRows = computed(() => visibleStatusCount.value < statusRows.value.length)
+
+function showMoreStatusRows() {
+  visibleStatusCount.value = Math.min(visibleStatusCount.value + 5, statusRows.value.length)
+}
+
+function collapseStatusRows() {
+  visibleStatusCount.value = 5
+}
 
 const canInstall = computed(() => (
   Boolean(store.selectedRoot)
@@ -85,21 +104,6 @@ const installActionHint = computed(() => {
 })
 
 const installActionDisabled = computed(() => store.busy || Boolean(installBlockReason.value))
-
-const heroBadges = computed(() => [
-  {
-    label: store.selectedRoot ? '目录已选择' : '目录未选择',
-    state: store.selectedRoot ? 'ready' as const : 'warn' as const,
-  },
-  {
-    label: store.environment?.baseEnvironmentReady ? '环境已就绪' : '环境待安装',
-    state: store.environment?.baseEnvironmentReady ? 'ready' as const : 'warn' as const,
-  },
-  {
-    label: store.cs2Running ? 'CS2 运行中' : 'CS2 未运行',
-    state: store.cs2Running ? 'danger' as const : 'ready' as const,
-  },
-])
 
 const summaryItems = computed(() => [
   {
@@ -339,32 +343,55 @@ onMounted(async () => {
 </script>
 
 <template>
-  <section class="page-grid">
-    <StatusHero
-      eyebrow="开始使用"
-      :title="primaryStatusMessage"
-      description="按照目录、安装、启动项三步走；写入前会检查 CS2 是否正在运行。"
-      :badges="heroBadges"
-    >
-      <template #actions>
-        <button class="primary-button install-hero-button" type="button" :disabled="installActionDisabled" @click="handleInstallButton">
-          安装人机插件包
-        </button>
-        <p
-          class="install-hero-hint"
-          :data-state="store.environment?.baseEnvironmentReady ? 'ready' : installBlockReason ? 'warn' : 'info'"
-        >
-          {{ installActionHint }}
-        </p>
-        <button class="ghost-button" type="button" @click="handleBrowse">
-          {{ store.selectedRoot ? '重新选择目录' : '选择 CS2 根目录' }}
-        </button>
-      </template>
-    </StatusHero>
+  <section class="page-grid install-console-page">
+    <section class="ops-overview">
+      <ConsolePanel
+        eyebrow="Preparation"
+        title="准备环境"
+        :description="primaryStatusMessage"
+        tone="strong"
+      >
+        <template #actions>
+          <button class="ghost-button" type="button" @click="handleBrowse">
+            {{ store.selectedRoot ? '重新选择目录' : '选择 CS2 根目录' }}
+          </button>
+          <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshAll">重新检查</button>
+        </template>
+        <div class="install-action-dock">
+          <div>
+            <p
+              class="install-hero-hint"
+              :data-state="store.environment?.baseEnvironmentReady ? 'ready' : installBlockReason ? 'warn' : 'info'"
+            >
+              {{ installActionHint }}
+            </p>
+          </div>
+          <button class="primary-button install-hero-button" type="button" :disabled="installActionDisabled" @click="handleInstallButton">
+            安装人机插件包
+          </button>
+        </div>
+        <div class="metric-grid">
+          <MetricTile
+            v-for="item in summaryItems"
+            :key="item.label"
+            :label="item.label"
+            :value="item.value"
+            :state="item.state"
+          />
+        </div>
+      </ConsolePanel>
+
+      <ConsolePanel eyebrow="Guardrail" title="安装安全检查" description="安装前必须确认目录、进程和启动项。">
+        <div class="readiness-summary">
+          <div v-for="row in readinessRows" :key="row.label" class="readiness-summary__row">
+            <span>{{ row.label }}</span>
+            <strong :data-state="row.state">{{ row.value }}</strong>
+          </div>
+        </div>
+      </ConsolePanel>
+    </section>
 
     <TaskStepper :steps="stepperItems" />
-
-    <SummaryStrip :items="summaryItems" />
 
     <QuickActionsBar
       :busy="store.busy"
@@ -412,12 +439,9 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="readiness-summary">
-          <div v-for="row in readinessRows" :key="row.label" class="readiness-summary__row">
-            <span>{{ row.label }}</span>
-            <strong :data-state="row.state">{{ row.value }}</strong>
-          </div>
-        </div>
+        <button class="primary-button install-hero-button" type="button" :disabled="installActionDisabled" @click="handleInstallButton">
+          安装人机插件包
+        </button>
 
         <p v-if="store.cs2Running" class="message-line">
           检测到 CS2 正在运行。请先退出游戏，再执行安装或配置写入。
@@ -494,9 +518,18 @@ onMounted(async () => {
 
     <CollapsiblePanel title="完整检查结果" subtitle="展开查看每个文件和目录是否存在" :badge="statusRows.length ? '已检查' : '待检查'">
       <div v-if="statusRows.length > 0" class="status-list">
-        <div v-for="row in statusRows" :key="row.label" class="status-row">
+        <div v-for="row in visibleStatusRows" :key="row.label" class="status-row">
           <span>{{ row.label }}</span>
           <strong :data-ok="row.value">{{ row.value ? '已找到' : '未找到' }}</strong>
+        </div>
+        <div class="status-list__controls">
+          <button v-if="hasMoreStatusRows" class="ghost-button" type="button" @click="showMoreStatusRows">
+            继续展开
+          </button>
+          <button v-if="visibleStatusCount > 5" class="ghost-button" type="button" @click="collapseStatusRows">
+            收起
+          </button>
+          <span class="muted">已显示 {{ visibleStatusRows.length }} / {{ statusRows.length }} 项</span>
         </div>
       </div>
       <p v-else class="muted">选好目录后，这里会显示检查结果。</p>

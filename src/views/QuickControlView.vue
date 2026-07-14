@@ -2,9 +2,9 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import ConsolePanel from '@/components/layout/ConsolePanel.vue'
 import CopyButton from '@/components/CopyButton.vue'
-import StatusHero from '@/components/StatusHero.vue'
-import SummaryStrip from '@/components/SummaryStrip.vue'
+import MetricTile from '@/components/ui/MetricTile.vue'
 import InlineNotice from '@/components/ui/InlineNotice.vue'
 import { appConfig } from '@/config/app'
 import { teamPresets } from '@/features/cs2/data'
@@ -93,12 +93,6 @@ const summaryItems = computed(() => [
   },
 ])
 
-const heroBadges = computed(() => [
-  { label: '模式 / 难度原生切换', state: 'ready' as const },
-  { label: 'Aim / Nades / Knife 一键复制', state: 'ready' as const },
-  { label: 'Teams 预设已接入', state: 'ready' as const },
-])
-
 function recordCopied(label: string, command: string) {
   preferences.recordCommand(command, label)
   localMessage.value = `已复制：${label}`
@@ -115,6 +109,27 @@ async function refreshStatus() {
       store.refreshEnvironment(),
     ])
     localMessage.value = '状态已刷新。'
+  } catch (error) {
+    localMessage.value = store.normalizeError(error)
+  }
+}
+
+async function runOneClickFlow() {
+  try {
+    await refreshStatus()
+    if (!store.selectedRoot) {
+      localMessage.value = '请先选择 CS2 根目录，再执行一键流程。'
+      return
+    }
+    if (!store.readyForConfig) {
+      localMessage.value = '环境还未就绪，请先到准备环境页完成安装。'
+      return
+    }
+    if (store.cs2Running) {
+      localMessage.value = 'CS2 正在运行。配置写入前请先退出游戏。'
+      return
+    }
+    localMessage.value = '状态检查通过，可以切换模式、难度或复制命令。'
   } catch (error) {
     localMessage.value = store.normalizeError(error)
   }
@@ -159,23 +174,30 @@ onMounted(() => {
 
 <template>
   <section class="page-grid quick-control-page">
-    <StatusHero
-      eyebrow="Quick Control"
-      title="高频玩家操作集中处理"
-      :description="`模式、难度和启动走桌面端原生能力；Aim、Nades、Knife 和 Teams 按 ${currentCommandsTxtLabel} 一键复制到控制台。`"
-      :badges="heroBadges"
-    >
-      <template #actions>
-        <button class="primary-button" type="button" @click="launchGame">
-          打开 CS2
-        </button>
-        <button class="ghost-button" type="button" @click="refreshStatus">
-          刷新状态
-        </button>
-      </template>
-    </StatusHero>
+    <section class="ops-overview">
+      <ConsolePanel
+        eyebrow="Live Operations"
+        title="作战总览"
+        :description="`模式、难度和启动走桌面端原生能力；Aim、Nades、Knife 和 Teams 按 ${currentCommandsTxtLabel} 一键复制。`"
+        tone="strong"
+      >
+        <template #actions>
+          <button class="primary-button" type="button" @click="launchGame">打开 CS2</button>
+          <button class="ghost-button" type="button" :disabled="store.busy" @click="runOneClickFlow">一键检查</button>
+          <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshStatus">刷新</button>
+        </template>
+        <div class="metric-grid">
+          <MetricTile
+            v-for="item in summaryItems"
+            :key="item.label"
+            :label="item.label"
+            :value="item.value"
+            :state="item.state"
+          />
+        </div>
+      </ConsolePanel>
 
-    <SummaryStrip :items="summaryItems" />
+    </section>
 
     <InlineNotice
       v-if="!store.selectedRoot"
@@ -184,7 +206,7 @@ onMounted(() => {
     />
 
     <div class="quick-control-grid">
-      <article class="card quick-card">
+      <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
             <p class="eyebrow">Game Mode</p>
@@ -209,7 +231,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="card quick-card">
+      <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
             <p class="eyebrow">Difficulty</p>
@@ -231,7 +253,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="card quick-card">
+      <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
             <p class="eyebrow">Presets</p>
@@ -270,7 +292,7 @@ onMounted(() => {
         </div>
       </article>
 
-      <article class="card quick-card">
+      <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
             <p class="eyebrow">Drop Knives</p>

@@ -323,7 +323,7 @@ export const useCs2Store = defineStore('cs2', () => {
     busy.value = true
     try {
       nadeRecoveryConfig.value = await resetNadeRecoveryConfig(selectedRoot.value)
-      message.value = '投掷物恢复时间已恢复默认。重启 CS2 或服务器后生效。'
+      message.value = '道具压制开火时间已恢复默认。重启 CS2 或服务器后生效。'
       return nadeRecoveryConfig.value
     } finally {
       busy.value = false
