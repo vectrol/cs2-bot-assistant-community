@@ -2211,6 +2211,18 @@ mod tests {
     }
 
     #[test]
+    fn drop_knife_marked_block_preserves_other_player_binds() {
+        let original = "bind \"f\" \"slot1\"\n// CS2-BOT-IMPROVER-ASSISTANT DROP KNIVES BEGIN\nbind \"\\\" \"subclass_create 500\"\n// CS2-BOT-IMPROVER-ASSISTANT DROP KNIVES END\nbind \"g\" \"drop\"\n";
+        let next = format!("{DROP_KNIFE_BEGIN}\nbind \"k\" \"subclass_create 515\"\n{DROP_KNIFE_END}\n");
+        let replaced = replace_marked_block(original, &next);
+
+        assert!(replaced.contains("bind \"f\" \"slot1\""));
+        assert!(replaced.contains("bind \"g\" \"drop\""));
+        assert!(replaced.contains("bind \"k\" \"subclass_create 515\""));
+        assert!(!replaced.contains("subclass_create 500"));
+    }
+
+    #[test]
     fn plugin_package_removal_deletes_unknown_plugins_and_preserves_cs2_core_files() {
         let root = std::env::temp_dir().join(format!(
             "cs2-uninstall-test-{}-{}",

@@ -3744,3 +3744,56 @@ code {
     display: none;
   }
 }
+
+.cosmetics-state {
+  min-height: 15rem;
+  display: grid;
+  align-content: center;
+  justify-items: start;
+  gap: 0.9rem;
+}
+
+.skeleton-line {
+  width: min(42rem, 100%);
+  height: 0.9rem;
+  border-radius: 4px;
+  background: var(--surface-muted, rgba(127, 140, 160, 0.22));
+  animation: cosmetics-skeleton-pulse 1.2s ease-in-out infinite alternate;
+}
+
+.skeleton-line--title {
+  width: min(18rem, 55%);
+  height: 1.45rem;
+}
+
+.cosmetics-catalog {
+  max-height: 18rem;
+  overflow: auto;
+  align-content: start;
+}
+
+.cosmetics-catalog .quick-option {
+  min-height: 4.25rem;
+  text-align: left;
+  overflow: hidden;
+}
+
+.cosmetics-catalog .quick-option img {
+  width: 2.3rem;
+  height: 2.3rem;
+  object-fit: contain;
+  flex: 0 0 auto;
+}
+
+.cosmetics-catalog .quick-option span {
+  overflow-wrap: anywhere;
+}
+
+@keyframes cosmetics-skeleton-pulse {
+  from { opacity: 0.55; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-line { animation: none; }
+}

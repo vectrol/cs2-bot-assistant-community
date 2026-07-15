@@ -22,26 +22,22 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
-    version: '0.4.6',
-    date: '2026-07-15',
-    title: '0.4.6 Plus 控制与开源来源同步',
-    summary: '同步 Plus 的模式文件逻辑和玩家外观配置入口，安装后可从当前 CS2 配置自动生成 Online 与 Bot 模式模板。',
-    items: [
-      { text: 'Bot / Online 模式改为按当前 gameinfo.gi 动态生成并校验 MetaMod 搜索路径，避免资源包模板缺失造成首次安装失败。' },
-      { text: 'Aim 与投掷物预设改为直接写入 Plus 的训练配置文件。' },
-      { text: '新增玩家外观配置页，可编辑 PlayerKnifeCustomizer 的刀具、枪械、手套和音乐盒完整配置。' },
-      { text: '内置资源来源与许可证同步为 AGPL-3.0-or-later，并在设置页提供上游项目链接。' },
-    ],
-  },
-  {
     version: '0.4.5',
-    date: '2026-07-06',
-    title: '0.4.5 CS2 全量指令库第一步',
-    summary:
-      '本次先接入 CS2 全量命令与 CVar 查询库，指令中心新增完整搜索入口，后续还会继续补充中文说明、分类和更多实用筛选。',
+    date: '2026-07-15',
+    title: '0.4.5 Plus 完整 GUI、资源安全与玩家饰品',
+    summary: '以 CS2-Bot-Improver-Plus v1.4.2.1 整包为基底，完整迁移高频 GUI 操作到现有助手，并修复玩家饰品页在读取前发生的空白渲染。',
     items: [
       { text: '新增 CS2 全量指令库入口，可搜索控制台命令、CVar、启动项和开发命令。' },
       { text: '指令保留英文原文，能确认的功能说明优先用中文展示，并保留源数据说明便于后续继续完善。' },
+      { text: '同步 Plus v1.4.2.1 整包基底，并保留选边、外观稳定性与现有 AI、BotTaunt、NadeSystem、Demo、指令库等能力。' },
+      { text: '安装前彻底删除旧插件、第三方插件和插件配置；新资源安装后会应用 Bot 模式 gameinfo.gi，并保留 Online / Bot 模板切换校验。' },
+      { text: 'Bot / Online 模式、难度、Aim、Nades、队伍、目录状态和启动体验继续在现有作战总览中统一呈现；不会伪造 Steam 持久启动项同步。' },
+      { text: '玩家饰品页改为结构化状态机，修复读取前空对象导致标题以下整页空白的问题；读取中、失败、未安装、CS2 运行中和正常配置都有固定页面状态。' },
+      { text: '新增结构化刀具、手套、枪械、音乐盒、名称标签、StatTrak、纪念品与拾取时应用编辑；保存保留未知 JSON 字段，支持 BOM 清理、原子写入、数值校验和运行中拒写。' },
+      { text: '掉落刀具支持按键录入、刀具多选与完整目录预览；只写入助手专属标记块，不会替换玩家已有 bind。' },
+      { text: 'BOT 皮肤、档案、探员和音乐盒开关与 Plus 一致，仅保存助手本地偏好，不会伪造为游戏或插件外观开关。' },
+      { text: '导入完整刀具、武器、手套、皮肤和音乐盒数据目录，使用延迟加载与图片懒加载控制首次页面开销。' },
+      { text: '应用内保留 CS2-Bot-Improver 与 CS2-Bot-Improver-Plus 的 AGPL-3.0-or-later 来源说明和上游链接。' },
     ],
   },
   {
