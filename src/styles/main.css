@@ -2416,6 +2416,53 @@ code {
   flex-wrap: wrap;
 }
 
+.config-textarea {
+  width: 100%;
+  min-height: 18rem;
+  resize: vertical;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--panel-strong-bg);
+  color: var(--text-color);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.55;
+  padding: 0.85rem;
+}
+
+.open-source-attribution {
+  margin-top: 0.9rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+.open-source-attribution p {
+  margin: 0;
+}
+
+.open-source-attribution div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-top: 0.4rem;
+}
+
+.open-source-attribution button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.open-source-attribution small {
+  display: block;
+  margin-top: 0.35rem;
+  color: #fca5a5;
+}
+
 .settings-section {
   display: grid;
   gap: 1rem;

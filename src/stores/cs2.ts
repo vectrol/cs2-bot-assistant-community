@@ -11,6 +11,7 @@ import {
   getBotTauntsConfig,
   getDiagnosticsPayload,
   getNadeRecoveryConfig,
+  getPlayerCosmeticsConfig,
   inspectCs2Root,
   installBotPackage,
   launchCs2Game,
@@ -22,6 +23,9 @@ import {
   saveAiApiConfig,
   saveBotTauntsConfig,
   saveNadeRecoveryConfig,
+  savePlayerCosmeticsConfig,
+  setUpstreamAimPreset,
+  setUpstreamNadesPreset,
   setGameModeProfile,
   uninstallBotPackage,
 } from '@/services/tauri/cs2'
@@ -35,6 +39,7 @@ import type {
   DifficultyPreset,
   GameModePreset,
   NadeRecoveryConfig,
+  PlayerCosmeticsConfig,
 } from '@/types/cs2'
 
 const PERSISTED_ROOTS_KEY = appConfig.persistedRootsStorageKey
@@ -96,6 +101,7 @@ export const useCs2Store = defineStore('cs2', () => {
   const botTauntsConfig = ref<BotTauntsConfig | null>(null)
   const nadeRecoveryConfig = ref<NadeRecoveryConfig | null>(null)
   const demoDiscovery = ref<DemoDiscoveryPayload | null>(null)
+  const playerCosmeticsConfig = ref<PlayerCosmeticsConfig | null>(null)
 
   const readyForConfig = computed(() => environment.value?.baseEnvironmentReady ?? false)
 
@@ -207,6 +213,28 @@ export const useCs2Store = defineStore('cs2', () => {
     return demoDiscovery.value
   }
 
+  async function refreshPlayerCosmeticsConfig() {
+    if (!selectedRoot.value) {
+      playerCosmeticsConfig.value = null
+      return null
+    }
+    playerCosmeticsConfig.value = await getPlayerCosmeticsConfig(selectedRoot.value)
+    return playerCosmeticsConfig.value
+  }
+
+  async function savePlayerCosmetics(nextConfig: PlayerCosmeticsConfig) {
+    requireSelectedRoot(selectedRoot.value)
+    busy.value = true
+    try {
+      const result = await savePlayerCosmeticsConfig(selectedRoot.value, nextConfig)
+      message.value = result.message
+      await refreshPlayerCosmeticsConfig()
+      return result
+    } finally {
+      busy.value = false
+    }
+  }
+
   async function install() {
     requireSelectedRoot(selectedRoot.value)
 
@@ -253,6 +281,30 @@ export const useCs2Store = defineStore('cs2', () => {
       const result = await setGameModeProfile(selectedRoot.value, preset)
       message.value = result.message
       await refreshEnvironment()
+      return result
+    } finally {
+      busy.value = false
+    }
+  }
+
+  async function applyUpstreamAim(value: 'head' | 'mixed' | 'body') {
+    requireSelectedRoot(selectedRoot.value)
+    busy.value = true
+    try {
+      const result = await setUpstreamAimPreset(selectedRoot.value, value)
+      message.value = result.message
+      return result
+    } finally {
+      busy.value = false
+    }
+  }
+
+  async function applyUpstreamNades(value: 'max' | 'more' | 'normal' | 'off') {
+    requireSelectedRoot(selectedRoot.value)
+    busy.value = true
+    try {
+      const result = await setUpstreamNadesPreset(selectedRoot.value, value)
+      message.value = result.message
       return result
     } finally {
       busy.value = false
@@ -449,6 +501,7 @@ export const useCs2Store = defineStore('cs2', () => {
     botTauntsConfig,
     nadeRecoveryConfig,
     demoDiscovery,
+    playerCosmeticsConfig,
     readyForConfig,
     scanRoots,
     selectRoot,
@@ -459,9 +512,12 @@ export const useCs2Store = defineStore('cs2', () => {
     refreshBotTauntsConfig,
     refreshNadeRecoveryConfig,
     refreshDemos,
+    refreshPlayerCosmeticsConfig,
     install,
     launchGame,
     applyDifficulty,
+    applyUpstreamAim,
+    applyUpstreamNades,
     switchGameMode,
     saveAiApi,
     resetAiApi,
@@ -469,6 +525,7 @@ export const useCs2Store = defineStore('cs2', () => {
     resetBotTaunts,
     saveNadeRecovery,
     resetNadeRecovery,
+    savePlayerCosmetics,
     openReplays,
     openDemoFolder,
     uninstall,

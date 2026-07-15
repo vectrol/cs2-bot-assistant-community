@@ -127,6 +127,17 @@ pub struct BotTauntsConfig {
     pub exists: bool,
 }
 
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerCosmeticsConfig {
+    pub knife_config: String,
+    pub gun_config: String,
+    pub knife_config_path: String,
+    pub gun_config_path: String,
+    pub plugin_present: bool,
+    pub exists: bool,
+}
+
 #[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub enum DifficultyPreset {

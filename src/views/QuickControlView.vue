@@ -32,16 +32,16 @@ const difficultyOptions: Array<{ label: string; value: DifficultyPreset; detail:
 ]
 
 const aimPresets = [
-  { label: '混合', command: 'bot_aim mixed', detail: '根据局势选择瞄准位置。' },
-  { label: '头部', command: 'bot_aim head', detail: '优先瞄准头部。' },
-  { label: '身体', command: 'bot_aim body', detail: '优先瞄准身体。' },
+  { label: '混合', value: 'mixed' as const, command: 'bot_aim mixed', detail: '根据局势选择瞄准位置。' },
+  { label: '头部', value: 'head' as const, command: 'bot_aim head', detail: '优先瞄准头部。' },
+  { label: '身体', value: 'body' as const, command: 'bot_aim body', detail: '优先瞄准身体。' },
 ]
 
 const nadePresets = [
-  { label: '正常', command: 'bot_nades normal', detail: '接近真人限制。' },
-  { label: '更多', command: 'bot_nades more', detail: '推荐训练档。' },
-  { label: '最大', command: 'bot_nades max', detail: '更频繁投掷。' },
-  { label: '关闭', command: 'bot_nades off', detail: '完全禁用 Bot 投掷物。' },
+  { label: '正常', value: 'normal' as const, command: 'bot_nades normal', detail: '接近真人限制。' },
+  { label: '更多', value: 'more' as const, command: 'bot_nades more', detail: '推荐训练档。' },
+  { label: '最大', value: 'max' as const, command: 'bot_nades max', detail: '更频繁投掷。' },
+  { label: '关闭', value: 'off' as const, command: 'bot_nades off', detail: '完全禁用 Bot 投掷物。' },
 ]
 
 const knifePresets = [
@@ -100,6 +100,24 @@ function recordCopied(label: string, command: string) {
 
 function handleCopyFailed() {
   localMessage.value = '复制失败，请手动选中命令后复制。'
+}
+
+async function applyAim(value: 'head' | 'mixed' | 'body') {
+  try {
+    const result = await store.applyUpstreamAim(value)
+    localMessage.value = result.message
+  } catch (error) {
+    localMessage.value = store.normalizeError(error)
+  }
+}
+
+async function applyNades(value: 'max' | 'more' | 'normal' | 'off') {
+  try {
+    const result = await store.applyUpstreamNades(value)
+    localMessage.value = result.message
+  } catch (error) {
+    localMessage.value = store.normalizeError(error)
+  }
 }
 
 async function refreshStatus() {
@@ -263,31 +281,31 @@ onMounted(() => {
         <div class="preset-section">
           <p class="muted">Aim</p>
           <div class="quick-chip-grid">
-            <CopyButton
+            <button
               v-for="preset in aimPresets"
               :key="preset.command"
-              :text="preset.command"
-              :label="preset.label"
-              copied-label="已复制"
-              :copy-without-semicolon="false"
-              @copied="recordCopied(preset.label, preset.command)"
-              @failed="handleCopyFailed"
-            />
+              class="quick-option"
+              type="button"
+              :disabled="!store.selectedRoot || store.busy"
+              @click="applyAim(preset.value)"
+            >
+              {{ preset.label }}
+            </button>
           </div>
         </div>
         <div class="preset-section">
           <p class="muted">Nades</p>
           <div class="quick-chip-grid">
-            <CopyButton
+            <button
               v-for="preset in nadePresets"
               :key="preset.command"
-              :text="preset.command"
-              :label="preset.label"
-              copied-label="已复制"
-              :copy-without-semicolon="false"
-              @copied="recordCopied(preset.label, preset.command)"
-              @failed="handleCopyFailed"
-            />
+              class="quick-option"
+              type="button"
+              :disabled="!store.selectedRoot || store.busy"
+              @click="applyNades(preset.value)"
+            >
+              {{ preset.label }}
+            </button>
           </div>
         </div>
       </article>

@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import { appConfig } from '@/config/app'
 import { useThemePreference, type ThemePreference } from '@/composables/useThemePreference'
 import { disableAutostart, enableAutostart, isAutostartEnabled } from '@/services/tauri/autostart'
+import { openExternalUrl } from '@/services/tauri/app'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const officialSiteRoute = '/official-site'
@@ -14,6 +15,7 @@ const themeOptions: ThemePreference[] = ['dark', 'light']
 const autostartEnabled = ref(false)
 const autostartLoading = ref(false)
 const autostartMessage = ref('')
+const sourceMessage = ref('')
 const isDesktopRuntime = '__TAURI_INTERNALS__' in window
 
 const autoInstallStatusLabel = computed(() => {
@@ -81,6 +83,15 @@ function normalizeError(error: unknown) {
     return error.message
   }
   return '操作失败，请稍后重试。'
+}
+
+async function openSource(url: string) {
+  try {
+    await openExternalUrl(url)
+    sourceMessage.value = ''
+  } catch (error) {
+    sourceMessage.value = normalizeError(error)
+  }
 }
 
 onMounted(() => {
@@ -200,7 +211,7 @@ onMounted(() => {
         </section>
         <section>
           <strong>插件配置目录</strong>
-          <p>BotTaunt、NadeSystem 等用户配置保存在 CS2 插件配置目录里。升级安装会尽量保留你已经改过的配置文件。</p>
+          <p>BotTaunt、NadeSystem 等配置保存在 CS2 插件配置目录里。每次安装都会清理旧插件包和插件配置，并写入内置整包。</p>
         </section>
         <section>
           <strong>运行日志 / 诊断信息</strong>
@@ -222,6 +233,14 @@ onMounted(() => {
         </RouterLink>
       </div>
       <p class="muted">更新日志会优先展示当前内置版本，并在网络可用时合并线上历史记录和下载入口。</p>
+      <div class="open-source-attribution">
+        <p>内置人机资源基于 CS2-Bot-Improver 及 CS2-Bot-Improver-Plus 的公开项目构建；本助手遵循 AGPL-3.0-or-later 发布。</p>
+        <div>
+          <button type="button" @click="openSource('https://github.com/ed0ard/CS2-Bot-Improver')">CS2-Bot-Improver</button>
+          <button type="button" @click="openSource('https://github.com/numakkiyu/CS2-Bot-Improver-Plus')">CS2-Bot-Improver-Plus</button>
+        </div>
+        <small v-if="sourceMessage">{{ sourceMessage }}</small>
+      </div>
     </article>
   </section>
 </template>

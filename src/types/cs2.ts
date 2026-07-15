@@ -95,5 +95,14 @@ export interface BotTauntsConfig {
   exists: boolean
 }
 
+export interface PlayerCosmeticsConfig {
+  knifeConfig: string
+  gunConfig: string
+  knifeConfigPath: string
+  gunConfigPath: string
+  pluginPresent: boolean
+  exists: boolean
+}
+
 export type DifficultyPreset = 'low' | 'medium' | 'high'
 export type GameModePreset = 'online' | 'withBots'

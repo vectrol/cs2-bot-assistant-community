@@ -436,10 +436,10 @@ export const guideSections = [
   },
   {
     title: '怎么卸载',
-    body: '在本页底部的危险操作区确认卸载。卸载只移除已知插件目录和对应配置目录，不会删除 CS2 本体。',
+    body: '在本页底部的危险操作区确认卸载。卸载会彻底删除 addons、plugins、cfg/plugins 和 MetaMod 加载文件，包含所有第三方插件配置；不会删除 CS2 本体。',
   },
   {
-    title: '哪些配置会被保留',
-    body: '安装和更新会尽量保留 configs/plugins 下的 BotTaunt、NadeSystem 等用户配置。卸载插件包时，对应配置目录会按提示一起移除。',
+    title: '安装会清理什么',
+    body: '每次安装都会先彻底删除现有插件包和所有插件配置，再安装内置整包。cfg/autoexec.cfg、游戏模式配置、overrides、gameinfo.gi 和 CS2 本体不会被删除。',
   },
 ]

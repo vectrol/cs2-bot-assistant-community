@@ -21,6 +21,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/QuickControlView.vue'),
   },
   {
+    path: '/player-cosmetics',
+    name: 'player-cosmetics',
+    component: () => import('@/views/PlayerCosmeticsView.vue'),
+  },
+  {
     path: '/commands',
     name: 'commands',
     component: () => import('@/views/CommandsView.vue'),

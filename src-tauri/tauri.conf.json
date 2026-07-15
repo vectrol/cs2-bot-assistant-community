@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "CS2人机增强助手",
   "mainBinaryName": "CS2BotImproverAssistant",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "identifier": "com.aipc.cs2botimprover",
   "build": {
     "frontendDist": "../dist",
@@ -36,8 +36,12 @@
       }
     },
     "resources": [
-      "resources/CS2BotImprover.zip"
+      "resources/CS2BotImprover.zip",
+      "../LICENSE",
+      "../NOTICE.md"
     ],
+    "license": "AGPL-3.0-or-later",
+    "licenseFile": "../LICENSE",
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

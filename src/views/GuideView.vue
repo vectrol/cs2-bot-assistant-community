@@ -194,7 +194,7 @@ onMounted(async () => {
         当前目录：<code>{{ store.selectedRoot }}</code>
       </p>
       <p v-else class="muted">请先在安装检查页选择 CS2 目录。</p>
-      <p class="muted">这里只删除已知插件目录、对应配置目录和旧版 BotHider 0.1.9 残留，不会动 CS2 本体。</p>
+      <p class="muted">卸载会彻底删除插件目录和插件配置，不会删除 CS2 本体、地图、Demo、overrides 或 gameinfo.gi。</p>
       <button class="ghost-button danger-button" :disabled="!store.selectedRoot || store.busy" @click="uninstallModalOpen = true">
         卸载插件包
       </button>
@@ -203,7 +203,7 @@ onMounted(async () => {
     <ActionModal
       :open="uninstallModalOpen"
       title="确认卸载插件包"
-      subtitle="这个操作会删除已知插件目录、配置目录，并清理旧版 BotHider 0.1.9 残留。"
+      subtitle="这个操作不可恢复，会彻底删除现有插件包和所有插件配置。"
       confirm-label="确认卸载"
       danger
       :loading="store.busy"
@@ -211,8 +211,8 @@ onMounted(async () => {
       @confirm="uninstallBotPackage"
     >
       <p class="muted">
-        将删除 BotAI、BotAimImprover、BotBuy、BotRandomizer、BotState、NadeSystem、BotTaunt、RoundDamageRecap、MapRotation 等插件目录，
-        以及 BotTaunt 和 NadeSystem 配置目录。也会清理旧版 BotHider 0.1.9 残留的 <code>BotHider.vdf</code>、<code>0Harmony</code> 和 <code>BotHiderApi</code>。
+        将直接删除整个 <code>addons</code>、<code>plugins</code>、<code>cfg\plugins</code> 目录，以及 MetaMod 加载文件。
+        包括本助手、旧版本和其他第三方插件的 DLL、配置、依赖与文件。此操作不可恢复。
         它不会删除或恢复 <code>gameinfo.gi</code> 与 <code>pak01_*.vpk</code>。
       </p>
       <p v-if="store.selectedRoot" class="inline-path">

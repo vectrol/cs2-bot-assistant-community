@@ -4,7 +4,7 @@ use crate::errors::AppError;
 use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset, GameModePreset, NadeRecoveryConfig,
-    OperationResult,
+    OperationResult, PlayerCosmeticsConfig,
 };
 use crate::services::cs2;
 
@@ -37,11 +37,40 @@ pub fn apply_difficulty_profile(
 }
 
 #[tauri::command]
+pub fn set_upstream_aim_preset(
+    root_path: String,
+    value: String,
+) -> Result<OperationResult, String> {
+    cs2::set_upstream_aim_preset(&root_path, &value).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn set_upstream_nades_preset(
+    root_path: String,
+    value: String,
+) -> Result<OperationResult, String> {
+    cs2::set_upstream_nades_preset(&root_path, &value).map_err(AppError::into_string)
+}
+
+#[tauri::command]
 pub fn set_game_mode_profile(
     root_path: String,
     preset: GameModePreset,
 ) -> Result<OperationResult, String> {
     cs2::set_game_mode_profile(&root_path, preset).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn get_player_cosmetics_config(root_path: String) -> Result<PlayerCosmeticsConfig, String> {
+    cs2::get_player_cosmetics_config(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn save_player_cosmetics_config(
+    root_path: String,
+    config: PlayerCosmeticsConfig,
+) -> Result<OperationResult, String> {
+    cs2::save_player_cosmetics_config(&root_path, config).map_err(AppError::into_string)
 }
 
 #[tauri::command]

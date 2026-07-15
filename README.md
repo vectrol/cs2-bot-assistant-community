@@ -230,13 +230,15 @@ workspace/projects/             # 项目源码工作区
 
 ## 维护边界
 
-这些路径属于用户配置或用户习惯，不能在清理、升级和重装时轻易删除：
+这些路径属于用户偏好或 CS2 核心文件，不会被插件包清理删除：
 
-- `game/csgo/addons/counterstrikesharp/configs/plugins/`
-- `game/csgo/addons/counterstrikesharp/configs/plugins/BotTaunt/BotTaunt.json`
-- `game/csgo/addons/counterstrikesharp/configs/plugins/BotTaunt/Taunts.json`
-- `game/csgo/addons/counterstrikesharp/configs/plugins/NadeSystem/NadeSystem.json`
+- `game/csgo/cfg/autoexec.cfg` 和其他非 `cfg/plugins/` 的游戏配置
+- `game/csgo/overrides/`
+- `game/csgo/gameinfo.gi`（模式切换会更新它，但卸载不会恢复它）
+- `game/csgo/pak01_*.vpk`
 - 应用本地偏好：最近目录、最近页面、固定命令、恢复点、最近错误和已关闭提示。
+
+每次安装和卸载都会删除 `addons/`、`plugins/`、`cfg/plugins/` 以及根级 MetaMod 加载声明，因此所有第三方插件及插件配置均会被清理。
 
 这些操作必须先退出 CS2：
 
@@ -269,7 +271,7 @@ workspace/projects/             # 项目源码工作区
 3. 确认 `src-tauri/resources/CS2BotImprover.zip` 已准备好。
 4. 运行 `npm run bundle:desktop`。
 5. 在 GitHub 创建版本 Release，例如 `v0.3.11`。
-6. 上传 NSIS 安装包和必要资源包到 Release assets。
+6. 上传 NSIS 安装包、`LBTVCS2BotEnhancer.zip` 和 `SHA256SUMS.txt` 到 Release assets。
 7. 如需客户端自动提示更新，在远端更新服务写入对应版本记录。
 
 正式包和测试包要分清楚：
@@ -281,6 +283,13 @@ workspace/projects/             # 项目源码工作区
 
 ## 授权
 
-本仓库中的助手源码使用 MIT License，详见 [LICENSE](./LICENSE)。
+本仓库中的助手源码使用 GNU Affero General Public License v3.0 or later，详见 [LICENSE](./LICENSE)。
 
-若 Release 中包含或再分发第三方插件二进制资源，需要单独确认上游项目授权，并在 Release 说明中标注来源和边界。
+## 上游项目与来源
+
+内置人机资源整合并再分发以下公开 AGPL 项目：
+
+- [CS2-Bot-Improver](https://github.com/ed0ard/CS2-Bot-Improver)
+- [CS2-Bot-Improver-Plus](https://github.com/numakkiyu/CS2-Bot-Improver-Plus)
+
+发布 GitHub Release 时必须同时提供源码、NSIS 安装程序、`LBTVCS2BotEnhancer.zip` 资源包及 `SHA256SUMS.txt`，并保留资源包内已有的 LICENSE、README 和版权信息。更多说明见 [NOTICE.md](./NOTICE.md)。

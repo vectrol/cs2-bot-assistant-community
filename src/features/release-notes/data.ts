@@ -22,6 +22,18 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '0.4.6',
+    date: '2026-07-15',
+    title: '0.4.6 Plus 控制与开源来源同步',
+    summary: '同步 Plus 的模式文件逻辑和玩家外观配置入口，安装后可从当前 CS2 配置自动生成 Online 与 Bot 模式模板。',
+    items: [
+      { text: 'Bot / Online 模式改为按当前 gameinfo.gi 动态生成并校验 MetaMod 搜索路径，避免资源包模板缺失造成首次安装失败。' },
+      { text: 'Aim 与投掷物预设改为直接写入 Plus 的训练配置文件。' },
+      { text: '新增玩家外观配置页，可编辑 PlayerKnifeCustomizer 的刀具、枪械、手套和音乐盒完整配置。' },
+      { text: '内置资源来源与许可证同步为 AGPL-3.0-or-later，并在设置页提供上游项目链接。' },
+    ],
+  },
+  {
     version: '0.4.5',
     date: '2026-07-06',
     title: '0.4.5 CS2 全量指令库第一步',
@@ -64,7 +76,7 @@ export const releaseNoteEntries: ReleaseNoteEntry[] = [
     items: [
       { text: '卸载插件包时会额外清理旧版 BotHider 0.1.9 残留的 BotHider.vdf、0Harmony 和 BotHiderApi。' },
       { text: '卸载结果会区分已删除目录数、已删除文件数和未找到项数，方便确认清理范围。' },
-      { text: '清理范围仍然是明确白名单，不会删除整个 shared 或 metamod 目录，也不会删除或恢复 gameinfo.gi 与 pak01_*.vpk。' },
+      { text: '当前版本已改为整包清理：删除 addons、plugins、cfg/plugins 与 MetaMod 加载文件；不会删除或恢复 gameinfo.gi 与 pak01_*.vpk。' },
     ],
   },
   {
@@ -93,7 +105,7 @@ export const releaseNoteEntries: ReleaseNoteEntry[] = [
       { text: '想使用自动换图时，可以在指令中心复制 lbtv_map_rotation 1 开启；lbtv_map_next 可以立即切到下一张图，方便测试。' },
       { text: 'AI 聊天设置新增免费 Key 一键启用入口。默认不会写入 Key，只有你在编辑弹窗里点击启用并保存后才会生效。' },
       { text: '仍然可以手动填写自己的 API 地址和 API Key；免费 Key 只是快捷填充，不会覆盖已经填写的自定义 Key。' },
-      { text: '继续保留安装配置保护，升级不会覆盖你已经改过的 BotTaunt / NadeSystem 配置。' },
+      { text: '当前安装策略会先清理现有插件包和插件配置，再写入内置整包。' },
       { text: '继续包含 Quick Control、诊断面板、常用命令、地图轮换平局边界修复等现有能力。' },
       { text: '帮助中心新增自愿赞赏入口，用于支持助手维护和 AI 服务成本；是否赞赏不影响任何功能。' },
     ],
@@ -110,7 +122,7 @@ export const releaseNoteEntries: ReleaseNoteEntry[] = [
       { text: 'Aim、Nades、Knife 和 Teams 按 0.4.0 Commands.txt 做成一键复制入口，复制后粘贴到 CS2 控制台使用。' },
       { text: '指令中心新增 Teams 分类，接入 40 支职业队伍的 CT / T 阵营预设。' },
       { text: '安装检查、诊断和卸载清单已补充 0.4.0 新增目录与插件，避免继续按 0.3.x 资源结构判断。' },
-      { text: '继续保留原有安装检查、BotTaunt / NadeSystem 编辑、Demo 查找、诊断日志、发布记录和配置保护能力。' },
+      { text: '继续保留原有安装检查、BotTaunt / NadeSystem 编辑、Demo 查找、诊断日志和发布记录能力。' },
       { text: '保留最近目录、最近命令、最近 Demo 和本地提示状态，减少重复选择和复制。' },
       { text: '开始使用页新增快捷动作条，可以直接重新检查、打开 CS2、进入配置、复制 -insecure 或打开 Demo 目录。' },
       { text: '指令中心支持固定常用命令，bot_kick、bot_nades more、-insecure 和 lbtv_map_next 会默认出现在固定区。' },

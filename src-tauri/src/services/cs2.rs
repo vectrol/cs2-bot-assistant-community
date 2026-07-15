@@ -13,7 +13,8 @@ use crate::errors::AppError;
 use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDirectoryCandidate, DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset,
-    GameModePreset, InstallDiagnostics, NadeRecoveryConfig, OperationResult, RecentDemoFile,
+    GameModePreset, InstallDiagnostics, NadeRecoveryConfig, OperationResult, PlayerCosmeticsConfig,
+    RecentDemoFile,
 };
 
 const CS2_FOLDER_NAME: &str = "Counter-Strike Global Offensive";
@@ -54,46 +55,27 @@ const NADE_SYSTEM_CONFIG_RELATIVE_PATH: &[&str] = &[
     "NadeSystem",
     "NadeSystem.json",
 ];
-const PROTECTED_CONFIG_RELATIVE_PARTS: &[&str] =
-    &["addons", "counterstrikesharp", "configs", "plugins"];
-const INSTALL_TOP_LEVEL_DIRS: &[&str] = &["addons", "backup", "cfg", "overrides"];
-const UNINSTALL_RELATIVE_DIRS: &[&[&str]] = &[
-    &["addons", "BotHider"],
-    &["addons", "RayTrace"],
-    &["addons", "counterstrikesharp", "plugins", "BotAI"],
-    &["addons", "counterstrikesharp", "plugins", "BotAimImprover"],
-    &["addons", "counterstrikesharp", "plugins", "BotBuy"],
-    &["addons", "counterstrikesharp", "plugins", "BotRandomizer"],
-    &["addons", "counterstrikesharp", "plugins", "BotState"],
-    &["addons", "counterstrikesharp", "plugins", "NadeSystem"],
-    &["addons", "counterstrikesharp", "plugins", "BotTaunt"],
-    &["addons", "counterstrikesharp", "plugins", "MapRotation"],
-    &["addons", "counterstrikesharp", "plugins", "BotHiderImpl"],
-    &["addons", "counterstrikesharp", "plugins", "RayTraceImpl"],
-    &[
-        "addons",
-        "counterstrikesharp",
-        "plugins",
-        "RoundDamageRecap",
-    ],
-    &[
-        "addons",
-        "counterstrikesharp",
-        "configs",
-        "plugins",
-        "BotTaunt",
-    ],
-    &[
-        "addons",
-        "counterstrikesharp",
-        "configs",
-        "plugins",
-        "NadeSystem",
-    ],
-    &["addons", "counterstrikesharp", "shared", "0Harmony"],
-    &["addons", "counterstrikesharp", "shared", "BotHiderApi"],
+const PLAYER_KNIFE_CONFIG_RELATIVE_PATH: &[&str] = &[
+    "game",
+    "csgo",
+    "addons",
+    "counterstrikesharp",
+    "plugins",
+    "PlayerKnifeCustomizer",
+    "player_knife_presets.json",
 ];
-const UNINSTALL_RELATIVE_FILES: &[&[&str]] = &[&["addons", "metamod", "BotHider.vdf"]];
+const PLAYER_GUN_CONFIG_RELATIVE_PATH: &[&str] = &[
+    "game",
+    "csgo",
+    "addons",
+    "counterstrikesharp",
+    "plugins",
+    "PlayerKnifeCustomizer",
+    "player_gun_presets.json",
+];
+const INSTALL_TOP_LEVEL_DIRS: &[&str] = &["addons", "backup", "cfg", "overrides"];
+const PLUGIN_PACKAGE_DIRS: &[&[&str]] = &[&["addons"], &["plugins"], &["cfg", "plugins"]];
+const PLUGIN_PACKAGE_FILES: &[&[&str]] = &[&["metamod.vdf"], &["metamod_x64.vdf"]];
 
 fn app_name() -> &'static str {
     option_env!("CS2_APP_NAME").unwrap_or(DEFAULT_APP_NAME)
@@ -293,6 +275,7 @@ pub fn install_bot_package(app: &AppHandle, root_path: &str) -> Result<Operation
 
     let zip_path = resolve_zip_path(app)?;
     ensure_install_destination_ready(&destination)?;
+    let cleanup_summary = remove_entire_plugin_package(&destination)?;
     let temp_dir = std::env::temp_dir().join(format!(
         "{}-{}-{}",
         install_temp_prefix(),
@@ -325,14 +308,16 @@ pub fn install_bot_package(app: &AppHandle, root_path: &str) -> Result<Operation
     })?;
 
     extract_zip(&zip_path, &temp_dir, &diagnostics)?;
-    let install_summary = copy_dir_contents(&temp_dir, &temp_dir, &destination, &diagnostics)?;
+    let package_root = find_package_payload_root(&temp_dir, &diagnostics)?;
+    copy_dir_contents(&package_root, &destination, &diagnostics)?;
+    activate_game_mode_profile(&destination, &GameModePreset::WithBots, Some(&diagnostics))?;
     let _ = fs::remove_dir_all(&temp_dir);
 
     Ok(OperationResult {
     success: true,
     message: format!(
-      "安装完成。\n资源包：{}\n目标目录：{}\n已保留用户配置文件：{}\n请手动把 -insecure 加入 Steam 启动项。",
-      diagnostics.zip_path, diagnostics.destination_dir, install_summary.preserved_configs
+      "安装完成。\n资源包：{}\n目标目录：{}\n已先彻底删除旧插件包，再完成安装。\n清理目录：{}；清理文件：{}；未找到项：{}。\n请手动把 -insecure 加入 Steam 启动项。",
+      diagnostics.zip_path, diagnostics.destination_dir, cleanup_summary.removed_dirs, cleanup_summary.removed_files, cleanup_summary.missing
     ),
   })
 }
@@ -357,6 +342,41 @@ pub fn apply_difficulty_profile(
     })
 }
 
+pub fn set_upstream_aim_preset(root_path: &str, value: &str) -> Result<OperationResult, AppError> {
+    ensure_cs2_not_running()?;
+    if !matches!(value, "head" | "mixed" | "body") {
+        return Err(AppError::runtime(
+            "[AIM_PRESET_INVALID]\n不支持的 Aim 预设。",
+        ));
+    }
+    let root = normalize_root(root_path)?;
+    let csgo_dir = root.join("game").join("csgo");
+    replace_cfg_command_in_upstream_files(&csgo_dir, "bot_aim", &format!("bot_aim {value}"))?;
+    Ok(OperationResult {
+        success: true,
+        message: format!("已写入 Plus Aim 预设：{value}。"),
+    })
+}
+
+pub fn set_upstream_nades_preset(
+    root_path: &str,
+    value: &str,
+) -> Result<OperationResult, AppError> {
+    ensure_cs2_not_running()?;
+    if !matches!(value, "max" | "more" | "normal" | "off") {
+        return Err(AppError::runtime(
+            "[NADES_PRESET_INVALID]\n不支持的投掷物预设。",
+        ));
+    }
+    let root = normalize_root(root_path)?;
+    let csgo_dir = root.join("game").join("csgo");
+    replace_cfg_command_in_upstream_files(&csgo_dir, "bot_nades", &format!("bot_nades {value}"))?;
+    Ok(OperationResult {
+        success: true,
+        message: format!("已写入 Plus 投掷物预设：{value}。"),
+    })
+}
+
 pub fn set_game_mode_profile(
     root_path: &str,
     preset: GameModePreset,
@@ -365,12 +385,7 @@ pub fn set_game_mode_profile(
 
     let root = normalize_root(root_path)?;
     let csgo_dir = root.join("game").join("csgo");
-    let source = csgo_dir
-        .join("backup")
-        .join(preset.as_folder_name())
-        .join(GAMEINFO_FILE_NAME);
-    let destination = csgo_dir.join(GAMEINFO_FILE_NAME);
-    copy_single_file(&source, &destination, None)?;
+    activate_game_mode_profile(&csgo_dir, &preset, None)?;
 
     Ok(OperationResult {
         success: true,
@@ -1018,34 +1033,34 @@ pub fn uninstall_bot_package(root_path: &str) -> Result<OperationResult, AppErro
         )));
     }
 
-    let summary = remove_uninstall_targets(&csgo_dir)?;
+    let summary = remove_entire_plugin_package(&csgo_dir)?;
 
     Ok(OperationResult {
         success: true,
         message: format!(
-            "卸载完成。\n已删除目录：{}\n已删除文件：{}\n未找到项：{}\n如需恢复 gameinfo.gi，请切换到在线模式。",
+            "卸载完成。\n已彻底删除插件目录、插件配置和第三方插件。\n已删除目录：{}\n已删除文件：{}\n未找到项：{}\n不会恢复 gameinfo.gi；需恢复在线模式请单独切换在线模式。",
             summary.removed_dirs, summary.removed_files, summary.missing
         ),
     })
 }
 
 #[derive(Debug, Default, PartialEq, Eq)]
-struct UninstallSummary {
+struct PluginPackageRemovalSummary {
     removed_dirs: usize,
     removed_files: usize,
     missing: usize,
 }
 
-fn remove_uninstall_targets(csgo_dir: &Path) -> Result<UninstallSummary, AppError> {
-    let mut summary = UninstallSummary::default();
+fn remove_entire_plugin_package(csgo_dir: &Path) -> Result<PluginPackageRemovalSummary, AppError> {
+    let mut summary = PluginPackageRemovalSummary::default();
 
-    for relative_parts in UNINSTALL_RELATIVE_DIRS {
+    for relative_parts in PLUGIN_PACKAGE_DIRS {
         let path = relative_parts
             .iter()
             .fold(csgo_dir.to_path_buf(), |current, part| current.join(part));
         if path.exists() {
             fs::remove_dir_all(&path).map_err(|error| {
-                install_io_error("UNINSTALL_REMOVE_DIR_FAILED", &path, error, None)
+                install_io_error("PLUGIN_PACKAGE_REMOVE_DIR_FAILED", &path, error, None)
             })?;
             summary.removed_dirs += 1;
         } else {
@@ -1053,13 +1068,13 @@ fn remove_uninstall_targets(csgo_dir: &Path) -> Result<UninstallSummary, AppErro
         }
     }
 
-    for relative_parts in UNINSTALL_RELATIVE_FILES {
+    for relative_parts in PLUGIN_PACKAGE_FILES {
         let path = relative_parts
             .iter()
             .fold(csgo_dir.to_path_buf(), |current, part| current.join(part));
         if path.exists() {
             fs::remove_file(&path).map_err(|error| {
-                install_io_error("UNINSTALL_REMOVE_FILE_FAILED", &path, error, None)
+                install_io_error("PLUGIN_PACKAGE_REMOVE_FILE_FAILED", &path, error, None)
             })?;
             summary.removed_files += 1;
         } else {
@@ -1153,6 +1168,77 @@ fn nade_system_config_path(root: &Path) -> PathBuf {
     NADE_SYSTEM_CONFIG_RELATIVE_PATH
         .iter()
         .fold(root.to_path_buf(), |path, part| path.join(part))
+}
+
+fn player_knife_config_path(root: &Path) -> PathBuf {
+    PLAYER_KNIFE_CONFIG_RELATIVE_PATH
+        .iter()
+        .fold(root.to_path_buf(), |path, part| path.join(part))
+}
+
+fn player_gun_config_path(root: &Path) -> PathBuf {
+    PLAYER_GUN_CONFIG_RELATIVE_PATH
+        .iter()
+        .fold(root.to_path_buf(), |path, part| path.join(part))
+}
+
+pub fn get_player_cosmetics_config(root_path: &str) -> Result<PlayerCosmeticsConfig, AppError> {
+    let root = normalize_root(root_path)?;
+    let knife_path = player_knife_config_path(&root);
+    let gun_path = player_gun_config_path(&root);
+    let plugin_path = knife_path.with_file_name("PlayerKnifeCustomizer.dll");
+    let knife_config = if knife_path.exists() {
+        serde_json::to_string_pretty(&read_json_value(&knife_path)?).map_err(|error| {
+            AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}"))
+        })?
+    } else {
+        "{}".to_string()
+    };
+    let gun_config = if gun_path.exists() {
+        serde_json::to_string_pretty(&read_json_value(&gun_path)?).map_err(|error| {
+            AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}"))
+        })?
+    } else {
+        "{}".to_string()
+    };
+    Ok(PlayerCosmeticsConfig {
+        knife_config,
+        gun_config,
+        knife_config_path: knife_path.display().to_string(),
+        gun_config_path: gun_path.display().to_string(),
+        plugin_present: plugin_path.exists(),
+        exists: knife_path.exists(),
+    })
+}
+
+pub fn save_player_cosmetics_config(
+    root_path: &str,
+    config: PlayerCosmeticsConfig,
+) -> Result<OperationResult, AppError> {
+    ensure_cs2_not_running()?;
+    let root = normalize_root(root_path)?;
+    let knife_path = player_knife_config_path(&root);
+    let gun_path = player_gun_config_path(&root);
+    let knife_value: serde_json::Value = serde_json::from_str(&config.knife_config).map_err(|error| {
+        AppError::runtime(format!("[PLAYER_COSMETICS_KNIFE_JSON_INVALID]\n刀具、手套和音乐盒配置不是有效 JSON：{error}"))
+    })?;
+    let gun_value: serde_json::Value =
+        serde_json::from_str(&config.gun_config).map_err(|error| {
+            AppError::runtime(format!(
+                "[PLAYER_COSMETICS_GUN_JSON_INVALID]\n枪械外观配置不是有效 JSON：{error}"
+            ))
+        })?;
+    if !knife_value.is_object() || !gun_value.is_object() {
+        return Err(AppError::runtime(
+            "[PLAYER_COSMETICS_JSON_SHAPE_INVALID]\n两份外观配置必须是 JSON 对象。",
+        ));
+    }
+    write_json_value(&knife_path, &knife_value, "PLAYER_COSMETICS_KNIFE")?;
+    write_json_value(&gun_path, &gun_value, "PLAYER_COSMETICS_GUN")?;
+    Ok(OperationResult {
+        success: true,
+        message: "Plus 玩家外观配置已保存。重启 CS2 或服务器后生效。".to_string(),
+    })
 }
 
 fn default_bot_taunts_config(config_path: &Path) -> Result<BotTauntsConfig, AppError> {
@@ -1618,22 +1704,225 @@ fn extract_zip(
     Ok(())
 }
 
-#[derive(Default)]
-struct InstallCopySummary {
-    preserved_configs: usize,
+fn find_package_payload_root(
+    extract_root: &Path,
+    diagnostics: &InstallDiagnostics,
+) -> Result<PathBuf, AppError> {
+    let is_payload_root = |path: &Path| path.join("addons").is_dir();
+
+    if is_payload_root(extract_root) {
+        return Ok(extract_root.to_path_buf());
+    }
+
+    let entries = fs::read_dir(extract_root).map_err(|error| {
+        install_io_error(
+            "INSTALL_PACKAGE_ROOT_READ_FAILED",
+            extract_root,
+            error,
+            Some(diagnostics),
+        )
+    })?;
+    let matches = entries
+        .filter_map(Result::ok)
+        .map(|entry| entry.path())
+        .filter(|path| path.is_dir() && is_payload_root(path))
+        .collect::<Vec<_>>();
+
+    if matches.len() == 1 {
+        return Ok(matches[0].clone());
+    }
+
+    Err(AppError::runtime(format!(
+        "[INSTALL_PACKAGE_LAYOUT_INVALID]\n资源包缺少 addons 目录。\n{}",
+        format_diagnostics(diagnostics)
+    )))
+}
+
+fn activate_game_mode_profile(
+    csgo_dir: &Path,
+    preset: &GameModePreset,
+    diagnostics: Option<&InstallDiagnostics>,
+) -> Result<(), AppError> {
+    let destination = csgo_dir.join(GAMEINFO_FILE_NAME);
+    let active = fs::read(&destination).map_err(|error| {
+        install_io_error(
+            "GAME_MODE_ACTIVE_GAMEINFO_READ_FAILED",
+            &destination,
+            error,
+            diagnostics,
+        )
+    })?;
+    let online = rewrite_gameinfo(&active, false).map_err(AppError::runtime)?;
+    let with_bots = rewrite_gameinfo(&online, true).map_err(AppError::runtime)?;
+    let online_backup = csgo_dir
+        .join("backup")
+        .join("Online")
+        .join(GAMEINFO_FILE_NAME);
+    let with_bots_backup = csgo_dir
+        .join("backup")
+        .join("WithBots")
+        .join(GAMEINFO_FILE_NAME);
+
+    for (path, content) in [(&online_backup, &online), (&with_bots_backup, &with_bots)] {
+        if let Some(parent) = path.parent() {
+            fs::create_dir_all(parent).map_err(|error| {
+                install_io_error(
+                    "GAME_MODE_BACKUP_DIR_CREATE_FAILED",
+                    parent,
+                    error,
+                    diagnostics,
+                )
+            })?;
+        }
+        fs::write(path, content).map_err(|error| {
+            install_io_error("GAME_MODE_BACKUP_WRITE_FAILED", path, error, diagnostics)
+        })?;
+    }
+
+    let expected = match preset {
+        GameModePreset::Online => &online,
+        GameModePreset::WithBots => &with_bots,
+    };
+    fs::write(&destination, expected).map_err(|error| {
+        install_io_error(
+            "GAME_MODE_ACTIVE_GAMEINFO_WRITE_FAILED",
+            &destination,
+            error,
+            diagnostics,
+        )
+    })?;
+    if fs::read(&destination).map_err(|error| {
+        install_io_error(
+            "GAME_MODE_ACTIVE_GAMEINFO_VERIFY_FAILED",
+            &destination,
+            error,
+            diagnostics,
+        )
+    })? != *expected
+    {
+        return Err(AppError::runtime(format!(
+            "[GAME_MODE_VERIFY_FAILED]\n写入后的 gameinfo.gi 与 {} 模板不一致：{}",
+            preset.as_folder_name(),
+            destination.display()
+        )));
+    }
+    let installed = fs::read(&destination).map_err(|error| {
+        install_io_error(
+            "GAME_MODE_ACTIVE_GAMEINFO_VERIFY_FAILED",
+            &destination,
+            error,
+            diagnostics,
+        )
+    })?;
+    match preset {
+        GameModePreset::Online if contains_metamod_search_path(&installed) => {
+            return Err(AppError::runtime(
+                "[GAME_MODE_ONLINE_VERIFY_FAILED]\n在线模式的 gameinfo.gi 仍加载 MetaMod。",
+            ));
+        }
+        GameModePreset::WithBots if !contains_metamod_search_path(&installed) => {
+            return Err(AppError::runtime(
+                "[GAME_MODE_BOTS_VERIFY_FAILED]\nBot 模式的 gameinfo.gi 未加载 MetaMod。",
+            ));
+        }
+        _ => {}
+    }
+    Ok(())
+}
+
+fn contains_metamod_search_path(bytes: &[u8]) -> bool {
+    String::from_utf8_lossy(bytes)
+        .to_ascii_lowercase()
+        .contains("csgo/addons/metamod")
+}
+
+fn game_path_value(line: &str) -> Option<&str> {
+    let content = line.split_once("//").map_or(line, |(content, _)| content);
+    let mut fields = content.split_whitespace();
+    if !fields.next()?.eq_ignore_ascii_case("game") {
+        return None;
+    }
+    let value = fields.next()?;
+    if fields.next().is_some() {
+        return None;
+    }
+    Some(value)
+}
+
+fn rewrite_gameinfo(bytes: &[u8], include_metamod: bool) -> Result<Vec<u8>, String> {
+    let text = std::str::from_utf8(bytes)
+        .map_err(|error| format!("gameinfo.gi 不是有效 UTF-8：{error}"))?;
+    let newline = if text.contains("\r\n") { "\r\n" } else { "\n" };
+    let trailing_newline = text.ends_with('\n');
+    let mut output = Vec::new();
+    let mut inserted = false;
+
+    for line in text.lines() {
+        if game_path_value(line)
+            .is_some_and(|value| value.eq_ignore_ascii_case("csgo/addons/metamod"))
+        {
+            continue;
+        }
+        if include_metamod
+            && !inserted
+            && game_path_value(line).is_some_and(|value| value.eq_ignore_ascii_case("csgo"))
+        {
+            let indent: String = line.chars().take_while(|ch| ch.is_whitespace()).collect();
+            output.push(format!("{indent}Game\tcsgo/addons/metamod"));
+            inserted = true;
+        }
+        output.push(line.to_string());
+    }
+
+    if include_metamod && !inserted {
+        return Err("gameinfo.gi 缺少主 Game csgo SearchPath。".to_string());
+    }
+
+    let mut rewritten = output.join(newline);
+    if trailing_newline {
+        rewritten.push_str(newline);
+    }
+    Ok(rewritten.into_bytes())
+}
+
+fn replace_cfg_command_in_upstream_files(
+    csgo_dir: &Path,
+    command: &str,
+    replacement: &str,
+) -> Result<(), AppError> {
+    for filename in ["my_bot_normal_config.cfg", "my_bot_ffa_config.cfg"] {
+        let path = csgo_dir.join("cfg").join(filename);
+        let content = fs::read_to_string(&path)
+            .map_err(|error| install_io_error("UPSTREAM_CFG_READ_FAILED", &path, error, None))?;
+        let mut found = false;
+        let mut lines = Vec::new();
+        for line in content.lines() {
+            if line.trim_start().starts_with(command) {
+                if !found {
+                    lines.push(replacement.to_string());
+                    found = true;
+                }
+            } else {
+                lines.push(line.to_string());
+            }
+        }
+        if !found {
+            lines.push(replacement.to_string());
+        }
+        fs::write(&path, format!("{}\r\n", lines.join("\r\n")))
+            .map_err(|error| install_io_error("UPSTREAM_CFG_WRITE_FAILED", &path, error, None))?;
+    }
+    Ok(())
 }
 
 fn copy_dir_contents(
-    root_source: &Path,
     source: &Path,
     destination: &Path,
     diagnostics: &InstallDiagnostics,
-) -> Result<InstallCopySummary, AppError> {
+) -> Result<(), AppError> {
     let entries = fs::read_dir(source).map_err(|error| {
         install_io_error("INSTALL_TEMP_READ_FAILED", source, error, Some(diagnostics))
     })?;
-    let mut summary = InstallCopySummary::default();
-
     for entry in entries {
         let entry = entry.map_err(|error| {
             install_io_error(
@@ -1654,18 +1943,12 @@ fn copy_dir_contents(
                     Some(diagnostics),
                 )
             })?;
-            let nested_summary = copy_dir_contents(root_source, &path, &target, diagnostics)?;
-            summary.preserved_configs += nested_summary.preserved_configs;
+            copy_dir_contents(&path, &target, diagnostics)?;
         } else {
-            if should_preserve_existing_config(root_source, &path, &target) {
-                summary.preserved_configs += 1;
-                write_log("INFO", &format!("已保留现有用户配置：{}", target.display()));
-                continue;
-            }
             copy_single_file(&path, &target, Some(diagnostics))?;
         }
     }
-    Ok(summary)
+    Ok(())
 }
 
 fn ensure_install_destination_ready(destination: &Path) -> Result<(), AppError> {
@@ -1717,34 +2000,6 @@ fn ensure_install_destination_ready(destination: &Path) -> Result<(), AppError> 
     }
 
     Ok(())
-}
-
-fn should_preserve_existing_config(
-    root_source: &Path,
-    source_file: &Path,
-    target_file: &Path,
-) -> bool {
-    if !target_file.exists() {
-        return false;
-    }
-    let Ok(relative_path) = source_file.strip_prefix(root_source) else {
-        return false;
-    };
-    path_has_prefix(relative_path, PROTECTED_CONFIG_RELATIVE_PARTS)
-}
-
-fn path_has_prefix(path: &Path, expected_parts: &[&str]) -> bool {
-    let mut components = path.components();
-    for expected_part in expected_parts {
-        let Some(component) = components.next() else {
-            return false;
-        };
-        let component_text = component.as_os_str().to_string_lossy();
-        if !component_text.eq_ignore_ascii_case(expected_part) {
-            return false;
-        }
-    }
-    true
 }
 
 fn copy_single_file(
@@ -1894,7 +2149,7 @@ mod tests {
     }
 
     #[test]
-    fn uninstall_targets_remove_legacy_bothider_files_without_touching_game_files() {
+    fn plugin_package_removal_deletes_unknown_plugins_and_preserves_cs2_core_files() {
         let root = std::env::temp_dir().join(format!(
             "cs2-uninstall-test-{}-{}",
             std::process::id(),
@@ -1903,57 +2158,180 @@ mod tests {
         let csgo_dir = root.join("game").join("csgo");
         fs::create_dir_all(&csgo_dir).unwrap();
 
-        create_dir_target(&csgo_dir, &["addons", "BotHider"]);
         create_dir_target(
             &csgo_dir,
-            &["addons", "counterstrikesharp", "plugins", "BotHiderImpl"],
+            &[
+                "addons",
+                "counterstrikesharp",
+                "plugins",
+                "UnknownThirdParty",
+            ],
         );
         create_dir_target(
             &csgo_dir,
-            &["addons", "counterstrikesharp", "shared", "0Harmony"],
+            &[
+                "addons",
+                "counterstrikesharp",
+                "configs",
+                "plugins",
+                "BotTaunt",
+            ],
         );
-        create_dir_target(
-            &csgo_dir,
-            &["addons", "counterstrikesharp", "shared", "BotHiderApi"],
-        );
-        create_file_target(&csgo_dir, &["addons", "metamod", "BotHider.vdf"]);
+        create_dir_target(&csgo_dir, &["addons", "RayTrace"]);
+        create_file_target(&csgo_dir, &["addons", "metamod", "ThirdParty.vdf"]);
+        create_dir_target(&csgo_dir, &["plugins", "OtherPlugin"]);
+        create_dir_target(&csgo_dir, &["cfg", "plugins", "OtherPlugin"]);
+        create_file_target(&csgo_dir, &["metamod.vdf"]);
+        create_file_target(&csgo_dir, &["metamod_x64.vdf"]);
+        fs::write(csgo_dir.join("cfg").join("autoexec.cfg"), "protected").unwrap();
+        fs::write(
+            csgo_dir.join("cfg").join("gamemode_competitive.cfg"),
+            "protected",
+        )
+        .unwrap();
+        fs::create_dir_all(csgo_dir.join("overrides")).unwrap();
+        fs::write(
+            csgo_dir.join("overrides").join("botprofile.vpk"),
+            "protected",
+        )
+        .unwrap();
         fs::write(csgo_dir.join("gameinfo.gi"), "protected").unwrap();
         fs::write(csgo_dir.join("pak01_001.vpk"), "protected").unwrap();
 
-        let summary = remove_uninstall_targets(&csgo_dir).unwrap();
+        let summary = remove_entire_plugin_package(&csgo_dir).unwrap();
 
-        assert_eq!(summary.removed_dirs, 4);
-        assert_eq!(summary.removed_files, 1);
-        assert_eq!(
-            summary.missing,
-            UNINSTALL_RELATIVE_DIRS.len() + UNINSTALL_RELATIVE_FILES.len() - 5
+        assert_eq!(summary.removed_dirs, 3);
+        assert_eq!(summary.removed_files, 2);
+        assert_eq!(summary.missing, 0);
+        assert!(!csgo_dir.join("addons").exists());
+        assert!(!csgo_dir.join("plugins").exists());
+        assert!(!csgo_dir.join("cfg").join("plugins").exists());
+        assert!(!csgo_dir.join("metamod.vdf").exists());
+        assert!(!csgo_dir.join("metamod_x64.vdf").exists());
+        assert!(csgo_dir.join("cfg").join("autoexec.cfg").exists());
+        assert!(csgo_dir
+            .join("cfg")
+            .join("gamemode_competitive.cfg")
+            .exists());
+        assert!(csgo_dir.join("overrides").join("botprofile.vpk").exists());
+        assert!(csgo_dir.join("gameinfo.gi").exists());
+        assert!(csgo_dir.join("pak01_001.vpk").exists());
+
+        fs::remove_dir_all(root).unwrap();
+    }
+
+    #[test]
+    fn install_copy_uses_nested_package_root_and_applies_gameinfo_profiles() {
+        let root = std::env::temp_dir().join(format!(
+            "cs2-install-quarantine-test-{}-{}",
+            std::process::id(),
+            chrono_like_timestamp()
+        ));
+        let csgo_dir = root.join("game").join("csgo");
+        create_dir_target(
+            &csgo_dir,
+            &[
+                "addons",
+                "counterstrikesharp",
+                "plugins",
+                "UnknownThirdParty",
+            ],
         );
-        assert!(!csgo_dir.join("addons").join("BotHider").exists());
+        create_dir_target(&csgo_dir, &["cfg", "plugins", "OldConfig"]);
+        create_file_target(&csgo_dir, &["metamod.vdf"]);
+        create_file_target(&csgo_dir, &["metamod_x64.vdf"]);
+        fs::write(
+            csgo_dir.join(GAMEINFO_FILE_NAME),
+            "SearchPaths\n{\n\tGame\tcsgo\n}\nCurrentSetting 1\n",
+        )
+        .unwrap();
+
+        remove_entire_plugin_package(&csgo_dir).unwrap();
+        assert!(!csgo_dir.join("addons").exists());
+        assert!(!csgo_dir.join("cfg").join("plugins").exists());
+        assert!(!csgo_dir.join("metamod.vdf").exists());
+        assert!(!csgo_dir.join("metamod_x64.vdf").exists());
+
+        let extract_root = root.join("extracted");
+        let source = extract_root.join("LBTVCS2BotEnhancer");
+        fs::create_dir_all(
+            source
+                .join("addons")
+                .join("counterstrikesharp")
+                .join("plugins")
+                .join("BundledPlugin"),
+        )
+        .unwrap();
+        fs::create_dir_all(source.join("backup").join("Online")).unwrap();
+        fs::create_dir_all(source.join("backup").join("WithBots")).unwrap();
+        fs::write(
+            source
+                .join("addons")
+                .join("counterstrikesharp")
+                .join("plugins")
+                .join("BundledPlugin")
+                .join("BundledPlugin.dll"),
+            "bundled",
+        )
+        .unwrap();
+        fs::write(source.join("addons").join("metamod.vdf"), "bundled").unwrap();
+        fs::write(source.join("addons").join("metamod_x64.vdf"), "bundled").unwrap();
+        let diagnostics = InstallDiagnostics {
+            zip_path: "test.zip".to_string(),
+            temp_dir: extract_root.display().to_string(),
+            destination_dir: csgo_dir.display().to_string(),
+        };
+        let package_root = find_package_payload_root(&extract_root, &diagnostics).unwrap();
+        assert_eq!(package_root, source);
+        copy_dir_contents(&package_root, &csgo_dir, &diagnostics).unwrap();
+        activate_game_mode_profile(&csgo_dir, &GameModePreset::WithBots, Some(&diagnostics))
+            .unwrap();
+
+        assert!(csgo_dir
+            .join("addons")
+            .join("counterstrikesharp")
+            .join("plugins")
+            .join("BundledPlugin")
+            .join("BundledPlugin.dll")
+            .exists());
+        assert!(csgo_dir.join("addons").join("metamod.vdf").exists());
+        assert!(csgo_dir.join("addons").join("metamod_x64.vdf").exists());
+        assert!(!csgo_dir.join("metamod.vdf").exists());
+        assert!(!csgo_dir.join("metamod_x64.vdf").exists());
+        assert_eq!(
+            fs::read_to_string(csgo_dir.join(GAMEINFO_FILE_NAME)).unwrap(),
+            fs::read_to_string(
+                csgo_dir
+                    .join("backup")
+                    .join("WithBots")
+                    .join(GAMEINFO_FILE_NAME)
+            )
+            .unwrap()
+        );
+        assert!(contains_metamod_search_path(
+            &fs::read(csgo_dir.join(GAMEINFO_FILE_NAME)).unwrap()
+        ));
         assert!(!csgo_dir
             .join("addons")
             .join("counterstrikesharp")
             .join("plugins")
-            .join("BotHiderImpl")
+            .join("UnknownThirdParty")
             .exists());
-        assert!(!csgo_dir
-            .join("addons")
-            .join("counterstrikesharp")
-            .join("shared")
-            .join("0Harmony")
-            .exists());
-        assert!(!csgo_dir
-            .join("addons")
-            .join("counterstrikesharp")
-            .join("shared")
-            .join("BotHiderApi")
-            .exists());
-        assert!(!csgo_dir
-            .join("addons")
-            .join("metamod")
-            .join("BotHider.vdf")
-            .exists());
-        assert!(csgo_dir.join("gameinfo.gi").exists());
-        assert!(csgo_dir.join("pak01_001.vpk").exists());
+
+        activate_game_mode_profile(&csgo_dir, &GameModePreset::Online, None).unwrap();
+        assert_eq!(
+            fs::read_to_string(csgo_dir.join(GAMEINFO_FILE_NAME)).unwrap(),
+            fs::read_to_string(
+                csgo_dir
+                    .join("backup")
+                    .join("Online")
+                    .join(GAMEINFO_FILE_NAME)
+            )
+            .unwrap()
+        );
+        assert!(!contains_metamod_search_path(
+            &fs::read(csgo_dir.join(GAMEINFO_FILE_NAME)).unwrap()
+        ));
 
         fs::remove_dir_all(root).unwrap();
     }

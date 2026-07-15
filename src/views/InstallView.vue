@@ -194,7 +194,7 @@ const repairActions = computed(() => [
   },
   {
     title: '修复缺失项',
-    description: '重新执行安装流程，保留已有插件配置，也可覆盖更新旧包。',
+    description: '先彻底清理现有插件包和插件配置，再重新安装内置整包。',
     disabled: !canInstall.value,
     action: () => {
       installConfirmOpen.value = true
@@ -286,7 +286,7 @@ async function handleInstall() {
   }
 
   try {
-    preferences.createRestorePoint('安装人机插件包', store.selectedRoot, '安装或覆盖更新基础插件环境，并保留已有用户配置', false)
+    preferences.createRestorePoint('安装人机插件包', store.selectedRoot, '先彻底删除现有插件包和所有插件配置，再安装内置整包', false)
     await store.install()
     preferences.recordAction('安装完成', store.selectedRoot)
     installCompleted.value = true
@@ -564,7 +564,7 @@ onMounted(async () => {
       </div>
       <div class="tip-box">
         <p>安装会写入当前 CS2 目录。</p>
-        <p>已有用户配置会尽量保留，尤其是 <code>addons/counterstrikesharp/configs/plugins/</code>。</p>
+        <p>每次安装都会先彻底删除现有插件包和所有插件配置，再安装内置整包。</p>
         <p>安装后需要手动处理 Steam 启动项。</p>
       </div>
       <p class="inline-path">

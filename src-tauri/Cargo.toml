@@ -3,10 +3,10 @@ name = "ai_pc_fac"
 # 发布事故记录：2026-06-01 升级 0.3.7 时，曾因批量替换误改 Cargo.lock 中第三方依赖版本。
 # 改版本号时只能改本 package 版本，并让 Cargo 维护锁文件；禁止全局替换 0.x.y。
 # 详情见 docs/dev-log-2026-06-01_0.3.7-version-bump-incident.md。
-version = "0.4.5"
+version = "0.4.6"
 description = "CS2人机增强助手"
 authors = ["you"]
-license = ""
+license = "AGPL-3.0-or-later"
 repository = ""
 edition = "2021"
 rust-version = "1.77.2"

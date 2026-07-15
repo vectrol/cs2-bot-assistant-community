@@ -12,6 +12,7 @@ import type {
   GameModePreset,
   NadeRecoveryConfig,
   OperationResult,
+  PlayerCosmeticsConfig,
 } from '@/types/cs2'
 
 function isTauriRuntime() {
@@ -91,11 +92,41 @@ export function applyDifficultyProfile(rootPath: string, preset: DifficultyPrese
   return invoke<OperationResult>('apply_difficulty_profile', { rootPath, preset })
 }
 
+export function setUpstreamAimPreset(rootPath: string, value: 'head' | 'mixed' | 'body') {
+  if (!isTauriRuntime()) {
+    return webOnlyOperation(`Web 预览不能写入 Aim 预设：${value}。目标目录：${rootPath}`)
+  }
+  return invoke<OperationResult>('set_upstream_aim_preset', { rootPath, value })
+}
+
+export function setUpstreamNadesPreset(rootPath: string, value: 'max' | 'more' | 'normal' | 'off') {
+  if (!isTauriRuntime()) {
+    return webOnlyOperation(`Web 预览不能写入投掷物预设：${value}。目标目录：${rootPath}`)
+  }
+  return invoke<OperationResult>('set_upstream_nades_preset', { rootPath, value })
+}
+
 export function setGameModeProfile(rootPath: string, preset: GameModePreset) {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web 预览不能切换模式：${preset}。目标目录：${rootPath}`)
   }
   return invoke<OperationResult>('set_game_mode_profile', { rootPath, preset })
+}
+
+export function getPlayerCosmeticsConfig(rootPath: string) {
+  if (!isTauriRuntime()) {
+    return Promise.resolve<PlayerCosmeticsConfig>({
+      knifeConfig: '{}', gunConfig: '{}', knifeConfigPath: '', gunConfigPath: '', pluginPresent: false, exists: false,
+    })
+  }
+  return invoke<PlayerCosmeticsConfig>('get_player_cosmetics_config', { rootPath })
+}
+
+export function savePlayerCosmeticsConfig(rootPath: string, config: PlayerCosmeticsConfig) {
+  if (!isTauriRuntime()) {
+    return webOnlyOperation(`Web 预览不能保存玩家外观配置。目标目录：${rootPath}`)
+  }
+  return invoke<OperationResult>('save_player_cosmetics_config', { rootPath, config })
 }
 
 export function getAiApiConfig(rootPath: string) {

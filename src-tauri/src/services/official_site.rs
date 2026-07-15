@@ -84,9 +84,7 @@ pub async fn show(
         WebviewUrl::External(url.clone()),
     )
     .initialization_script_for_all_frames(PRINT_GUARD_SCRIPT)
-    .on_navigation(move |target_url| {
-        handle_navigation_target(&app_for_navigation, target_url)
-    })
+    .on_navigation(move |target_url| handle_navigation_target(&app_for_navigation, target_url))
     .on_new_window(move |target_url, _features| {
         if is_allowed_official_url(&target_url) {
             if let Some(webview) = app_for_new_window.get_webview(OFFICIAL_SITE_WEBVIEW_LABEL) {

@@ -29,6 +29,7 @@ const navGroups = [
     label: '控制',
     items: [
       { label: '作战总览', to: '/quick-control', description: '模式、难度、启动和常用命令' },
+      { label: '玩家外观', to: '/player-cosmetics', description: '刀具、枪械、手套和音乐盒' },
       { label: '指令库', to: '/commands', description: '搜索、复制和固定命令' },
       { label: '我的指令', to: '/custom-commands', description: '维护本地自定义命令' },
     ],
