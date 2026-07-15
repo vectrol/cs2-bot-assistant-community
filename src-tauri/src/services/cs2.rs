@@ -1179,7 +1179,7 @@ pub fn get_player_cosmetics_state(root_path: &str) -> Result<PlayerCosmeticsStat
     } else {
         serde_json::json!({})
     };
-    let patch = serde_json::from_value(value).map_err(|error| {
+    let patch = player_cosmetics_patch_from_document(&value).map_err(|error| {
         AppError::runtime(format!("[PLAYER_COSMETICS_CONFIG_INVALID]\n{}\n{}", knife_path.display(), error))
     })?;
     Ok(PlayerCosmeticsState {
@@ -1203,20 +1203,99 @@ pub fn save_player_cosmetics_state(
     let Some(object) = value.as_object_mut() else {
         return Err(AppError::runtime("[PLAYER_COSMETICS_JSON_SHAPE_INVALID]\n玩家外观配置必须是 JSON 对象。"));
     };
-    let patch_value = serde_json::to_value(&patch).map_err(|error| AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}")))?;
-    for key in ["enabled", "applyToHumanPlayers", "applyOnPickup", "defaultKnifeDefindex", "presets", "gunPresets", "musicKitId", "glove"] {
-        let snake = match key {
-            "applyToHumanPlayers" => "apply_to_human_players", "applyOnPickup" => "apply_on_pickup",
-            "defaultKnifeDefindex" => "default_knife_defindex", "gunPresets" => "gun_presets",
-            "musicKitId" => "music_kit_id", _ => key,
-        };
-        if let Some(field) = patch_value.get(key).or_else(|| patch_value.get(snake)) { object.insert(snake.to_string(), field.clone()); }
-    }
+    write_player_cosmetics_patch_to_document(object, &patch)?;
     write_json_value(&knife_path, &value, "PLAYER_COSMETICS")?;
     Ok(OperationResult {
         success: true,
         message: "Plus 玩家外观配置已保存。重启 CS2 或服务器后生效。".to_string(),
     })
+}
+
+fn player_cosmetics_patch_from_document(value: &serde_json::Value) -> Result<PlayerCosmeticsPatch, String> {
+    let object = value.as_object().ok_or("根节点必须是 JSON 对象。")?;
+    Ok(PlayerCosmeticsPatch {
+        enabled: read_document_bool(object, "enabled", "enabled", false)?,
+        apply_to_human_players: read_document_bool(object, "apply_to_human_players", "applyToHumanPlayers", true)?,
+        apply_on_pickup: read_document_bool(object, "apply_on_pickup", "applyOnPickup", false)?,
+        default_knife_defindex: read_document_i32(object, "default_knife_defindex", "defaultKnifeDefindex", 0)?,
+        presets: read_document_presets(object, "presets", "presets")?,
+        gun_presets: read_document_presets(object, "gun_presets", "gunPresets")?,
+        music_kit_id: read_document_i32(object, "music_kit_id", "musicKitId", 0)?,
+        glove: read_document_glove(object)?,
+    })
+}
+
+fn read_document_value<'a>(object: &'a serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str) -> Option<&'a serde_json::Value> {
+    object.get(snake).or_else(|| object.get(camel))
+}
+
+fn read_document_bool(object: &serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str, fallback: bool) -> Result<bool, String> {
+    match read_document_value(object, snake, camel) { Some(value) => value.as_bool().ok_or_else(|| format!("字段 {snake} 必须为布尔值。")), None => Ok(fallback) }
+}
+
+fn read_document_i32(object: &serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str, fallback: i32) -> Result<i32, String> {
+    match read_document_value(object, snake, camel) { Some(value) => value.as_i64().and_then(|item| i32::try_from(item).ok()).ok_or_else(|| format!("字段 {snake} 必须为整数。")), None => Ok(fallback) }
+}
+
+fn read_document_f64(object: &serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str, fallback: f64) -> Result<f64, String> {
+    match read_document_value(object, snake, camel) { Some(value) => value.as_f64().ok_or_else(|| format!("字段 {snake} 必须为数字。")), None => Ok(fallback) }
+}
+
+fn read_document_string(object: &serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str) -> Result<String, String> {
+    match read_document_value(object, snake, camel) { Some(value) => value.as_str().map(ToString::to_string).ok_or_else(|| format!("字段 {snake} 必须为字符串。")), None => Ok(String::new()) }
+}
+
+fn read_document_presets(object: &serde_json::Map<String, serde_json::Value>, snake: &str, camel: &str) -> Result<std::collections::BTreeMap<String, crate::models::cs2::KnifePreset>, String> {
+    let Some(value) = read_document_value(object, snake, camel) else { return Ok(Default::default()); };
+    let entries = value.as_object().ok_or_else(|| format!("字段 {snake} 必须为对象。"))?;
+    entries.iter().map(|(id, item)| {
+        let preset = item.as_object().ok_or_else(|| format!("预设 {id} 必须为对象。"))?;
+        Ok((id.clone(), crate::models::cs2::KnifePreset {
+            paint: read_document_i32(preset, "paint", "paint", 0)?, seed: read_document_i32(preset, "seed", "seed", 0)?,
+            wear: read_document_f64(preset, "wear", "wear", 0.0)?, name_tag: read_document_string(preset, "name_tag", "nameTag")?,
+            stattrak_enabled: read_document_bool(preset, "stattrak_enabled", "stattrakEnabled", false)?,
+            stattrak_count: read_document_i32(preset, "stattrak_count", "stattrakCount", 0)?,
+            souvenir_enabled: read_document_bool(preset, "souvenir_enabled", "souvenirEnabled", false)?,
+        }))
+    }).collect()
+}
+
+fn read_document_glove(object: &serde_json::Map<String, serde_json::Value>) -> Result<crate::models::cs2::GlovePreset, String> {
+    let Some(value) = read_document_value(object, "glove", "glove") else { return Ok(Default::default()); };
+    let glove = value.as_object().ok_or("字段 glove 必须为对象。")?;
+    Ok(crate::models::cs2::GlovePreset { enabled: read_document_bool(glove, "enabled", "enabled", false)?, defindex: read_document_i32(glove, "defindex", "defindex", 0)?, paint: read_document_i32(glove, "paint", "paint", 0)?, seed: read_document_i32(glove, "seed", "seed", 0)?, wear: read_document_f64(glove, "wear", "wear", 0.0)? })
+}
+
+fn write_player_cosmetics_patch_to_document(object: &mut serde_json::Map<String, serde_json::Value>, patch: &PlayerCosmeticsPatch) -> Result<(), AppError> {
+    for (snake, camel, value) in [
+        ("enabled", "enabled", serde_json::Value::Bool(patch.enabled)),
+        ("apply_to_human_players", "applyToHumanPlayers", serde_json::Value::Bool(patch.apply_to_human_players)),
+        ("apply_on_pickup", "applyOnPickup", serde_json::Value::Bool(patch.apply_on_pickup)),
+        ("default_knife_defindex", "defaultKnifeDefindex", serde_json::json!(patch.default_knife_defindex)),
+        ("music_kit_id", "musicKitId", serde_json::json!(patch.music_kit_id)),
+    ] { object.remove(camel); object.insert(snake.to_string(), value); }
+    object.insert("presets".to_string(), write_document_presets(object.get("presets"), &patch.presets)?);
+    object.remove("gunPresets"); object.insert("gun_presets".to_string(), write_document_presets(object.get("gun_presets"), &patch.gun_presets)?);
+    object.insert("glove".to_string(), write_document_glove(object.get("glove"), patch)?);
+    Ok(())
+}
+
+fn write_document_presets(existing: Option<&serde_json::Value>, presets: &std::collections::BTreeMap<String, crate::models::cs2::KnifePreset>) -> Result<serde_json::Value, AppError> {
+    let mut output = existing.and_then(serde_json::Value::as_object).cloned().unwrap_or_default();
+    for (id, preset) in presets {
+        let mut entry = output.get(id).and_then(serde_json::Value::as_object).cloned().unwrap_or_default();
+        for key in ["paint", "seed", "wear", "name_tag", "nameTag", "stattrak_enabled", "stattrakEnabled", "stattrak_count", "stattrakCount", "souvenir_enabled", "souvenirEnabled"] { entry.remove(key); }
+        entry.insert("paint".to_string(), serde_json::json!(preset.paint)); entry.insert("seed".to_string(), serde_json::json!(preset.seed)); entry.insert("wear".to_string(), serde_json::json!(preset.wear)); entry.insert("name_tag".to_string(), serde_json::json!(preset.name_tag)); entry.insert("stattrak_enabled".to_string(), serde_json::json!(preset.stattrak_enabled)); entry.insert("stattrak_count".to_string(), serde_json::json!(preset.stattrak_count)); entry.insert("souvenir_enabled".to_string(), serde_json::json!(preset.souvenir_enabled));
+        output.insert(id.clone(), serde_json::Value::Object(entry));
+    }
+    Ok(serde_json::Value::Object(output))
+}
+
+fn write_document_glove(existing: Option<&serde_json::Value>, patch: &PlayerCosmeticsPatch) -> Result<serde_json::Value, AppError> {
+    let mut glove = existing.and_then(serde_json::Value::as_object).cloned().unwrap_or_default();
+    for key in ["enabled", "defindex", "paint", "seed", "wear"] { glove.remove(key); }
+    glove.insert("enabled".to_string(), serde_json::json!(patch.glove.enabled)); glove.insert("defindex".to_string(), serde_json::json!(patch.glove.defindex)); glove.insert("paint".to_string(), serde_json::json!(patch.glove.paint)); glove.insert("seed".to_string(), serde_json::json!(patch.glove.seed)); glove.insert("wear".to_string(), serde_json::json!(patch.glove.wear));
+    Ok(serde_json::Value::Object(glove))
 }
 
 fn validate_cosmetics_patch(patch: &PlayerCosmeticsPatch) -> Result<(), AppError> {
@@ -2220,6 +2299,55 @@ mod tests {
         assert!(replaced.contains("bind \"g\" \"drop\""));
         assert!(replaced.contains("bind \"k\" \"subclass_create 515\""));
         assert!(!replaced.contains("subclass_create 500"));
+    }
+
+    #[test]
+    fn player_cosmetics_reads_upstream_snake_case_without_optional_fields() {
+        let value: serde_json::Value = serde_json::from_str(r#"{
+          "enabled": true, "apply_to_human_players": true, "apply_on_pickup": true,
+          "default_knife_defindex": 515,
+          "presets": { "515": { "paint": 568, "seed": 0, "wear": 0.01, "name_tag": "" } }
+        }"#).unwrap();
+        let patch = player_cosmetics_patch_from_document(&value).unwrap();
+        assert_eq!(patch.presets["515"].name_tag, "");
+        assert!(!patch.presets["515"].souvenir_enabled);
+        assert!(patch.gun_presets.is_empty());
+        assert!(!patch.glove.enabled);
+    }
+
+    #[test]
+    fn player_cosmetics_reads_legacy_camel_case_and_saves_standard_snake_case() {
+        let mut value: serde_json::Value = serde_json::from_str(r#"{
+          "enabled": true, "applyToHumanPlayers": true,
+          "presets": { "515": { "paint": 568, "seed": 1, "wear": 0.02, "nameTag": "Legacy", "stattrakEnabled": true } }
+        }"#).unwrap();
+        let patch = player_cosmetics_patch_from_document(&value).unwrap();
+        assert_eq!(patch.presets["515"].name_tag, "Legacy");
+        let object = value.as_object_mut().unwrap();
+        write_player_cosmetics_patch_to_document(object, &patch).unwrap();
+        let saved = value.to_string();
+        assert!(saved.contains("name_tag"));
+        assert!(!saved.contains("nameTag"));
+        assert!(!saved.contains("stattrakEnabled"));
+    }
+
+    #[test]
+    fn player_cosmetics_save_preserves_unknown_top_and_preset_fields() {
+        let mut value: serde_json::Value = serde_json::from_str(r#"{
+          "top_unknown": "keep", "presets": { "515": { "paint": 568, "seed": 0, "wear": 0.01, "name_tag": "", "preset_unknown": 42 } }
+        }"#).unwrap();
+        let mut patch = player_cosmetics_patch_from_document(&value).unwrap();
+        patch.presets.get_mut("515").unwrap().wear = 0.2;
+        write_player_cosmetics_patch_to_document(value.as_object_mut().unwrap(), &patch).unwrap();
+        assert_eq!(value["top_unknown"], "keep");
+        assert_eq!(value["presets"]["515"]["preset_unknown"], 42);
+        assert_eq!(value["presets"]["515"]["wear"], 0.2);
+    }
+
+    #[test]
+    fn player_cosmetics_rejects_non_object_or_invalid_field_types() {
+        assert!(player_cosmetics_patch_from_document(&serde_json::json!([])).is_err());
+        assert!(player_cosmetics_patch_from_document(&serde_json::json!({ "enabled": "yes" })).is_err());
     }
 
     #[test]

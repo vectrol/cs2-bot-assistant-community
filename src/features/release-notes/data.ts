@@ -38,6 +38,7 @@ export const releaseNoteEntries: ReleaseNoteEntry[] = [
       { text: 'BOT 皮肤、档案、探员和音乐盒开关与 Plus 一致，仅保存助手本地偏好，不会伪造为游戏或插件外观开关。' },
       { text: '导入完整刀具、武器、手套、皮肤和音乐盒数据目录，使用延迟加载与图片懒加载控制首次页面开销。' },
       { text: '应用内保留 CS2-Bot-Improver 与 CS2-Bot-Improver-Plus 的 AGPL-3.0-or-later 来源说明和上游链接。' },
+      { text: '修复玩家饰品读取兼容性：现在可直接读取 Plus 原始 player_knife_presets.json，兼容旧配置字段；已有刀具、枪械、手套和音乐盒预设无需手动修改。' },
     ],
   },
   {
