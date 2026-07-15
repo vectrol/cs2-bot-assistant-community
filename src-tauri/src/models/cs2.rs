@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -127,15 +129,89 @@ pub struct BotTauntsConfig {
     pub exists: bool,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
 #[serde(rename_all = "camelCase")]
-pub struct PlayerCosmeticsConfig {
-    pub knife_config: String,
-    pub gun_config: String,
-    pub knife_config_path: String,
-    pub gun_config_path: String,
+pub struct KnifePreset {
+    pub paint: i32,
+    pub seed: i32,
+    pub wear: f64,
+    pub name_tag: String,
+    pub stattrak_enabled: bool,
+    pub stattrak_count: i32,
+    pub souvenir_enabled: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct GlovePreset {
+    pub enabled: bool,
+    pub defindex: i32,
+    pub paint: i32,
+    pub seed: i32,
+    pub wear: f64,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerCosmeticsPatch {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub apply_to_human_players: bool,
+    #[serde(default)]
+    pub apply_on_pickup: bool,
+    #[serde(default)]
+    pub default_knife_defindex: i32,
+    #[serde(default)]
+    pub presets: BTreeMap<String, KnifePreset>,
+    #[serde(default)]
+    pub gun_presets: BTreeMap<String, KnifePreset>,
+    #[serde(default)]
+    pub music_kit_id: i32,
+    #[serde(default)]
+    pub glove: GlovePreset,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct PlayerCosmeticsState {
+    #[serde(flatten)]
+    pub patch: PlayerCosmeticsPatch,
+    pub config_path: String,
     pub plugin_present: bool,
     pub exists: bool,
+    pub cs2_running: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct DropKnivesState {
+    pub bind_key: String,
+    pub selected: Vec<u16>,
+    pub cfg_present: bool,
+    pub cs2_running: bool,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize, Default)]
+#[serde(rename_all = "camelCase")]
+pub struct BotItemsState {
+    pub skins: bool,
+    pub profiles: bool,
+    pub agents: bool,
+    pub music: bool,
+    pub cfg_present: bool,
+    pub cs2_running: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct PlusRuntimeStatus {
+    pub directory_selected: bool,
+    pub resources_ready: bool,
+    pub cs2_running: bool,
+    pub mode: String,
+    pub restart_required: bool,
+    pub player_knife_customizer_present: bool,
 }
 
 #[derive(Debug, Deserialize)]

@@ -11,7 +11,7 @@ import {
   getBotTauntsConfig,
   getDiagnosticsPayload,
   getNadeRecoveryConfig,
-  getPlayerCosmeticsConfig,
+  getPlayerCosmeticsState,
   inspectCs2Root,
   installBotPackage,
   launchCs2Game,
@@ -23,7 +23,7 @@ import {
   saveAiApiConfig,
   saveBotTauntsConfig,
   saveNadeRecoveryConfig,
-  savePlayerCosmeticsConfig,
+  savePlayerCosmeticsState,
   setUpstreamAimPreset,
   setUpstreamNadesPreset,
   setGameModeProfile,
@@ -39,7 +39,8 @@ import type {
   DifficultyPreset,
   GameModePreset,
   NadeRecoveryConfig,
-  PlayerCosmeticsConfig,
+  PlayerCosmeticsPatch,
+  PlayerCosmeticsState,
 } from '@/types/cs2'
 
 const PERSISTED_ROOTS_KEY = appConfig.persistedRootsStorageKey
@@ -101,7 +102,7 @@ export const useCs2Store = defineStore('cs2', () => {
   const botTauntsConfig = ref<BotTauntsConfig | null>(null)
   const nadeRecoveryConfig = ref<NadeRecoveryConfig | null>(null)
   const demoDiscovery = ref<DemoDiscoveryPayload | null>(null)
-  const playerCosmeticsConfig = ref<PlayerCosmeticsConfig | null>(null)
+  const playerCosmeticsConfig = ref<PlayerCosmeticsState | null>(null)
 
   const readyForConfig = computed(() => environment.value?.baseEnvironmentReady ?? false)
 
@@ -218,15 +219,15 @@ export const useCs2Store = defineStore('cs2', () => {
       playerCosmeticsConfig.value = null
       return null
     }
-    playerCosmeticsConfig.value = await getPlayerCosmeticsConfig(selectedRoot.value)
+    playerCosmeticsConfig.value = await getPlayerCosmeticsState(selectedRoot.value)
     return playerCosmeticsConfig.value
   }
 
-  async function savePlayerCosmetics(nextConfig: PlayerCosmeticsConfig) {
+  async function savePlayerCosmetics(nextConfig: PlayerCosmeticsPatch) {
     requireSelectedRoot(selectedRoot.value)
     busy.value = true
     try {
-      const result = await savePlayerCosmeticsConfig(selectedRoot.value, nextConfig)
+      const result = await savePlayerCosmeticsState(selectedRoot.value, nextConfig)
       message.value = result.message
       await refreshPlayerCosmeticsConfig()
       return result

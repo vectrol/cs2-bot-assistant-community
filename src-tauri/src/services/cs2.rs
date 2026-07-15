@@ -13,8 +13,8 @@ use crate::errors::AppError;
 use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDirectoryCandidate, DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset,
-    GameModePreset, InstallDiagnostics, NadeRecoveryConfig, OperationResult, PlayerCosmeticsConfig,
-    RecentDemoFile,
+    BotItemsState, DropKnivesState, GameModePreset, InstallDiagnostics, NadeRecoveryConfig,
+    OperationResult, PlayerCosmeticsPatch, PlayerCosmeticsState, PlusRuntimeStatus, RecentDemoFile,
 };
 
 const CS2_FOLDER_NAME: &str = "Counter-Strike Global Offensive";
@@ -64,15 +64,9 @@ const PLAYER_KNIFE_CONFIG_RELATIVE_PATH: &[&str] = &[
     "PlayerKnifeCustomizer",
     "player_knife_presets.json",
 ];
-const PLAYER_GUN_CONFIG_RELATIVE_PATH: &[&str] = &[
-    "game",
-    "csgo",
-    "addons",
-    "counterstrikesharp",
-    "plugins",
-    "PlayerKnifeCustomizer",
-    "player_gun_presets.json",
-];
+const DROP_KNIFE_CFG_NAMES: &[&str] = &["my_bot_normal_config.cfg", "my_bot_ffa_config.cfg"];
+const DROP_KNIFE_BEGIN: &str = "// CS2-BOT-IMPROVER-ASSISTANT DROP KNIVES BEGIN";
+const DROP_KNIFE_END: &str = "// CS2-BOT-IMPROVER-ASSISTANT DROP KNIVES END";
 const INSTALL_TOP_LEVEL_DIRS: &[&str] = &["addons", "backup", "cfg", "overrides"];
 const PLUGIN_PACKAGE_DIRS: &[&[&str]] = &[&["addons"], &["plugins"], &["cfg", "plugins"]];
 const PLUGIN_PACKAGE_FILES: &[&[&str]] = &[&["metamod.vdf"], &["metamod_x64.vdf"]];
@@ -1176,69 +1170,137 @@ fn player_knife_config_path(root: &Path) -> PathBuf {
         .fold(root.to_path_buf(), |path, part| path.join(part))
 }
 
-fn player_gun_config_path(root: &Path) -> PathBuf {
-    PLAYER_GUN_CONFIG_RELATIVE_PATH
-        .iter()
-        .fold(root.to_path_buf(), |path, part| path.join(part))
-}
-
-pub fn get_player_cosmetics_config(root_path: &str) -> Result<PlayerCosmeticsConfig, AppError> {
+pub fn get_player_cosmetics_state(root_path: &str) -> Result<PlayerCosmeticsState, AppError> {
     let root = normalize_root(root_path)?;
     let knife_path = player_knife_config_path(&root);
-    let gun_path = player_gun_config_path(&root);
     let plugin_path = knife_path.with_file_name("PlayerKnifeCustomizer.dll");
-    let knife_config = if knife_path.exists() {
-        serde_json::to_string_pretty(&read_json_value(&knife_path)?).map_err(|error| {
-            AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}"))
-        })?
+    let value = if knife_path.exists() {
+        read_json_value(&knife_path)?
     } else {
-        "{}".to_string()
+        serde_json::json!({})
     };
-    let gun_config = if gun_path.exists() {
-        serde_json::to_string_pretty(&read_json_value(&gun_path)?).map_err(|error| {
-            AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}"))
-        })?
-    } else {
-        "{}".to_string()
-    };
-    Ok(PlayerCosmeticsConfig {
-        knife_config,
-        gun_config,
-        knife_config_path: knife_path.display().to_string(),
-        gun_config_path: gun_path.display().to_string(),
+    let patch = serde_json::from_value(value).map_err(|error| {
+        AppError::runtime(format!("[PLAYER_COSMETICS_CONFIG_INVALID]\n{}\n{}", knife_path.display(), error))
+    })?;
+    Ok(PlayerCosmeticsState {
+        patch,
+        config_path: knife_path.display().to_string(),
         plugin_present: plugin_path.exists(),
         exists: knife_path.exists(),
+        cs2_running: check_cs2_process()?,
     })
 }
 
-pub fn save_player_cosmetics_config(
+pub fn save_player_cosmetics_state(
     root_path: &str,
-    config: PlayerCosmeticsConfig,
+    patch: PlayerCosmeticsPatch,
 ) -> Result<OperationResult, AppError> {
     ensure_cs2_not_running()?;
     let root = normalize_root(root_path)?;
     let knife_path = player_knife_config_path(&root);
-    let gun_path = player_gun_config_path(&root);
-    let knife_value: serde_json::Value = serde_json::from_str(&config.knife_config).map_err(|error| {
-        AppError::runtime(format!("[PLAYER_COSMETICS_KNIFE_JSON_INVALID]\n刀具、手套和音乐盒配置不是有效 JSON：{error}"))
-    })?;
-    let gun_value: serde_json::Value =
-        serde_json::from_str(&config.gun_config).map_err(|error| {
-            AppError::runtime(format!(
-                "[PLAYER_COSMETICS_GUN_JSON_INVALID]\n枪械外观配置不是有效 JSON：{error}"
-            ))
-        })?;
-    if !knife_value.is_object() || !gun_value.is_object() {
-        return Err(AppError::runtime(
-            "[PLAYER_COSMETICS_JSON_SHAPE_INVALID]\n两份外观配置必须是 JSON 对象。",
-        ));
+    validate_cosmetics_patch(&patch)?;
+    let mut value = if knife_path.exists() { read_json_value(&knife_path)? } else { serde_json::json!({}) };
+    let Some(object) = value.as_object_mut() else {
+        return Err(AppError::runtime("[PLAYER_COSMETICS_JSON_SHAPE_INVALID]\n玩家外观配置必须是 JSON 对象。"));
+    };
+    let patch_value = serde_json::to_value(&patch).map_err(|error| AppError::runtime(format!("[PLAYER_COSMETICS_SERIALIZE_FAILED]\n{error}")))?;
+    for key in ["enabled", "applyToHumanPlayers", "applyOnPickup", "defaultKnifeDefindex", "presets", "gunPresets", "musicKitId", "glove"] {
+        let snake = match key {
+            "applyToHumanPlayers" => "apply_to_human_players", "applyOnPickup" => "apply_on_pickup",
+            "defaultKnifeDefindex" => "default_knife_defindex", "gunPresets" => "gun_presets",
+            "musicKitId" => "music_kit_id", _ => key,
+        };
+        if let Some(field) = patch_value.get(key).or_else(|| patch_value.get(snake)) { object.insert(snake.to_string(), field.clone()); }
     }
-    write_json_value(&knife_path, &knife_value, "PLAYER_COSMETICS_KNIFE")?;
-    write_json_value(&gun_path, &gun_value, "PLAYER_COSMETICS_GUN")?;
+    write_json_value(&knife_path, &value, "PLAYER_COSMETICS")?;
     Ok(OperationResult {
         success: true,
         message: "Plus 玩家外观配置已保存。重启 CS2 或服务器后生效。".to_string(),
     })
+}
+
+fn validate_cosmetics_patch(patch: &PlayerCosmeticsPatch) -> Result<(), AppError> {
+    if !(0..=u16::MAX as i32).contains(&patch.music_kit_id) || !(0..=526).contains(&patch.default_knife_defindex) {
+        return Err(AppError::runtime("[PLAYER_COSMETICS_RANGE_INVALID]\n音乐盒或默认刀具编号超出允许范围。"));
+    }
+    for (defindex, preset) in patch.presets.iter().chain(patch.gun_presets.iter()) {
+        let id = defindex.parse::<i32>().map_err(|_| AppError::runtime("[PLAYER_COSMETICS_RANGE_INVALID]\n武器编号无效。"))?;
+        if id <= 0 || preset.paint < 0 || !(0..=1000).contains(&preset.seed) || !(0.0..=1.0).contains(&preset.wear) || preset.stattrak_count < 0 || preset.name_tag.chars().count() > 20 {
+            return Err(AppError::runtime("[PLAYER_COSMETICS_RANGE_INVALID]\n预设数值或名称标签超出允许范围。"));
+        }
+    }
+    let glove = &patch.glove;
+    if glove.enabled && (!(4725..=5035).contains(&glove.defindex) || glove.paint < 0 || !(0..=1000).contains(&glove.seed) || !(0.0..=1.0).contains(&glove.wear)) {
+        return Err(AppError::runtime("[PLAYER_COSMETICS_RANGE_INVALID]\n手套预设无效。"));
+    }
+    Ok(())
+}
+
+pub fn get_drop_knives_state(root_path: &str) -> Result<DropKnivesState, AppError> {
+    let root = normalize_root(root_path)?;
+    let cfg_dir = root.join("game").join("csgo").join("cfg");
+    let cfg_present = DROP_KNIFE_CFG_NAMES.iter().all(|name| cfg_dir.join(name).is_file());
+    let content = DROP_KNIFE_CFG_NAMES.iter().find_map(|name| fs::read_to_string(cfg_dir.join(name)).ok()).unwrap_or_default();
+    let bind_key = content.lines().find_map(|line| line.strip_prefix("bind ")).and_then(|line| line.split_whitespace().next()).unwrap_or("\\").trim_matches('"').to_string();
+    let selected = content.split("subclass_create ").skip(1).filter_map(|item| item.split(|c: char| !c.is_ascii_digit()).next()?.parse().ok()).collect();
+    Ok(DropKnivesState { bind_key, selected, cfg_present, cs2_running: check_cs2_process()? })
+}
+
+pub fn save_drop_knives_state(root_path: &str, state: DropKnivesState) -> Result<OperationResult, AppError> {
+    ensure_cs2_not_running()?;
+    if state.bind_key.trim().is_empty() || state.bind_key.contains(['"', ';', '\n', '\r']) || state.selected.iter().any(|id| !(500..=526).contains(id)) {
+        return Err(AppError::runtime("[DROP_KNIVES_INVALID]\n按键或刀具编号无效。"));
+    }
+    let root = normalize_root(root_path)?;
+    let commands = state.selected.iter().map(|id| format!("subclass_create {id}")).collect::<Vec<_>>().join(";");
+    let block = format!("{DROP_KNIFE_BEGIN}\nbind \"{}\" \"{}\"\n{DROP_KNIFE_END}\n", state.bind_key.trim(), commands);
+    for name in DROP_KNIFE_CFG_NAMES {
+        let path = root.join("game").join("csgo").join("cfg").join(name);
+        let previous = fs::read_to_string(&path).unwrap_or_default();
+        let updated = replace_marked_block(&previous, &block);
+        if let Some(parent) = path.parent() { fs::create_dir_all(parent).map_err(|e| install_io_error("DROP_KNIVES_CFG_DIR", parent, e, None))?; }
+        fs::write(&path, updated).map_err(|e| install_io_error("DROP_KNIVES_CFG_WRITE", &path, e, None))?;
+    }
+    Ok(OperationResult { success: true, message: "已更新掉落刀具专用绑定块，不会修改其他 bind。".to_string() })
+}
+
+fn replace_marked_block(content: &str, block: &str) -> String {
+    match (content.find(DROP_KNIFE_BEGIN), content.find(DROP_KNIFE_END)) {
+        (Some(start), Some(end)) if end >= start => format!("{}{}{}", &content[..start], block, &content[end + DROP_KNIFE_END.len()..].trim_start_matches(['\r', '\n'])),
+        _ => format!("{}{}", content.trim_end(), if content.trim().is_empty() { block.to_string() } else { format!("\n\n{block}") }),
+    }
+}
+
+pub fn get_bot_items_state(app: &AppHandle, root_path: &str) -> Result<BotItemsState, AppError> {
+    let root = normalize_root(root_path)?;
+    let mut state = read_bot_items_state(app)?;
+    state.cfg_present = root.join("game/csgo/addons/counterstrikesharp/configs/core.json").is_file();
+    state.cs2_running = check_cs2_process()?;
+    Ok(state)
+}
+
+pub fn set_bot_items_state(app: &AppHandle, root_path: &str, mut state: BotItemsState) -> Result<BotItemsState, AppError> {
+    let root = normalize_root(root_path)?;
+    state.cfg_present = root.join("game/csgo/addons/counterstrikesharp/configs/core.json").is_file();
+    state.cs2_running = check_cs2_process()?;
+    let path = app.path().app_data_dir().map_err(|e| AppError::runtime(format!("无法确定偏好目录：{e}")))?.join("bot-items-preferences.json");
+    write_json_value(&path, &serde_json::to_value(&state).map_err(|e| AppError::runtime(e.to_string()))?, "BOT_ITEMS_PREFERENCES")?;
+    Ok(state)
+}
+
+fn read_bot_items_state(app: &AppHandle) -> Result<BotItemsState, AppError> {
+    let path = app.path().app_data_dir().map_err(|e| AppError::runtime(format!("无法确定偏好目录：{e}")))?.join("bot-items-preferences.json");
+    if !path.exists() { return Ok(BotItemsState::default()); }
+    serde_json::from_value(read_json_value(&path)?).map_err(|e| AppError::runtime(format!("BOT 偏好配置无效：{e}")))
+}
+
+pub fn get_plus_runtime_status(root_path: &str) -> Result<PlusRuntimeStatus, AppError> {
+    let root = normalize_root(root_path)?;
+    let env = inspect_cs2_root(root_path)?;
+    let csgo = root.join("game/csgo");
+    let active = fs::read(csgo.join(GAMEINFO_FILE_NAME)).unwrap_or_default();
+    let player = player_knife_config_path(&root).with_file_name("PlayerKnifeCustomizer.dll").is_file();
+    Ok(PlusRuntimeStatus { directory_selected: true, resources_ready: env.base_environment_ready, cs2_running: check_cs2_process()?, mode: if contains_metamod_search_path(&active) { "withBots".to_string() } else { "online".to_string() }, restart_required: false, player_knife_customizer_present: player })
 }
 
 fn default_bot_taunts_config(config_path: &Path) -> Result<BotTauntsConfig, AppError> {

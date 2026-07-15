@@ -4,7 +4,8 @@ use crate::errors::AppError;
 use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset, GameModePreset, NadeRecoveryConfig,
-    OperationResult, PlayerCosmeticsConfig,
+    BotItemsState, DropKnivesState, OperationResult, PlayerCosmeticsPatch, PlayerCosmeticsState,
+    PlusRuntimeStatus,
 };
 use crate::services::cs2;
 
@@ -61,16 +62,41 @@ pub fn set_game_mode_profile(
 }
 
 #[tauri::command]
-pub fn get_player_cosmetics_config(root_path: String) -> Result<PlayerCosmeticsConfig, String> {
-    cs2::get_player_cosmetics_config(&root_path).map_err(AppError::into_string)
+pub fn get_player_cosmetics_state(root_path: String) -> Result<PlayerCosmeticsState, String> {
+    cs2::get_player_cosmetics_state(&root_path).map_err(AppError::into_string)
 }
 
 #[tauri::command]
-pub fn save_player_cosmetics_config(
+pub fn save_player_cosmetics_state(
     root_path: String,
-    config: PlayerCosmeticsConfig,
+    patch: PlayerCosmeticsPatch,
 ) -> Result<OperationResult, String> {
-    cs2::save_player_cosmetics_config(&root_path, config).map_err(AppError::into_string)
+    cs2::save_player_cosmetics_state(&root_path, patch).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn get_drop_knives_state(root_path: String) -> Result<DropKnivesState, String> {
+    cs2::get_drop_knives_state(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn save_drop_knives_state(root_path: String, state: DropKnivesState) -> Result<OperationResult, String> {
+    cs2::save_drop_knives_state(&root_path, state).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn get_bot_items_state(app: AppHandle, root_path: String) -> Result<BotItemsState, String> {
+    cs2::get_bot_items_state(&app, &root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn set_bot_items_state(app: AppHandle, root_path: String, state: BotItemsState) -> Result<BotItemsState, String> {
+    cs2::set_bot_items_state(&app, &root_path, state).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn get_plus_runtime_status(root_path: String) -> Result<PlusRuntimeStatus, String> {
+    cs2::get_plus_runtime_status(&root_path).map_err(AppError::into_string)
 }
 
 #[tauri::command]

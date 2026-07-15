@@ -12,7 +12,10 @@ import type {
   GameModePreset,
   NadeRecoveryConfig,
   OperationResult,
-  PlayerCosmeticsConfig,
+  BotItemsState,
+  DropKnivesState,
+  PlayerCosmeticsPatch,
+  PlayerCosmeticsState,
 } from '@/types/cs2'
 
 function isTauriRuntime() {
@@ -113,21 +116,27 @@ export function setGameModeProfile(rootPath: string, preset: GameModePreset) {
   return invoke<OperationResult>('set_game_mode_profile', { rootPath, preset })
 }
 
-export function getPlayerCosmeticsConfig(rootPath: string) {
+export function getPlayerCosmeticsState(rootPath: string) {
   if (!isTauriRuntime()) {
-    return Promise.resolve<PlayerCosmeticsConfig>({
-      knifeConfig: '{}', gunConfig: '{}', knifeConfigPath: '', gunConfigPath: '', pluginPresent: false, exists: false,
+    return Promise.resolve<PlayerCosmeticsState>({
+      enabled: false, applyToHumanPlayers: true, applyOnPickup: false, defaultKnifeDefindex: 0, presets: {}, gunPresets: {}, musicKitId: 0,
+      glove: { enabled: false, defindex: 0, paint: 0, seed: 0, wear: 0 }, configPath: '', pluginPresent: false, exists: false, cs2Running: false,
     })
   }
-  return invoke<PlayerCosmeticsConfig>('get_player_cosmetics_config', { rootPath })
+  return invoke<PlayerCosmeticsState>('get_player_cosmetics_state', { rootPath })
 }
 
-export function savePlayerCosmeticsConfig(rootPath: string, config: PlayerCosmeticsConfig) {
+export function savePlayerCosmeticsState(rootPath: string, patch: PlayerCosmeticsPatch) {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web 预览不能保存玩家外观配置。目标目录：${rootPath}`)
   }
-  return invoke<OperationResult>('save_player_cosmetics_config', { rootPath, config })
+  return invoke<OperationResult>('save_player_cosmetics_state', { rootPath, patch })
 }
+
+export function getDropKnivesState(rootPath: string) { return invoke<DropKnivesState>('get_drop_knives_state', { rootPath }) }
+export function saveDropKnivesState(rootPath: string, state: DropKnivesState) { return invoke<OperationResult>('save_drop_knives_state', { rootPath, state }) }
+export function getBotItemsState(rootPath: string) { return invoke<BotItemsState>('get_bot_items_state', { rootPath }) }
+export function setBotItemsState(rootPath: string, state: BotItemsState) { return invoke<BotItemsState>('set_bot_items_state', { rootPath, state }) }
 
 export function getAiApiConfig(rootPath: string) {
   if (!isTauriRuntime()) {
