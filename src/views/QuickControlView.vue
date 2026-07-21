@@ -152,6 +152,7 @@ async function switchMode(value: GameModePreset) {
   try {
     const result = await store.switchGameMode(value)
     localMessage.value = result.message
+    await refreshStatus()
   } catch (error) {
     localMessage.value = store.normalizeError(error)
   }
