@@ -2,7 +2,7 @@ import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
 const STORAGE_KEY = 'cs2-bot-improver.ui-preferences.v1'
-const DEFAULT_PINNED_COMMANDS = ['bot_kick', 'bot_nades more', '-insecure', 'lbtv_map_next']
+const DEFAULT_PINNED_COMMANDS = ['bot_kick', 'bot_nades more', '-insecure']
 const MAX_RECENT_COMMANDS = 8
 const MAX_RECENT_ACTIONS = 8
 const MAX_RESTORE_POINTS = 10

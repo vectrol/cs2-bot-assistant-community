@@ -4,14 +4,14 @@ use crate::models::runtime_context::RuntimeContext;
 #[cfg(target_os = "windows")]
 const AUTOSTART_REG_KEY: &str = r"Software\Microsoft\Windows\CurrentVersion\Run";
 #[cfg(target_os = "windows")]
-const AUTOSTART_VALUE_NAME: &str = "CS2BotImproverAssistant";
+const AUTOSTART_VALUE_NAME: &str = "CS2BotAssistantCE";
 #[cfg(target_os = "windows")]
 const LEGACY_AUTOSTART_VALUE_NAME: &str = "CS2人机增强助手";
 
 pub fn get_runtime_context() -> Result<RuntimeContext, AppError> {
     let app_name = option_env!("CARGO_PKG_DESCRIPTION")
         .filter(|value| !value.is_empty())
-        .unwrap_or("CS2人机增强助手")
+        .unwrap_or("CS2人机助手社区版")
         .to_string();
 
     if app_name.trim().is_empty() {
@@ -63,6 +63,36 @@ pub fn open_external_url(url: &str) -> Result<(), AppError> {
 pub fn launch_cs2_game() -> Result<(), AppError> {
     open_fixed_protocol_url("steam://rungameid/730")
         .map_err(|error| AppError::runtime(format!("打开 CS2 失败：{}", error)))
+}
+
+pub fn launch_cs2_direct(cs2_root: &str, insecure: bool) -> Result<(), AppError> {
+    let root = std::path::Path::new(cs2_root);
+    let exe_path = root
+        .join("game")
+        .join("bin")
+        .join("win64")
+        .join("cs2.exe");
+
+    if !exe_path.is_file() {
+        return Err(AppError::runtime(format!(
+            "未找到 CS2 可执行文件：{}",
+            exe_path.display()
+        )));
+    }
+
+    let mut cmd = std::process::Command::new(exe_path);
+    if insecure {
+        cmd.arg("-insecure");
+    }
+
+    cmd.spawn()
+        .map(|_| ())
+        .map_err(|error| AppError::runtime(format!("启动 CS2 失败：{}", error)))
+}
+
+pub fn open_inventory_window() -> Result<(), AppError> {
+    open_fixed_protocol_url("https://inventory.cstrike.app")
+        .map_err(|error| AppError::runtime(format!("打开库存模拟器失败：{}", error)))
 }
 
 pub fn enable_autostart() -> Result<(), AppError> {
@@ -204,10 +234,8 @@ fn paths_match(actual: &std::path::Path, expected: &std::path::Path) -> bool {
 
 fn is_allowed_external_url(url: &str) -> bool {
     [
-        "https://qm.qq.com/",
         "https://github.com/",
-        "https://pan.quark.cn/",
-        "https://cs2as.600318.xyz/",
+        "https://inventory.cstrike.app/",
     ]
     .iter()
     .any(|prefix| url.starts_with(prefix))

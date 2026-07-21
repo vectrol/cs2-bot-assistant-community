@@ -14,38 +14,9 @@ import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
 
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
-const aiApiModalOpen = ref(false)
-const botTauntModalOpen = ref(false)
 const nadeRecoveryModalOpen = ref(false)
 const demoDetailModalOpen = ref(false)
-const activeConfigSection = ref<'base' | 'ai' | 'taunts' | 'nades' | 'demo'>('base')
-const aiApiUrl = ref('')
-const aiApiKey = ref('')
-const botRivalryEnabled = ref(false)
-const aiApiLoadedPath = ref('')
-const freeAiApiKey = 'mmc_5d75635d51839386a23758f8129bf4a095c319f8f1506927'
-const freeAiApiMessage = ref('')
-type BotTauntTextKey =
-  | 'normalTaunts'
-  | 'headshotTaunts'
-  | 'knifeTaunts'
-  | 'botRivalryTaunts'
-  | 'openingTrashTalks'
-type BotTauntSingleTextKey = 'roundKillTaunt' | 'multiKillTaunt' | 'clutchTaunt' | 'saveTaunt'
-const botTauntLines = ref<Record<BotTauntTextKey, string>>({
-  normalTaunts: '',
-  headshotTaunts: '',
-  knifeTaunts: '',
-  botRivalryTaunts: '',
-  openingTrashTalks: '',
-})
-const botTauntSingleLines = ref<Record<BotTauntSingleTextKey, string>>({
-  roundKillTaunt: '',
-  multiKillTaunt: '',
-  clutchTaunt: '',
-  saveTaunt: '',
-})
-const botTauntLoadedPath = ref('')
+const activeConfigSection = ref<'base' | 'nades' | 'demo'>('base')
 const nadeRecovery = ref({
   flash: 0.55,
   smoke: 0.85,
@@ -67,24 +38,9 @@ const modeCards: Array<{ title: string; preset: GameModePreset; description: str
   { title: 'Bot 模式', preset: 'withBots', description: '继续打人机或练习地图时使用。' },
 ]
 
-const botTauntTextFields: Array<{ key: BotTauntTextKey; label: string; hint: string }> = [
-  { key: 'normalTaunts', label: '普通击杀', hint: '普通击杀时随机发送，每行一句' },
-  { key: 'headshotTaunts', label: '爆头击杀', hint: '爆头时随机发送，每行一句' },
-  { key: 'knifeTaunts', label: '刀杀', hint: '刀杀时随机发送，每行一句' },
-  { key: 'botRivalryTaunts', label: 'BOT 互相嘲讽', hint: 'BOT 击杀敌方 BOT 时随机发送，每行一句' },
-  { key: 'openingTrashTalks', label: '开局嘲讽', hint: '回合开局随机发送，每行一句' },
-]
-
-const botTauntSingleTextFields: Array<{ key: BotTauntSingleTextKey; label: string; hint: string }> = [
-  { key: 'roundKillTaunt', label: '单回合 5 杀', hint: '触发单回合 5 杀时发送' },
-  { key: 'multiKillTaunt', label: '5 秒 3 杀', hint: '短时间连续击杀时发送' },
-  { key: 'clutchTaunt', label: '残局', hint: '残局表现触发时发送' },
-  { key: 'saveTaunt', label: '保枪', hint: '保枪场景触发时发送' },
-]
-
 const blockedReason = computed(() => {
   if (!store.selectedRoot) {
-    return '请先到“安装检查”页选择游戏目录。'
+    return '请先到"安装检查"页选择游戏目录。'
   }
   if (!store.readyForConfig) {
     return '当前环境尚未就绪，请先完成安装。'
@@ -93,26 +49,6 @@ const blockedReason = computed(() => {
     return '检测到 CS2 正在运行，请先退出游戏。'
   }
   return ''
-})
-
-const aiConfigStatus = computed(() => {
-  if (!store.aiApiConfig) {
-    return '选择并安装 CS2 目录后，可以在这里修改 Bot AI 聊天 API。'
-  }
-  if (!store.aiApiConfig.exists) {
-    return '尚未找到配置文件，保存后会自动创建 BotTaunt.json。'
-  }
-  return `当前配置文件：${store.aiApiConfig.configPath}`
-})
-
-const botTauntStatus = computed(() => {
-  if (!store.botTauntsConfig) {
-    return '选择并安装 CS2 目录后，可以在这里设置击杀嘲讽内容。'
-  }
-  if (!store.botTauntsConfig.exists) {
-    return '尚未找到 Taunts.json，保存后会自动创建。'
-  }
-  return `当前配置文件：${store.botTauntsConfig.configPath}`
 })
 
 const nadeRecoveryFields = [
@@ -167,13 +103,11 @@ const demoStatus = computed(() => {
 })
 
 const recentConfigItems = computed(() => preferences.recentActions
-  .filter((item) => ['设置难度', '切换模式', '保存 AI 聊天', '保存嘲讽内容', '保存道具压制开火'].includes(item.label))
+  .filter((item) => ['设置难度', '切换模式', '保存道具压制开火'].includes(item.label))
   .slice(0, 4))
 
 const configSections = computed(() => [
   { key: 'base' as const, label: '基础配置', detail: blockedReason.value || '难度和模式可写入' },
-  { key: 'ai' as const, label: 'AI 聊天', detail: store.aiApiConfig?.exists ? '已读取配置' : '可选配置' },
-  { key: 'taunts' as const, label: 'Bot 嘲讽', detail: store.botTauntsConfig?.exists ? '已读取文本' : '可编辑文本' },
   { key: 'nades' as const, label: '道具压制开火', detail: store.nadeRecoveryConfig?.exists ? '已读取时间' : '可编辑时间' },
   { key: 'demo' as const, label: 'Demo / 启动项', detail: recentDemo.value?.fileName ?? '辅助操作' },
 ])
@@ -213,166 +147,6 @@ async function switchMode(preset: GameModePreset) {
     const message = store.normalizeError(error)
     preferences.recordError(message, '切换游戏模式')
     store.setMessage(`${message} 请先退出 CS2，再返回安装页重新检查。`)
-  }
-}
-
-async function refreshAiApiConfig() {
-  try {
-    const config = await store.refreshAiApiConfig()
-    aiApiUrl.value = config?.aiApiUrl ?? ''
-    aiApiKey.value = config?.aiApiKey ?? ''
-    botRivalryEnabled.value = config?.botRivalryEnabled ?? false
-    aiApiLoadedPath.value = config?.configPath ?? ''
-    freeAiApiMessage.value = ''
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '读取 AI 聊天配置')
-    store.setMessage(`${message} 可以重新读取，或到帮助页复制诊断信息。`)
-  }
-}
-
-function enableFreeAiApiKey() {
-  if (aiApiKey.value.trim()) {
-    freeAiApiMessage.value = '当前已经填写了 API Key。为了避免覆盖你的自定义 Key，请先手动清空后再启用免费 Key。'
-    return
-  }
-
-  aiApiKey.value = freeAiApiKey
-  freeAiApiMessage.value = '免费 Key 已填入当前表单。点击“保存 AI 聊天设置”后才会写入配置文件。'
-}
-
-async function saveAiApi() {
-  if (!canWriteConfig()) {
-    return false
-  }
-  try {
-    preferences.createRestorePoint('保存 AI 聊天设置', store.selectedRoot, '写入 BotTaunt.json 的 AI API 配置', false)
-    await store.saveAiApi({
-      aiApiUrl: aiApiUrl.value,
-      aiApiKey: aiApiKey.value,
-      botRivalryEnabled: botRivalryEnabled.value,
-    })
-    preferences.recordAction('保存 AI 聊天', aiApiLoadedPath.value || store.selectedRoot)
-    return true
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '保存 AI 聊天设置')
-    store.setMessage(`${message} 请确认目录可写；仍失败时复制诊断信息。`)
-    return false
-  }
-}
-
-async function saveAiApiAndClose() {
-  if (await saveAiApi()) {
-    aiApiModalOpen.value = false
-  }
-}
-
-async function resetAiApi() {
-  if (!canWriteConfig()) {
-    return
-  }
-  try {
-    const config = await store.resetAiApi()
-    aiApiUrl.value = config?.aiApiUrl ?? ''
-    aiApiKey.value = config?.aiApiKey ?? ''
-    botRivalryEnabled.value = config?.botRivalryEnabled ?? false
-    aiApiLoadedPath.value = config?.configPath ?? ''
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '恢复 AI 默认配置')
-    store.setMessage(`${message} 可以重新读取配置后再试。`)
-  }
-}
-
-function tauntsToText(items: string[]) {
-  return items.join('\n')
-}
-
-function textToTaunts(value: string) {
-  return value
-    .split(/\r?\n/)
-    .map((item) => item.trim())
-    .filter(Boolean)
-}
-
-function applyBotTauntsConfig(config: NonNullable<typeof store.botTauntsConfig>) {
-  botTauntLines.value = {
-    normalTaunts: tauntsToText(config.normalTaunts),
-    headshotTaunts: tauntsToText(config.headshotTaunts),
-    knifeTaunts: tauntsToText(config.knifeTaunts),
-    botRivalryTaunts: tauntsToText(config.botRivalryTaunts),
-    openingTrashTalks: tauntsToText(config.openingTrashTalks),
-  }
-  botTauntSingleLines.value = {
-    roundKillTaunt: config.roundKillTaunt,
-    multiKillTaunt: config.multiKillTaunt,
-    clutchTaunt: config.clutchTaunt,
-    saveTaunt: config.saveTaunt,
-  }
-  botTauntLoadedPath.value = config.configPath
-}
-
-async function refreshBotTauntsConfig() {
-  try {
-    const config = await store.refreshBotTauntsConfig()
-    if (config) {
-      applyBotTauntsConfig(config)
-    }
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '读取嘲讽文本')
-    store.setMessage(`${message} 可以重新读取，或检查 Taunts.json 是否能正常解析。`)
-  }
-}
-
-async function saveBotTaunts() {
-  if (!canWriteConfig()) {
-    return false
-  }
-  try {
-    preferences.createRestorePoint('保存嘲讽内容', store.selectedRoot, '写入 Taunts.json 文本配置', false)
-    await store.saveBotTaunts({
-      normalTaunts: textToTaunts(botTauntLines.value.normalTaunts),
-      headshotTaunts: textToTaunts(botTauntLines.value.headshotTaunts),
-      knifeTaunts: textToTaunts(botTauntLines.value.knifeTaunts),
-      botRivalryTaunts: textToTaunts(botTauntLines.value.botRivalryTaunts),
-      openingTrashTalks: textToTaunts(botTauntLines.value.openingTrashTalks),
-      roundKillTaunt: botTauntSingleLines.value.roundKillTaunt,
-      multiKillTaunt: botTauntSingleLines.value.multiKillTaunt,
-      clutchTaunt: botTauntSingleLines.value.clutchTaunt,
-      saveTaunt: botTauntSingleLines.value.saveTaunt,
-    })
-    await refreshBotTauntsConfig()
-    preferences.recordAction('保存嘲讽内容', botTauntLoadedPath.value || store.selectedRoot)
-    return true
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '保存嘲讽内容')
-    store.setMessage(`${message} 请检查是否有空文本或 JSON 被占用。`)
-    return false
-  }
-}
-
-async function saveBotTauntsAndClose() {
-  if (await saveBotTaunts()) {
-    botTauntModalOpen.value = false
-  }
-}
-
-async function resetBotTaunts() {
-  if (!canWriteConfig()) {
-    return
-  }
-  try {
-    const config = await store.resetBotTaunts()
-    if (config) {
-      applyBotTauntsConfig(config)
-    }
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '恢复嘲讽默认配置')
-    store.setMessage(`${message} 可以重新读取配置后再试。`)
   }
 }
 
@@ -510,8 +284,6 @@ onMounted(async () => {
   try {
     await store.refreshCs2Running()
     if (store.selectedRoot) {
-      await refreshAiApiConfig()
-      await refreshBotTauntsConfig()
       await refreshNadeRecoveryConfig()
       await refreshRecentDemo()
     }
@@ -529,7 +301,7 @@ onMounted(async () => {
     <ConsolePanel
       eyebrow="Configuration"
       title="配置控制台"
-      :description="blockedReason || '当前可以配置。写入后会刷新对应配置状态。'"
+      :description="blockedReason || 'Bot 难度、游戏模式、投掷物恢复、Demo 录制。写入前请退出 CS2。'"
       tone="strong"
     >
       <template #actions>
@@ -625,52 +397,6 @@ onMounted(async () => {
     </div>
 
     <ConfigSection
-      v-show="activeConfigSection === 'ai'"
-      title="AI 聊天"
-      :description="aiConfigStatus"
-      :badge="store.aiApiConfig?.exists ? '已配置' : '可选'"
-      :default-open="false"
-    >
-      <ConfigActionGroup
-        primary-label="编辑"
-        reset-label="恢复默认"
-        :primary-disabled="Boolean(blockedReason)"
-        :secondary-disabled="!store.selectedRoot"
-        :reset-disabled="Boolean(blockedReason)"
-        :busy="store.busy"
-        @primary="aiApiModalOpen = true"
-        @secondary="refreshAiApiConfig"
-        @reset="resetAiApi"
-      />
-      <p v-if="aiApiLoadedPath && store.aiApiConfig?.exists" class="inline-path">
-        配置文件：<code>{{ aiApiLoadedPath }}</code>
-      </p>
-    </ConfigSection>
-
-    <ConfigSection
-      v-show="activeConfigSection === 'taunts'"
-      title="击杀嘲讽内容"
-      :description="botTauntStatus"
-      :badge="store.botTauntsConfig?.exists ? '已读取' : '可编辑'"
-      :default-open="false"
-    >
-      <ConfigActionGroup
-        primary-label="编辑"
-        reset-label="恢复默认"
-        :primary-disabled="Boolean(blockedReason)"
-        :secondary-disabled="!store.selectedRoot"
-        :reset-disabled="Boolean(blockedReason)"
-        :busy="store.busy"
-        @primary="botTauntModalOpen = true"
-        @secondary="refreshBotTauntsConfig"
-        @reset="resetBotTaunts"
-      />
-      <p v-if="botTauntLoadedPath && store.botTauntsConfig?.exists" class="inline-path">
-        配置文件：<code>{{ botTauntLoadedPath }}</code>
-      </p>
-    </ConfigSection>
-
-    <ConfigSection
       v-show="activeConfigSection === 'nades'"
       title="道具压制开火"
       :description="nadeRecoveryStatus"
@@ -723,117 +449,6 @@ onMounted(async () => {
         </div>
       </div>
     </ConfigSection>
-
-    <ConfigEditorModal
-      :open="aiApiModalOpen"
-      title="设置 AI 聊天"
-      description="保存后需要重启 CS2 或服务器。"
-      save-label="保存 AI 聊天设置"
-      :save-disabled="Boolean(blockedReason) || store.busy"
-      :loading="store.busy"
-      @close="aiApiModalOpen = false"
-      @save="saveAiApiAndClose"
-    >
-      <p class="muted">
-        默认不会写入 API Key。你可以使用自己准备的服务，也可以点击下方按钮启用我们免费提供的 AI 聊天 Key；
-        按钮只会填入当前表单，保存后才会写入 BotTaunt.json。
-      </p>
-      <div class="inline-notice" data-state="ready">
-        <strong>免费 AI 聊天 Key</strong>
-        <span>这是我们免费提供给玩家使用的 Key。不会自动启用，也不会覆盖你已经填写的自定义 Key。</span>
-        <div class="actions-row">
-          <button
-            class="ghost-button"
-            type="button"
-            :disabled="Boolean(blockedReason) || store.busy"
-            @click="enableFreeAiApiKey"
-          >
-            启用免费 KEY
-          </button>
-        </div>
-        <span v-if="freeAiApiMessage">{{ freeAiApiMessage }}</span>
-      </div>
-      <p class="muted">
-        如果换成自己的服务，请填写接口地址和密钥；接口应接收
-        <code>temperature</code>、<code>messages</code>，并返回 <code>reply</code> 或 OpenAI 兼容结果。
-      </p>
-      <div class="form-grid ai-api-form">
-        <label class="field">
-          <span>API 地址</span>
-          <input
-            v-model="aiApiUrl"
-            type="url"
-            placeholder="https://your-domain.com/api/chat"
-            :disabled="Boolean(blockedReason) || store.busy"
-          />
-        </label>
-
-        <label class="field">
-          <span>API Key</span>
-          <input
-            v-model="aiApiKey"
-            type="password"
-            autocomplete="off"
-            placeholder="your_api_key_here"
-            :disabled="Boolean(blockedReason) || store.busy"
-          />
-        </label>
-
-        <label class="checkbox-field">
-          <input v-model="botRivalryEnabled" type="checkbox" :disabled="Boolean(blockedReason) || store.busy" />
-          <span>
-            <strong>开启 Bot 之间的低频互相嘲讽</strong>
-            <small>开启后，Bot 击杀敌方 Bot 时会偶尔发送互相嘲讽内容。</small>
-          </span>
-        </label>
-      </div>
-      <template #actions>
-        <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetAiApi">
-          恢复默认
-        </button>
-      </template>
-    </ConfigEditorModal>
-
-    <ConfigEditorModal
-      :open="botTauntModalOpen"
-      title="设置击杀嘲讽内容"
-      description="多行文本每组至少一条，特殊场景文本不能为空。"
-      save-label="保存嘲讽内容"
-      :save-disabled="Boolean(blockedReason) || store.busy"
-      :loading="store.busy"
-      @close="botTauntModalOpen = false"
-      @save="saveBotTauntsAndClose"
-    >
-      <div class="form-grid bot-taunts-form">
-        <label v-for="field in botTauntTextFields" :key="field.key" class="field">
-          <span>{{ field.label }}</span>
-          <textarea
-            v-model="botTauntLines[field.key]"
-            class="bot-taunts-textarea"
-            :placeholder="field.hint"
-            :disabled="Boolean(blockedReason) || store.busy"
-          />
-        </label>
-      </div>
-
-      <div class="form-grid bot-taunts-single-form">
-        <label v-for="field in botTauntSingleTextFields" :key="field.key" class="field">
-          <span>{{ field.label }}</span>
-          <input
-            v-model="botTauntSingleLines[field.key]"
-            type="text"
-            :placeholder="field.hint"
-            :disabled="Boolean(blockedReason) || store.busy"
-          />
-        </label>
-      </div>
-
-      <template #actions>
-        <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetBotTaunts">
-          恢复默认
-        </button>
-      </template>
-    </ConfigEditorModal>
 
     <ConfigEditorModal
       :open="nadeRecoveryModalOpen"

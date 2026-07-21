@@ -1,49 +1,69 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { open } from '@tauri-apps/plugin-dialog'
 
 import ActionModal from '@/components/ActionModal.vue'
-import CopyButton from '@/components/CopyButton.vue'
 import DiagnosticsPanel from '@/components/DiagnosticsPanel.vue'
-import StatusHero from '@/components/StatusHero.vue'
-import SummaryStrip from '@/components/SummaryStrip.vue'
-import wechatRewardImage from '@/assets/images/wechat-reward.png'
+import InlineNotice from '@/components/ui/InlineNotice.vue'
 import { guideSections } from '@/features/cs2/data'
 import { openDiagnosticsLogDirectory } from '@/services/tauri/cs2'
-import { openExternalUrl } from '@/services/tauri/app'
 import { useCs2Store } from '@/stores/cs2'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
-const groupMessage = ref('')
 const uninstallModalOpen = ref(false)
-const rewardVisible = ref(false)
-const rewardMessage = ref('')
-const groupUrl = 'https://qm.qq.com/q/QRlMlc1h2E'
+const installConfirmOpen = ref(false)
+const confirmExited = ref(false)
+const confirmRoot = ref(false)
 
-const summaryItems = computed(() => [
-  { label: '交流群', value: '可打开或复制', state: 'ready' as const },
-  { label: '当前目录', value: store.selectedRoot || '未选择', state: store.selectedRoot ? 'ready' as const : 'warn' as const },
-  { label: 'FAQ', value: `${guideSections.length} 条`, state: 'ready' as const },
-])
+const statusGrid = computed(() => {
+  if (!store.environment) return []
+  const e = store.environment
+  return [
+    { label: 'game', ok: e.gameDirExists }, { label: 'csgo', ok: e.csgoDirExists },
+    { label: 'MetaMod', ok: e.metamodExists }, { label: 'CSS', ok: e.counterstrikeSharpExists },
+    { label: 'gameinfo.gi', ok: e.gameinfoExists }, { label: 'botprofile', ok: e.activeBotprofileExists },
+    { label: 'BotHider', ok: e.botHiderExists }, { label: 'RayTrace', ok: e.rayTraceExists },
+    { label: 'CSS核心', ok: e.coreConfigExists }, { label: 'Inventory', ok: e.inventorySimulatorExists },
+  ]
+})
 
-const heroBadges = computed(() => [
-  {
-    label: store.selectedRoot ? '目录已选择' : '目录未选择',
-    state: store.selectedRoot ? 'ready' as const : 'warn' as const,
-  },
-])
+const canInstall = computed(() => store.selectedRoot && !store.cs2Running && store.environment)
+const installStatus = computed(() => {
+  if (!store.environment) return ''
+  return store.environment.baseEnvironmentReady ? '已安装 (可重装)' : '未安装'
+})
 
-function handleGroupCopied() {
-  groupMessage.value = '群链接已复制。'
+function selectDirectory(path: string) {
+  store.selectRoot(path)
+  store.refreshEnvironment()
 }
 
-async function openGroupUrl() {
+async function browseDirectory() {
+  const dir = await open({ directory: true, multiple: false, title: '选择 CS2 根目录' })
+  if (dir) selectDirectory(dir as string)
+}
+
+async function scanRoots() {
+  await store.scanRoots()
+}
+
+function canWrite() {
+  if (store.cs2Running) { store.setMessage('CS2 正在运行，请先退出游戏再写入。'); return false }
+  if (!store.selectedRoot) { store.setMessage('请先选择 CS2 目录。'); return false }
+  return true
+}
+
+async function installPackage() {
+  if (!canWrite()) return
   try {
-    await openExternalUrl(groupUrl)
-    groupMessage.value = ''
+    const result = await store.install()
+    store.setMessage(result.message)
+    installConfirmOpen.value = false
+    await refreshAll()
   } catch (error) {
-    groupMessage.value = typeof error === 'string' ? error : '打开交流群链接失败，请手动复制后访问。'
+    store.setMessage(store.normalizeError(error))
   }
 }
 
@@ -51,73 +71,97 @@ async function uninstallBotPackage() {
   try {
     await store.uninstall()
     uninstallModalOpen.value = false
+    await refreshAll()
   } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '卸载插件包')
-    store.setMessage(`${message} 可以重新检查目录，或复制诊断信息继续排查。`)
+    store.setMessage(store.normalizeError(error))
   }
 }
 
-async function refreshDiagnosticsPanel() {
-  try {
-    await store.refreshCs2Running()
-    if (store.selectedRoot) {
-      await store.refreshEnvironment()
-    }
-    await store.refreshDiagnostics()
-    preferences.recordAction('刷新诊断', store.selectedRoot || '未选择目录')
-  } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '刷新诊断')
-    store.setMessage(`${message} 可以返回安装页重新选择目录后再读取。`)
-  }
+async function refreshAll() {
+  await store.refreshCs2Running()
+  if (store.selectedRoot) await store.refreshEnvironment()
+  await store.refreshDiagnostics()
+  preferences.recordAction('刷新环境', store.selectedRoot || '未选择')
 }
 
 async function openLogs() {
   try {
     const result = await openDiagnosticsLogDirectory()
     store.setMessage(result.message)
-    preferences.recordAction('打开日志位置', store.diagnostics?.logPath || '日志目录')
   } catch (error) {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '打开日志位置')
-    store.setMessage(`${message} 可以先复制诊断信息，把日志路径发给维护者。`)
+    store.setMessage(store.normalizeError(error))
   }
-}
-
-function openRewardModal() {
-  rewardMessage.value = ''
-  rewardVisible.value = true
-}
-
-function closeRewardModal() {
-  rewardVisible.value = false
-  rewardMessage.value = '感谢你的支持与理解。'
 }
 
 onMounted(async () => {
   preferences.load()
-  await refreshDiagnosticsPanel()
+  if (!store.selectedRoot) await store.scanRoots()
+  await refreshAll()
 })
-
 </script>
 
 <template>
   <section class="page-grid">
-    <StatusHero
-      eyebrow="帮助中心"
-      title="卡住时先看这里"
-      description="按安装、运行、联机、卸载和保留内容来找答案。"
-      :badges="heroBadges"
-    >
-      <template #actions>
-        <button class="ghost-button" @click="openGroupUrl">打开交流群</button>
-        <CopyButton :text="groupUrl" label="复制群链接" copied-label="已复制群链接" @copied="handleGroupCopied" />
-      </template>
-    </StatusHero>
-    <p v-if="groupMessage" class="message-line">{{ groupMessage }}</p>
+    <article class="hero-banner install-hero">
+      <div>
+        <p class="eyebrow">环境管理</p>
+        <h2>{{ store.selectedRoot ? 'CS2 目录已选择' : '选择 CS2 目录' }}</h2>
+        <p class="muted">
+          {{ store.selectedRoot ? store.selectedRoot : '需要先找到 Counter-Strike Global Offensive 根目录才能安装插件。' }}
+        </p>
+      </div>
+      <div class="install-hero__actions">
+        <button class="ghost-button" type="button" :disabled="store.busy" @click="scanRoots">扫描目录</button>
+        <button class="ghost-button" type="button" @click="browseDirectory">手动选择</button>
+        <button
+          class="primary-button install-hero-button"
+          type="button"
+          :disabled="!canInstall"
+          @click="installConfirmOpen = true"
+        >
+          {{ installStatus || '安装插件包' }}
+        </button>
+      </div>
+    </article>
 
-    <SummaryStrip :items="summaryItems" />
+    <div v-if="store.candidates.length > 0" class="install-candidates">
+      <p class="eyebrow">发现的 CS2 目录</p>
+      <button
+        v-for="c in store.candidates"
+        :key="c.path"
+        class="candidate-item"
+        :data-active="c.path === store.selectedRoot"
+        type="button"
+        @click="selectDirectory(c.path)"
+      >
+        <code>{{ c.path }}</code>
+        <small>{{ c.source }}</small>
+      </button>
+    </div>
+
+    <InlineNotice
+      v-if="store.cs2Running"
+      message="CS2 正在运行，安装、卸载、切换模式前请先退出游戏。"
+      state="warn"
+    />
+
+    <article v-if="store.environment" class="card env-status-card">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">环境检查</p>
+          <h3>插件安装状态</h3>
+        </div>
+        <span class="status-pill" :data-state="store.environment.baseEnvironmentReady ? 'ready' : 'warn'">
+          {{ store.environment.baseEnvironmentReady ? '就绪' : '未安装' }}
+        </span>
+      </div>
+      <div class="env-grid">
+        <span v-for="item in statusGrid" :key="item.label" class="env-dot" :data-ok="item.ok">
+          <span class="env-dot__indicator" />
+          {{ item.label }}
+        </span>
+      </div>
+    </article>
 
     <DiagnosticsPanel
       :root-path="store.selectedRoot"
@@ -126,7 +170,7 @@ onMounted(async () => {
       :diagnostics="store.diagnostics"
       :last-error="preferences.lastError"
       :busy="store.busy"
-      @refresh="refreshDiagnosticsPanel"
+      @refresh="refreshAll"
       @open-logs="openLogs"
     />
 
@@ -138,51 +182,6 @@ onMounted(async () => {
       </article>
     </section>
 
-    <section class="support-maintenance card">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">自愿支持</p>
-          <h3>支持维护</h3>
-        </div>
-      </div>
-      <div class="support-maintenance__content">
-        <div class="support-maintenance__copy">
-          <p class="muted">
-            这个助手壳软件由我独立开发和长期维护；插件内容来自社区协作，我也参与了其中一小部分开发。
-            过去一段时间我也一直免费提供相关 AI 服务和维护支持。
-          </p>
-          <p class="muted">
-            如果它确实帮你省了时间，可以自愿给一点小额赞赏，帮我继续承担维护和 AI 服务成本。
-          </p>
-          <p class="muted">
-            赞赏完全自愿，不赞赏也不会影响插件、助手软件、AI 服务或任何功能使用。
-          </p>
-          <p class="support-maintenance__note">请按自己的情况决定，感谢理解。</p>
-          <button
-            class="ghost-button"
-            type="button"
-            @click="openRewardModal"
-          >
-            查看赞赏码
-          </button>
-          <p v-if="rewardMessage" class="reward-thanks-message">{{ rewardMessage }}</p>
-        </div>
-      </div>
-    </section>
-
-    <div v-if="rewardVisible" class="reward-modal" role="dialog" aria-modal="true" aria-label="微信赞赏码">
-      <div class="reward-modal__backdrop" @click="closeRewardModal"></div>
-      <div class="reward-modal__panel">
-        <button class="reward-modal__close" type="button" aria-label="关闭赞赏码" @click="closeRewardModal">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="m7 7 10 10" />
-            <path d="m17 7-10 10" />
-          </svg>
-        </button>
-        <img class="reward-modal__image" :src="wechatRewardImage" alt="微信赞赏码" />
-      </div>
-    </div>
-
     <section class="danger-zone card">
       <div class="section-head">
         <div>
@@ -190,15 +189,24 @@ onMounted(async () => {
           <h3>卸载插件包</h3>
         </div>
       </div>
-      <p v-if="store.selectedRoot" class="inline-path">
-        当前目录：<code>{{ store.selectedRoot }}</code>
-      </p>
-      <p v-else class="muted">请先在安装检查页选择 CS2 目录。</p>
-      <p class="muted">卸载会彻底删除插件目录和插件配置，不会删除 CS2 本体、地图、Demo、overrides 或 gameinfo.gi。</p>
+      <p class="muted">卸载会彻底删除 addons/plugins/cfg/plugins 和 MetaMod 加载文件，不会删除 CS2 本体。</p>
       <button class="ghost-button danger-button" :disabled="!store.selectedRoot || store.busy" @click="uninstallModalOpen = true">
         卸载插件包
       </button>
     </section>
+
+    <ActionModal
+      :open="installConfirmOpen"
+      title="确认安装插件包"
+      subtitle="安装前会清理旧插件和残留文件，需要退出 CS2。"
+      confirm-label="确认安装"
+      :loading="store.busy"
+      @close="installConfirmOpen = false"
+      @confirm="installPackage"
+    >
+      <label class="checkbox-row"><input v-model="confirmExited" type="checkbox" /> 我已退出 CS2</label>
+      <label class="checkbox-row"><input v-model="confirmRoot" type="checkbox" /> 已确认目录正确</label>
+    </ActionModal>
 
     <ActionModal
       :open="uninstallModalOpen"
@@ -210,14 +218,73 @@ onMounted(async () => {
       @close="uninstallModalOpen = false"
       @confirm="uninstallBotPackage"
     >
-      <p class="muted">
-        将直接删除整个 <code>addons</code>、<code>plugins</code>、<code>cfg\plugins</code> 目录，以及 MetaMod 加载文件。
-        包括本助手、旧版本和其他第三方插件的 DLL、配置、依赖与文件。此操作不可恢复。
-        它不会删除或恢复 <code>gameinfo.gi</code> 与 <code>pak01_*.vpk</code>。
-      </p>
-      <p v-if="store.selectedRoot" class="inline-path">
-        当前目录：<code>{{ store.selectedRoot }}</code>
-      </p>
+      <p class="muted">将删除 addons、plugins、cfg\plugins 及 MetaMod 加载文件。不会删除游戏本体。</p>
     </ActionModal>
   </section>
 </template>
+
+<style scoped>
+.install-hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.install-hero__actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.install-hero-button {
+  min-width: 140px;
+}
+
+.install-candidates {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.candidate-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-bg);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.candidate-item:hover { border-color: var(--active-border); }
+.candidate-item[data-active='true'] { border-color: var(--accent); background: var(--active-bg); }
+.candidate-item code { font-size: var(--fs-xs); word-break: break-all; }
+.candidate-item small { font-size: var(--fs-xs); color: var(--muted-color); }
+
+.env-status-card { padding: 0.75rem 1rem; }
+.env-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 0.3rem;
+  margin-top: 0.5rem;
+}
+.env-dot {
+  display: flex; align-items: center; gap: 0.4rem;
+  font-size: var(--fs-sm); opacity: 0.55;
+}
+.env-dot[data-ok='true'] { opacity: 1; }
+.env-dot__indicator {
+  width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0;
+  background: var(--border-muted);
+}
+.env-dot[data-ok='true'] .env-dot__indicator { background: var(--success-text); }
+
+.checkbox-row {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: var(--fs-sm); padding: 0.25rem 0;
+}
+</style>

@@ -3,12 +3,7 @@ import type { RouteRecordRaw } from 'vue-router'
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/install',
-  },
-  {
-    path: '/install',
-    name: 'install',
-    component: () => import('@/views/InstallView.vue'),
+    redirect: '/quick-control',
   },
   {
     path: '/config',
@@ -21,9 +16,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/QuickControlView.vue'),
   },
   {
-    path: '/player-cosmetics',
-    name: 'player-cosmetics',
-    component: () => import('@/views/PlayerCosmeticsView.vue'),
+    path: '/inventory',
+    name: 'inventory',
+    component: () => import('@/views/InventoryView.vue'),
   },
   {
     path: '/commands',
@@ -39,11 +34,6 @@ export const routes: RouteRecordRaw[] = [
     path: '/settings',
     name: 'settings',
     component: () => import('@/views/SettingsView.vue'),
-  },
-  {
-    path: '/official-site',
-    name: 'official-site',
-    component: () => import('@/views/OfficialSiteView.vue'),
   },
   {
     path: '/guide',

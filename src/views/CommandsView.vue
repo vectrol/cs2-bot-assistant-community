@@ -102,11 +102,6 @@ const summaryItems = computed(() => [
         : `${visibleCommands.value.length} 条`,
     state: 'ready' as const,
   },
-  {
-    label: '完整指令库',
-    value: '官网维护',
-    state: 'info' as const,
-  },
 ])
 
 const commandLookup = computed(() => {
@@ -118,10 +113,6 @@ const commandLookup = computed(() => {
   }
   return map
 })
-
-const pinnedCommandItems = computed(() => preferences.pinnedCommands
-  .map((command) => commandLookup.value.get(command) ?? { command, summary: '自定义固定命令' })
-  .slice(0, 8))
 
 function resetForm() {
   editingId.value = ''
@@ -143,10 +134,6 @@ function setActiveTab(tab: CommandPageTabKey) {
   router.replace({ path: '/commands', query: tab === 'common' ? {} : { tab } })
 }
 
-function openOfficialCommandLibrary() {
-  void router.push({ path: '/official-site', query: { path: '/commands' } })
-}
-
 function markCopied(key: string) {
   copiedKey.value = key
   if (copiedTimer) {
@@ -165,14 +152,6 @@ function handleCopyFailed() {
 function recordCommandUse(command: string, summary: string) {
   preferences.recordCommand(command, summary)
   markCommandsFeatureUsed()
-}
-
-function togglePinnedCommand(command: string) {
-  preferences.togglePinnedCommand(command)
-}
-
-function isPinned(command: string) {
-  return preferences.pinnedCommands.includes(command)
 }
 
 function markCommandsFeatureUsed() {
@@ -294,9 +273,6 @@ onBeforeUnmount(() => {
       tone="strong"
     >
       <template #actions>
-        <button class="primary-button" type="button" @click="openOfficialCommandLibrary">
-          打开官网完整指令库
-        </button>
       </template>
       <div class="metric-grid">
         <MetricTile
@@ -331,38 +307,6 @@ onBeforeUnmount(() => {
     </article>
 
     <p v-if="hintVisible" class="tip-box">点击任意命令卡即可复制。</p>
-
-    <article v-if="pinnedCommandItems.length > 0 || preferences.recentCommands.length > 0" class="card pinned-command-panel">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow">固定和最近</p>
-          <h3>老用户常用命令放这里。</h3>
-        </div>
-      </div>
-      <div v-if="pinnedCommandItems.length > 0" class="pinned-command-strip">
-        <button
-          v-for="item in pinnedCommandItems"
-          :key="`pinned:${item.command}`"
-          class="pinned-command"
-          type="button"
-          @click="copy(item.command, `pinned:${item.command}`, item.copyWithoutSemicolon)"
-        >
-          <code>{{ item.command }}</code>
-          <span>{{ item.summary }}</span>
-        </button>
-      </div>
-      <div v-if="preferences.recentCommands.length > 0" class="recent-command-strip">
-        <button
-          v-for="item in preferences.recentCommands.slice(0, 4)"
-          :key="`recent:${item.command}`"
-          class="ghost-button"
-          type="button"
-          @click="copy(item.command, `recent:${item.command}`, commandLookup.get(item.command)?.copyWithoutSemicolon)"
-        >
-          {{ item.command }}
-        </button>
-      </div>
-    </article>
 
     <article v-if="isTeamsTab" class="card command-center-panel">
       <div class="section-head">
@@ -410,17 +354,8 @@ onBeforeUnmount(() => {
           v-for="item in visibleCommands"
           :key="`${activeTab}:${item.command}`"
           class="command-card"
+          @click="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)"
         >
-          <button
-            class="command-card__pin"
-            type="button"
-            :aria-label="isPinned(item.command) ? '取消固定命令' : '固定命令'"
-            @click="togglePinnedCommand(item.command)"
-          >
-            <svg aria-hidden="true" viewBox="0 0 24 24" :data-filled="isPinned(item.command)">
-              <path d="m12 3 2.74 5.55 6.13.89-4.44 4.33 1.05 6.1L12 17l-5.48 2.88 1.05-6.1-4.44-4.33 6.13-.89L12 3Z" />
-            </svg>
-          </button>
           <code>{{ item.command }}</code>
           <span>{{ item.summary }}</span>
           <button class="command-card__copy" type="button" @click="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">

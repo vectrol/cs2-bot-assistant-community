@@ -18,6 +18,11 @@ pub fn launch_cs2_game() -> Result<(), String> {
 }
 
 #[tauri::command]
+pub fn launch_cs2_direct(cs2_root: String, insecure: bool) -> Result<(), String> {
+    app_runtime::launch_cs2_direct(&cs2_root, insecure).map_err(AppError::into_string)
+}
+
+#[tauri::command]
 pub fn enable_autostart() -> Result<(), String> {
     app_runtime::enable_autostart().map_err(AppError::into_string)
 }
@@ -30,4 +35,9 @@ pub fn disable_autostart() -> Result<(), String> {
 #[tauri::command]
 pub fn is_autostart_enabled() -> Result<bool, String> {
     app_runtime::is_autostart_enabled().map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn open_inventory_window() -> Result<(), String> {
+    app_runtime::open_inventory_window().map_err(AppError::into_string)
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, provide, ref, watch } from 'vue'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 
@@ -18,18 +18,16 @@ const { initializeTheme } = useThemePreference()
 const launchGameModalOpen = ref(false)
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
+provide('openLaunchGameModal', () => {
+  launchGameModalOpen.value = true
+})
+
 const navGroups = [
-  {
-    label: '准备',
-    items: [
-      { label: '准备环境', to: '/install', description: '目录、安装、安全确认' },
-    ],
-  },
   {
     label: '控制',
     items: [
       { label: '作战总览', to: '/quick-control', description: '模式、难度、启动和常用命令' },
-      { label: '玩家外观', to: '/player-cosmetics', description: '刀具、枪械、手套和音乐盒' },
+      { label: '库存模拟', to: '/inventory', description: '皮肤、开箱、贴纸、手套、音乐盒' },
       { label: '指令库', to: '/commands', description: '搜索、复制和固定命令' },
       { label: '我的指令', to: '/custom-commands', description: '维护本地自定义命令' },
     ],
@@ -37,26 +35,24 @@ const navGroups = [
   {
     label: '配置',
     items: [
-      { label: '配置控制台', to: '/config', description: 'AI、嘲讽、投掷物和 Demo' },
+      { label: '配置控制台', to: '/config', description: '难度、模式、投掷物和 Demo' },
     ],
   },
   {
     label: '资料',
     items: [
-      { label: '使用帮助', to: '/guide', description: '启动项、诊断和常见问题' },
-      { label: '官网意见', to: '/official-site', description: '浏览官网、意见区和更新信息' },
+      { label: '使用帮助', to: '/guide', description: '安装、诊断、FAQ和卸载' },
     ],
   },
   {
     label: '系统',
     items: [
-      { label: '设置', to: '/settings', description: '外观、启动、官网和储存说明' },
+      { label: '设置', to: '/settings', description: '外观、启动和储存说明' },
     ],
   },
 ]
 
 const navItems = navGroups.flatMap((group) => group.items)
-const isOfficialSiteRoute = computed(() => route.name === 'official-site')
 
 const pageDescription = computed(
   () => navItems.find((item) => item.to === route.path)?.description ?? appConfig.appName,
@@ -118,24 +114,12 @@ watch(
 </script>
 
 <template>
-  <div class="app-chrome" :class="{ 'app-chrome--official': isOfficialSiteRoute }">
+  <div class="app-chrome">
     <header class="app-titlebar">
       <div class="app-titlebar-brand" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize">
         <span>{{ appConfig.appName }}</span>
         <small>v{{ appConfig.appVersion }}</small>
       </div>
-
-      <nav v-if="isOfficialSiteRoute" class="official-app-nav" aria-label="应用页面导航">
-        <RouterLink class="official-app-nav__link official-app-nav__link--primary" to="/install">
-          返回准备环境
-        </RouterLink>
-        <RouterLink class="official-app-nav__link" to="/quick-control">
-          作战总览
-        </RouterLink>
-        <RouterLink class="official-app-nav__link" to="/settings">
-          设置
-        </RouterLink>
-      </nav>
 
       <div class="app-titlebar-drag" aria-hidden="true" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize" />
 
@@ -143,7 +127,7 @@ watch(
     </header>
 
     <div class="shell chrome-shell">
-      <aside v-if="!isOfficialSiteRoute" class="sidebar">
+      <aside class="sidebar">
         <div class="brand-panel">
           <p class="eyebrow">{{ appConfig.appBrandLabel }}</p>
           <div class="brand-title-row">
@@ -151,7 +135,7 @@ watch(
             <span class="version-badge">v{{ appConfig.appVersion }}</span>
           </div>
           <p class="muted">
-            CS2 人机增强训练控制台
+            CS2助手社区版
           </p>
         </div>
 
@@ -179,7 +163,7 @@ watch(
       </aside>
 
       <main class="content">
-        <header v-if="!isOfficialSiteRoute" class="titlebar console-titlebar">
+        <header class="titlebar console-titlebar">
           <div class="titlebar-main">
             <p class="eyebrow">任务面板</p>
             <h2>{{ pageTitle }}</h2>
@@ -196,7 +180,7 @@ watch(
           </div>
         </header>
 
-        <GlobalStatusBar v-if="!isOfficialSiteRoute" />
+        <GlobalStatusBar />
 
         <RouterView />
       </main>

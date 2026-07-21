@@ -4,7 +4,7 @@ type CommandItem = {
   copyWithoutSemicolon?: boolean
 }
 
-export type CommandTabKey = 'common' | 'bot' | 'nades' | 'chat' | 'maps' | 'teams' | 'weapons' | 'custom'
+export type CommandTabKey = 'common' | 'bot' | 'nades' | 'teams' | 'weapons' | 'custom'
 
 export type TeamPreset = {
   name: string
@@ -65,9 +65,6 @@ export const commandGroups = [
       { command: 'bot_nades more', summary: '推荐模式，沿用 normal 的判断逻辑，但允许更多道具。' },
       { command: 'bot_nades max', summary: '限制最少，Bot 会更频繁地使用道具。' },
       { command: 'bot_nades', summary: '查看当前 Bot 投掷物模式。' },
-      { command: 'lbtv_nade_recovery_status', summary: '查看当前 BOT 道具压制开火计时状态。' },
-      { command: 'lbtv_nade_recovery_debug 1', summary: '开启 NadeSystem 道具压制开火调试日志。' },
-      { command: 'lbtv_nade_recovery_test flash 1', summary: '对存活 BOT 测试指定道具类型的压制开火时长。' },
     ] satisfies CommandItem[],
   },
   {
@@ -85,43 +82,16 @@ export const commandGroups = [
     ] satisfies CommandItem[],
   },
   {
-    title: '插件功能',
-    description: '和资源包 README 一致的常用附加命令。',
+    title: '启动选项',
+    description: 'Steam 启动项和常用附加命令。',
     commands: [
       { command: 'bot_buy', summary: '恢复 Bot 默认买枪逻辑。' },
-      { command: 'scouts_on', summary: '在对局开始后开启 Flying Scoutsman。' },
-      { command: 'scouts_off', summary: '关闭 Flying Scoutsman。' },
-      { command: 'lbtv_bot_taunt 1', summary: '开启 Bot 击杀嘲讽。' },
-      { command: 'lbtv_bot_taunt 0', summary: '关闭 Bot 击杀嘲讽。' },
-      { command: 'lbtv_bot_chat 1', summary: '开启 Bot AI 聊天回复。' },
-      { command: 'lbtv_bot_chat 0', summary: '关闭 Bot AI 聊天回复。' },
-      { command: 'lbtv_bot_chat_reload', summary: '重新读取 Bot AI 聊天配置。' },
-      { command: 'lbtv_bot_chat_diag', summary: '输出 Bot AI 聊天诊断信息。' },
-      { command: 'lbtv_bot_chat_saytest hello', summary: '测试 Bot 原生 say 输出。' },
-      { command: 'lbtv_bot_chat_test hello', summary: '测试完整 AI 回复链路。' },
-      { command: 'lbtv_bot_rivalry 1', summary: '开启 BOT 之间的低频互相嘲讽。' },
-      { command: 'lbtv_bot_rivalry 0', summary: '关闭 BOT 之间的低频互相嘲讽。' },
-      { command: 'lbtv_difficulty', summary: '查看当前 Bot 难度档位。' },
-      { command: 'lbtv_knife_hot', summary: '切换为热门五刀：爪子、蝴蝶、锯齿、M9 和刺刀。' },
-      { command: 'lbtv_knife_rdm', summary: '切换为轮换五刀组合，每次生成一组不同刀型。' },
-      { command: 'lbtv_knife_all', summary: '切换为旧版模式，一次生成全部刀具。' },
-      { command: 'lbtv_knife_spawn', summary: '生成当前刀具模板，通常绑定到反斜杠按键。' },
       { command: '-insecure', summary: '把它加入 Steam 启动项，才能加载本地插件。', copyWithoutSemicolon: true },
       {
         command: '-disable_workshop_command_filtering',
         summary: '游玩创意工坊地图时，把它加入 Steam 启动项。',
         copyWithoutSemicolon: true,
       },
-    ] satisfies CommandItem[],
-  },
-  {
-    title: '地图轮换 / 测试换图',
-    description: '控制比赛结束后的自动换图，也可以立刻测试下一张图。',
-    commands: [
-      { command: 'lbtv_map_rotation', summary: '查看地图轮换状态、当前地图和下一张地图。' },
-      { command: 'lbtv_map_rotation 1', summary: '开启比赛结束后自动换下一张图。' },
-      { command: 'lbtv_map_rotation 0', summary: '关闭自动地图轮换。' },
-      { command: 'lbtv_map_next', summary: '立刻切到轮换列表中的下一张图，用于测试。' },
     ] satisfies CommandItem[],
   },
 ]
@@ -139,9 +109,6 @@ export const commandCenterTabs: Array<{
     commands: [
       { command: 'bot_kick', summary: '踢出当前全部 Bot。' },
       { command: 'mp_restartgame 1', summary: '保留当前设置并重开对局。' },
-      { command: 'lbtv_difficulty', summary: '查看当前 Bot 难度档位。' },
-      { command: 'lbtv_map_rotation', summary: '查看地图轮换状态。' },
-      { command: 'lbtv_map_next', summary: '立刻测试下一张图。' },
       { command: '-insecure', summary: '加入 Steam 启动项后才能加载本地插件。', copyWithoutSemicolon: true },
       {
         command: '-disable_workshop_command_filtering',
@@ -165,33 +132,6 @@ export const commandCenterTabs: Array<{
     label: '投掷物',
     description: '控制 Bot 使用道具的频率。',
     commands: commandGroups.find((group) => group.title === 'Bot 投掷物')?.commands ?? [],
-  },
-  {
-    key: 'chat',
-    label: '聊天与嘲讽',
-    description: 'Bot 聊天、击杀嘲讽和刀具生成。',
-    commands: [
-      { command: 'lbtv_bot_taunt 1', summary: '开启 Bot 击杀嘲讽。' },
-      { command: 'lbtv_bot_taunt 0', summary: '关闭 Bot 击杀嘲讽。' },
-      { command: 'lbtv_bot_chat 1', summary: '开启 Bot AI 聊天回复。' },
-      { command: 'lbtv_bot_chat 0', summary: '关闭 Bot AI 聊天回复。' },
-      { command: 'lbtv_bot_chat_reload', summary: '重新读取 Bot AI 聊天配置。' },
-      { command: 'lbtv_bot_chat_diag', summary: '输出 Bot AI 聊天诊断信息。' },
-      { command: 'lbtv_bot_chat_saytest hello', summary: '测试 Bot 原生 say 输出。' },
-      { command: 'lbtv_bot_chat_test hello', summary: '测试完整 AI 回复链路。' },
-      { command: 'lbtv_bot_rivalry 1', summary: '开启 Bot 之间的低频互相嘲讽。' },
-      { command: 'lbtv_bot_rivalry 0', summary: '关闭 Bot 之间的低频互相嘲讽。' },
-      { command: 'lbtv_knife_hot', summary: '切换为热门五刀。' },
-      { command: 'lbtv_knife_rdm', summary: '切换为轮换五刀组合。' },
-      { command: 'lbtv_knife_all', summary: '切换为旧版全部刀具模式。' },
-      { command: 'lbtv_knife_spawn', summary: '生成当前刀具模板。' },
-    ],
-  },
-  {
-    key: 'maps',
-    label: '地图轮换',
-    description: '控制比赛结束后的自动换图。',
-    commands: commandGroups.find((group) => group.title === '地图轮换 / 测试换图')?.commands ?? [],
   },
   {
     key: 'teams',

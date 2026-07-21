@@ -11,10 +11,10 @@ import {
   getBotTauntsConfig,
   getDiagnosticsPayload,
   getNadeRecoveryConfig,
-  getPlayerCosmeticsState,
   inspectCs2Root,
   installBotPackage,
   launchCs2Game,
+  launchCs2Direct,
   openDemoDirectory,
   openRecentDemoDirectory,
   resetBotTauntsConfig,
@@ -23,7 +23,6 @@ import {
   saveAiApiConfig,
   saveBotTauntsConfig,
   saveNadeRecoveryConfig,
-  savePlayerCosmeticsState,
   setUpstreamAimPreset,
   setUpstreamNadesPreset,
   setGameModeProfile,
@@ -39,8 +38,6 @@ import type {
   DifficultyPreset,
   GameModePreset,
   NadeRecoveryConfig,
-  PlayerCosmeticsPatch,
-  PlayerCosmeticsState,
 } from '@/types/cs2'
 
 const PERSISTED_ROOTS_KEY = appConfig.persistedRootsStorageKey
@@ -102,7 +99,6 @@ export const useCs2Store = defineStore('cs2', () => {
   const botTauntsConfig = ref<BotTauntsConfig | null>(null)
   const nadeRecoveryConfig = ref<NadeRecoveryConfig | null>(null)
   const demoDiscovery = ref<DemoDiscoveryPayload | null>(null)
-  const playerCosmeticsConfig = ref<PlayerCosmeticsState | null>(null)
 
   const readyForConfig = computed(() => environment.value?.baseEnvironmentReady ?? false)
 
@@ -214,28 +210,6 @@ export const useCs2Store = defineStore('cs2', () => {
     return demoDiscovery.value
   }
 
-  async function refreshPlayerCosmeticsConfig() {
-    if (!selectedRoot.value) {
-      playerCosmeticsConfig.value = null
-      return null
-    }
-    playerCosmeticsConfig.value = await getPlayerCosmeticsState(selectedRoot.value)
-    return playerCosmeticsConfig.value
-  }
-
-  async function savePlayerCosmetics(nextConfig: PlayerCosmeticsPatch) {
-    requireSelectedRoot(selectedRoot.value)
-    busy.value = true
-    try {
-      const result = await savePlayerCosmeticsState(selectedRoot.value, nextConfig)
-      message.value = result.message
-      await refreshPlayerCosmeticsConfig()
-      return result
-    } finally {
-      busy.value = false
-    }
-  }
-
   async function install() {
     requireSelectedRoot(selectedRoot.value)
 
@@ -255,6 +229,20 @@ export const useCs2Store = defineStore('cs2', () => {
     try {
       await launchCs2Game()
       message.value = '已向 Steam 发送启动 CS2 请求。'
+    } catch (error) {
+      message.value = normalizeError(error)
+      throw error
+    }
+  }
+
+  async function launchGameDirect(insecure: boolean) {
+    requireSelectedRoot(selectedRoot.value)
+
+    try {
+      await launchCs2Direct(selectedRoot.value!, insecure)
+      message.value = insecure
+        ? '已直接启动 CS2（-insecure 模式）。'
+        : '已直接启动 CS2。'
     } catch (error) {
       message.value = normalizeError(error)
       throw error
@@ -502,7 +490,6 @@ export const useCs2Store = defineStore('cs2', () => {
     botTauntsConfig,
     nadeRecoveryConfig,
     demoDiscovery,
-    playerCosmeticsConfig,
     readyForConfig,
     scanRoots,
     selectRoot,
@@ -513,9 +500,9 @@ export const useCs2Store = defineStore('cs2', () => {
     refreshBotTauntsConfig,
     refreshNadeRecoveryConfig,
     refreshDemos,
-    refreshPlayerCosmeticsConfig,
     install,
     launchGame,
+    launchGameDirect,
     applyDifficulty,
     applyUpstreamAim,
     applyUpstreamNades,
@@ -526,7 +513,6 @@ export const useCs2Store = defineStore('cs2', () => {
     resetBotTaunts,
     saveNadeRecovery,
     resetNadeRecovery,
-    savePlayerCosmetics,
     openReplays,
     openDemoFolder,
     uninstall,

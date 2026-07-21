@@ -66,7 +66,7 @@ describe('ReleaseNotesView', () => {
     await vi.dynamicImportSettled()
 
     expect(wrapper.text()).toContain('0.4.4 设置页、自启动与初次安装优化')
-    expect(wrapper.text()).toContain('新增设置页面，集中管理外观主题、官网入口和程序行为。')
+    expect(wrapper.text()).toContain('新增设置页面，集中管理外观主题和程序行为。')
     expect(wrapper.text()).toContain('修复设定打身体时 BOT 爆头率仍然偏高的问题')
   })
 

@@ -3,15 +3,13 @@ import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { appConfig } from '@/config/app'
-import { useThemePreference, type ThemePreference } from '@/composables/useThemePreference'
+import { useThemePreference } from '@/composables/useThemePreference'
 import { disableAutostart, enableAutostart, isAutostartEnabled } from '@/services/tauri/autostart'
 import { openExternalUrl } from '@/services/tauri/app'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
-const officialSiteRoute = '/official-site'
 const preferences = useUiPreferencesStore()
-const { theme, themeLabel, applyTheme, initializeTheme } = useThemePreference()
-const themeOptions: ThemePreference[] = ['dark', 'light']
+const { theme, themeLabel, accentHue, applyTheme, setAccent, initializeTheme } = useThemePreference()
 const autostartEnabled = ref(false)
 const autostartLoading = ref(false)
 const autostartMessage = ref('')
@@ -112,9 +110,6 @@ onMounted(() => {
         </p>
       </div>
       <div class="settings-hero__actions">
-        <RouterLink class="primary-button" :to="officialSiteRoute">
-          程序内访问官网
-        </RouterLink>
       </div>
     </article>
 
@@ -122,22 +117,30 @@ onMounted(() => {
       <div class="section-heading">
         <div>
           <p class="eyebrow">外观</p>
-          <h3>主题模式</h3>
+          <h3>主题与配色</h3>
         </div>
-        <span class="status-pill" data-state="info">当前 {{ themeLabel }}</span>
+        <span class="status-pill" data-state="info">
+          {{ theme === 'dark' ? '深色' : '亮色' }}
+        </span>
       </div>
-      <div class="segmented-control" aria-label="外观主题">
-        <button
-          v-for="option in themeOptions"
-          :key="option"
-          type="button"
-          :data-active="theme === option"
-          @click="applyTheme(option)"
-        >
-          {{ option === 'dark' ? '深色' : '亮色' }}
-        </button>
+      <div class="segmented-control" aria-label="主题模式">
+        <button :data-active="theme === 'dark'" type="button" @click="applyTheme('dark')">深色</button>
+        <button :data-active="theme === 'light'" type="button" @click="applyTheme('light')">亮色</button>
       </div>
-      <p class="muted">主题会保存在浏览器缓存里，下次打开程序会继续使用。</p>
+      <div class="accent-picker">
+        <p class="eyebrow">自定义主色调</p>
+        <div class="accent-row">
+          <input
+            type="range"
+            :value="accentHue"
+            min="0"
+            max="360"
+            class="accent-slider"
+            @input="setAccent(Number(($event.target as HTMLInputElement).value))"
+          />
+          <span class="accent-swatch" :style="{ background: `hsl(${accentHue},85%,55%)` }" />
+        </div>
+      </div>
     </article>
 
     <article class="panel settings-section">

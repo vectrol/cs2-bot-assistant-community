@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 const baseConfig = {
-  appName: 'CS2人机增强助手',
-  appVersion: '0.4.4',
-  appBrandLabel: 'CS2 BOT IMPROVER',
+    appName: 'CS2人机助手社区版',
+      appVersion: '',
+      appBrandLabel: 'CS2 BOT ASSISTANT COMMUNITY',
   channel: 'prod',
   projectId: 'cs2-bot-improver',
-  workspaceName: 'CS2人机增强助手工作区',
+    workspaceName: 'CS2人机助手社区版工作区',
   themeStorageKey: 'cs2-bot-improver.theme',
   customCommandsStorageKey: 'cs2-bot-improver.custom-commands',
   persistedRootsStorageKey: 'cs2-bot-improver.persistedRoots',

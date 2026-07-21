@@ -1,14 +1,14 @@
 {
   "version": 1,
   "workspace": {
-    "name": "CS2人机增强助手工作区",
+    "name": "CS2人机助手社区版工作区",
     "rootDir": "workspace/projects",
     "runtimeDir": "workspace/runtime"
   },
   "projects": [
     {
       "id": "cs2-bot-improver",
-      "name": "CS2人机增强助手",
+      "name": "CS2人机助手社区版",
       "status": "active",
       "channel": "prod",
       "rootDir": "workspace/projects/cs2-bot-improver",

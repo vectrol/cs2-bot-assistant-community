@@ -1,9 +1,9 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "CS2人机增强助手",
-  "mainBinaryName": "CS2BotImproverAssistant",
-  "version": "0.4.5",
-  "identifier": "com.aipc.cs2botimprover",
+  "productName": "CS2人机助手社区版",
+  "mainBinaryName": "CS2BotAssistantCE",
+  "version": "1.2.0",
+  "identifier": "com.aipc.cs2botassistantce",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -14,7 +14,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "CS2人机增强助手",
+        "title": "CS2人机助手社区版",
         "width": 1280,
         "height": 820,
         "resizable": true,

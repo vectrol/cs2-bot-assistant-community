@@ -5,7 +5,6 @@ import { appConfig } from '@/config/app'
 import { latestReleaseNote } from '@/features/release-notes/data'
 import { openExternalUrl } from '@/services/tauri/app'
 
-const groupUrl = 'https://qm.qq.com/q/QRlMlc1h2E'
 const storageKey = `${appConfig.projectId}.release-notes-seen`
 const openMessage = ref('')
 const visible = ref(window.localStorage.getItem(storageKey) !== appConfig.appVersion)
@@ -15,15 +14,6 @@ const title = computed(() => `${appConfig.appName} v${appConfig.appVersion} 更�
 function closeModal() {
   window.localStorage.setItem(storageKey, appConfig.appVersion)
   visible.value = false
-}
-
-async function joinGroup() {
-  try {
-    await openExternalUrl(groupUrl)
-    openMessage.value = ''
-  } catch {
-    openMessage.value = '打开群链接失败，请到“使用帮助”页复制链接后手动打开。'
-  }
 }
 
 async function openReleaseLink(url: string) {
@@ -66,7 +56,6 @@ async function openReleaseLink(url: string) {
       <p v-if="openMessage" class="message-line">{{ openMessage }}</p>
 
       <div class="actions-row release-actions">
-        <button class="ghost-button" @click="joinGroup">加入交流群</button>
         <button class="primary-button" @click="closeModal">我知道了</button>
       </div>
     </article>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import ConsolePanel from '@/components/layout/ConsolePanel.vue'
@@ -14,6 +14,8 @@ import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
 
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
+
+const openLaunchGameModal = inject<() => void>('openLaunchGameModal', () => {})
 
 const teamQuery = ref('')
 const localMessage = ref('')
@@ -42,13 +44,6 @@ const nadePresets = [
   { label: '更多', value: 'more' as const, command: 'bot_nades more', detail: '推荐训练档。' },
   { label: '最大', value: 'max' as const, command: 'bot_nades max', detail: '更频繁投掷。' },
   { label: '关闭', value: 'off' as const, command: 'bot_nades off', detail: '完全禁用 Bot 投掷物。' },
-]
-
-const knifePresets = [
-  { label: '热门五刀', command: 'lbtv_knife_hot', detail: '爪子、蝴蝶、锯齿、M9 和刺刀。' },
-  { label: '轮换五刀', command: 'lbtv_knife_rdm', detail: '每次切换到下一组五刀。' },
-  { label: '全部刀具', command: 'lbtv_knife_all', detail: '使用旧版全部刀具模板。' },
-  { label: '生成刀具', command: 'lbtv_knife_spawn', detail: '执行当前绑定的生成命令。' },
 ]
 
 const botItemNotes = computed(() => [
@@ -171,13 +166,8 @@ async function applyDifficulty(value: DifficultyPreset) {
   }
 }
 
-async function launchGame() {
-  try {
-    await store.launchGame()
-    localMessage.value = store.message
-  } catch (error) {
-    localMessage.value = store.normalizeError(error)
-  }
+async function openLaunchModal() {
+  openLaunchGameModal()
 }
 
 onMounted(() => {
@@ -200,7 +190,7 @@ onMounted(() => {
         tone="strong"
       >
         <template #actions>
-          <button class="primary-button" type="button" @click="launchGame">打开 CS2</button>
+          <button class="primary-button" type="button" @click="openLaunchModal">打开 CS2</button>
           <button class="ghost-button" type="button" :disabled="store.busy" @click="runOneClickFlow">一键检查</button>
           <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshStatus">刷新</button>
         </template>
@@ -230,8 +220,8 @@ onMounted(() => {
             <p class="eyebrow">Game Mode</p>
             <h3>Bot / Online 模式</h3>
           </div>
-          <RouterLink class="ghost-button" to="/install">
-            目录与安装
+          <RouterLink class="ghost-button" to="/guide">
+            使用帮助
           </RouterLink>
         </div>
         <div class="quick-option-list">
@@ -306,30 +296,6 @@ onMounted(() => {
             >
               {{ preset.label }}
             </button>
-          </div>
-        </div>
-      </article>
-
-      <article class="card quick-card command-panel">
-        <div class="section-head">
-          <div>
-            <p class="eyebrow">Drop Knives</p>
-            <h3>刀具模板</h3>
-          </div>
-        </div>
-        <div class="quick-option-list">
-          <div v-for="preset in knifePresets" :key="preset.command" class="quick-copy-row">
-            <div>
-              <strong>{{ preset.label }}</strong>
-              <span>{{ preset.detail }}</span>
-            </div>
-            <CopyButton
-              :text="preset.command"
-              label="复制"
-              :copy-without-semicolon="false"
-              @copied="recordCopied(preset.label, preset.command)"
-              @failed="handleCopyFailed"
-            />
           </div>
         </div>
       </article>

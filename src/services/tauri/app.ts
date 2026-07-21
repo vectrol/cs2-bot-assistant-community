@@ -10,6 +10,18 @@ export async function openExternalUrl(url: string) {
   return invoke<void>('open_external_url', { url })
 }
 
+export async function launchCs2Game() {
+  return invoke<void>('launch_cs2_game')
+}
+
+export async function launchCs2Direct(cs2Root: string, insecure: boolean) {
+  return invoke<void>('launch_cs2_direct', { cs2Root, insecure })
+}
+
+export async function openInventoryWindow() {
+  return invoke<void>('open_inventory_window')
+}
+
 export function getFrontendContext() {
   return {
     appName: import.meta.env.VITE_APP_NAME,

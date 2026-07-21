@@ -22,6 +22,8 @@ export interface Cs2EnvironmentStatus {
   botHiderImplExists: boolean
   rayTraceImplExists: boolean
   roundDamageRecapExists: boolean
+  inventorySimulatorExists: boolean
+  activeGameMode: string
   baseEnvironmentReady: boolean
 }
 
@@ -94,16 +96,6 @@ export interface BotTauntsConfig {
   configPath: string
   exists: boolean
 }
-
-export interface KnifePreset { paint: number; seed: number; wear: number; nameTag: string; stattrakEnabled: boolean; stattrakCount: number; souvenirEnabled: boolean }
-export interface GlovePreset { enabled: boolean; defindex: number; paint: number; seed: number; wear: number }
-export interface PlayerCosmeticsPatch {
-  enabled: boolean; applyToHumanPlayers: boolean; applyOnPickup: boolean; defaultKnifeDefindex: number
-  presets: Record<string, KnifePreset>; gunPresets: Record<string, KnifePreset>; musicKitId: number; glove: GlovePreset
-}
-export interface PlayerCosmeticsState extends PlayerCosmeticsPatch { configPath: string; pluginPresent: boolean; exists: boolean; cs2Running: boolean }
-export interface DropKnivesState { bindKey: string; selected: number[]; cfgPresent: boolean; cs2Running: boolean }
-export interface BotItemsState { skins: boolean; profiles: boolean; agents: boolean; music: boolean; cfgPresent: boolean; cs2Running: boolean }
 
 export type DifficultyPreset = 'low' | 'medium' | 'high'
 export type GameModePreset = 'online' | 'withBots'

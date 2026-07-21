@@ -12,10 +12,6 @@ import type {
   GameModePreset,
   NadeRecoveryConfig,
   OperationResult,
-  BotItemsState,
-  DropKnivesState,
-  PlayerCosmeticsPatch,
-  PlayerCosmeticsState,
 } from '@/types/cs2'
 
 function isTauriRuntime() {
@@ -42,6 +38,8 @@ function emptyEnvironment(rootPath: string): Cs2EnvironmentStatus {
     botHiderImplExists: false,
     rayTraceImplExists: false,
     roundDamageRecapExists: false,
+    inventorySimulatorExists: false,
+    activeGameMode: '',
     baseEnvironmentReady: false,
   }
 }
@@ -81,6 +79,13 @@ export function launchCs2Game() {
   return invoke<void>('launch_cs2_game')
 }
 
+export function launchCs2Direct(rootPath: string, insecure: boolean) {
+  if (!isTauriRuntime()) {
+    return Promise.resolve()
+  }
+  return invoke<void>('launch_cs2_direct', { cs2Root: rootPath, insecure })
+}
+
 export function installBotPackage(rootPath: string) {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web 预览不能安装资源包。目标目录：${rootPath}`)
@@ -115,28 +120,6 @@ export function setGameModeProfile(rootPath: string, preset: GameModePreset) {
   }
   return invoke<OperationResult>('set_game_mode_profile', { rootPath, preset })
 }
-
-export function getPlayerCosmeticsState(rootPath: string) {
-  if (!isTauriRuntime()) {
-    return Promise.resolve<PlayerCosmeticsState>({
-      enabled: false, applyToHumanPlayers: true, applyOnPickup: false, defaultKnifeDefindex: 0, presets: {}, gunPresets: {}, musicKitId: 0,
-      glove: { enabled: false, defindex: 0, paint: 0, seed: 0, wear: 0 }, configPath: '', pluginPresent: false, exists: false, cs2Running: false,
-    })
-  }
-  return invoke<PlayerCosmeticsState>('get_player_cosmetics_state', { rootPath })
-}
-
-export function savePlayerCosmeticsState(rootPath: string, patch: PlayerCosmeticsPatch) {
-  if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能保存玩家外观配置。目标目录：${rootPath}`)
-  }
-  return invoke<OperationResult>('save_player_cosmetics_state', { rootPath, patch })
-}
-
-export function getDropKnivesState(rootPath: string) { return invoke<DropKnivesState>('get_drop_knives_state', { rootPath }) }
-export function saveDropKnivesState(rootPath: string, state: DropKnivesState) { return invoke<OperationResult>('save_drop_knives_state', { rootPath, state }) }
-export function getBotItemsState(rootPath: string) { return invoke<BotItemsState>('get_bot_items_state', { rootPath }) }
-export function setBotItemsState(rootPath: string, state: BotItemsState) { return invoke<BotItemsState>('set_bot_items_state', { rootPath, state }) }
 
 export function getAiApiConfig(rootPath: string) {
   if (!isTauriRuntime()) {
@@ -291,7 +274,7 @@ export function getDiagnosticsPayload(rootPath?: string) {
   if (!isTauriRuntime()) {
     const logPath = 'Web 预览环境没有本机运行日志'
     const summary = [
-      '应用：CS2人机增强助手',
+              '应用：CS2人机助手社区版',
       `生成时间：${new Date().toLocaleString()}`,
       `日志文件：${logPath}`,
       'cs2.exe 正在运行：否',

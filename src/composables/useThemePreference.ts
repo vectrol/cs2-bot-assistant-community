@@ -1,56 +1,62 @@
-import { computed, ref, watch } from 'vue'
+import { type Ref, ref, watch } from 'vue'
 
 import { appConfig } from '@/config/app'
+import { type ThemeMode, loadAccent, saveAccent, applyAccentToDocument } from '@/features/theme/themes'
 
-export type ThemePreference = 'dark' | 'light'
+type ThemePreference = ThemeMode
 
-const theme = ref<ThemePreference>('dark')
-let initialized = false
+const DEFAULT_THEME: ThemePreference = 'dark'
 
-function persistTheme(nextTheme: ThemePreference) {
-  document.documentElement.dataset.theme = nextTheme
-  document.documentElement.style.colorScheme = nextTheme
-  window.localStorage.setItem(appConfig.themeStorageKey, nextTheme)
+function persistTheme(value: ThemePreference) {
+  document.documentElement.dataset.theme = value
+  document.documentElement.style.colorScheme = value
+  localStorage.setItem(appConfig.themeStorageKey, value)
 }
 
 export function useThemePreference() {
-  const themeLabel = computed(() => (theme.value === 'dark' ? '深色' : '亮色'))
+  const theme: Ref<ThemePreference> = ref(DEFAULT_THEME)
+  const accentHue: Ref<number> = ref(200)
 
-  function applyTheme(nextTheme: ThemePreference) {
-    theme.value = nextTheme
-    persistTheme(nextTheme)
+  const themeLabel = ref('深色')
+
+  function applyTheme(value: ThemePreference) {
+    theme.value = value
+    themeLabel.value = value === 'dark' ? '深色' : '亮色'
+    persistTheme(value)
+    applyAccentToDocument(accentHue.value, value)
   }
 
   function toggleTheme() {
     applyTheme(theme.value === 'dark' ? 'light' : 'dark')
   }
 
-  function initializeTheme() {
-    if (initialized || typeof window === 'undefined') {
-      return
-    }
-
-    const savedTheme = window.localStorage.getItem(appConfig.themeStorageKey)
-    if (savedTheme === 'dark' || savedTheme === 'light') {
-      applyTheme(savedTheme)
-    } else {
-      const prefersLight = window.matchMedia('(prefers-color-scheme: light)').matches
-      applyTheme(prefersLight ? 'light' : 'dark')
-    }
-    initialized = true
+  function setAccent(hue: number) {
+    accentHue.value = hue
+    saveAccent({ hue })
+    applyAccentToDocument(hue, theme.value)
   }
 
-  watch(theme, (nextTheme) => {
-    if (typeof document !== 'undefined') {
-      document.documentElement.style.colorScheme = nextTheme
+  function initializeTheme() {
+    const stored = localStorage.getItem(appConfig.themeStorageKey) as ThemePreference | null
+    if (stored === 'dark' || stored === 'light') {
+      applyTheme(stored)
+    } else if (window.matchMedia('(prefers-color-scheme: light)').matches) {
+      applyTheme('light')
+    } else {
+      applyTheme(DEFAULT_THEME)
     }
-  })
+    const accent = loadAccent()
+    accentHue.value = accent.hue
+    applyAccentToDocument(accent.hue, theme.value)
+  }
 
   return {
     theme,
     themeLabel,
+    accentHue,
     applyTheme,
     toggleTheme,
+    setAccent,
     initializeTheme,
   }
 }

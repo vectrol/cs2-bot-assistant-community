@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, inject, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { open } from '@tauri-apps/plugin-dialog'
 
@@ -17,6 +17,7 @@ import { useUiPreferencesStore } from '@/stores/ui-preferences'
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
 const router = useRouter()
+const openLaunchGameModalFn = inject<() => void>('openLaunchGameModal', () => {})
 const installConfirmOpen = ref(false)
 const diagnosticsOpen = ref(false)
 const installCompleted = ref(false)
@@ -321,11 +322,7 @@ async function handleOpenDemos() {
 }
 
 function openLaunchGameModal() {
-  preferences.recordAction('打开 CS2', '从快捷动作触发')
-  store.launchGame().catch((error: unknown) => {
-    const message = store.normalizeError(error)
-    preferences.recordError(message, '打开 CS2')
-  })
+  openLaunchGameModalFn()
 }
 
 onMounted(async () => {
