@@ -22,17 +22,30 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
-    version: '1.1.1',
+    version: '1.2.1',
     date: '2026-07-21',
-    title: '1.1.1 主题重制、面板优化、库存模拟器修复',
-    summary: '13套主题配色全面重制为高饱和鲜明色。库存模拟器改为浏览器直开。指令库精简固定/最近功能。',
+    title: '1.2.1 模式切换修复、比赛记录',
+    summary: '修复 Bot/Online 模式切换后状态不刷新问题。新增比赛记录功能，管理 Demo 录像和战绩。',
     items: [
-      { text: '主题配色全面重制：13套战队主题色彩更鲜明，active/bg透明度提升至0.45，指示器和阴影强化。' },
-      { text: '默认深色主题主色调改为天蓝#0ea5e9，与CS2默认UI配色统一。' },
-      { text: '库存模拟器重构：移除不稳定的iframe嵌入，改为卡片引导+系统浏览器直开inventory.cstrike.app。' },
-      { text: '指令库删除固定/最近面板和图钉按钮，界面更简洁。' },
-      { text: '主题系统独立为src/features/theme/themes.ts，增删主题只需修改一个文件。' },
-      { text: '面板UI优化：库存页改用特色卡片布局，配置标签间距调整。' },
+      { text: '修复模式切换后面板状态不更新：switchMode 和 applyDifficulty 操作后自动刷新环境状态。' },
+      { text: '新增比赛记录模块：列出最近比赛 Demo，显示地图、时间、路径，支持打开目录和复制路径。' },
+      { text: '修复"准备环境"死链接：QuickControl 中"目录与安装"按钮指向使用帮助页。' },
+    ],
+  },
+  {
+    version: '1.2.0',
+    date: '2026-07-21',
+    title: '1.2.0 自定义主题、面板整合',
+    summary: '删除11套战队配色，改为深色/亮色双模式+HSL色相滑块自定义。准备环境合并入使用帮助。',
+    items: [
+      { text: '主题系统重做：深色/亮色双模切换，HSL滑块0-360度自由配色，即时预览保存。' },
+      { text: '面板整合：准备环境（InstallView）合并入使用帮助（GuideView），导航4组→3组。' },
+      { text: '库存模拟器：inventory.cstrike.app WebView内嵌，单击打开外部窗口。' },
+      { text: '环境诊断升级：18项检查（含InventorySimulator和游戏模式），复制诊断含完整状态。' },
+      { text: '指令库精简：删除24条lbtv_*无效命令、聊天/嘲讽和地图轮换标签页、固定/最近面板。' },
+      { text: '配置控制台精简：删除AI聊天和Bot嘲讽UI（LBTV插件不存在）。' },
+      { text: '移除Panel v1.4.2.exe：根除与助手的gameinfo.gi双重管理冲突。' },
+      { text: '移除官网嵌入、赞赏码、交流群入口。' },
     ],
   },
   {

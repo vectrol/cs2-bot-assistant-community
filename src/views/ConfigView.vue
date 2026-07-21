@@ -419,33 +419,50 @@ onMounted(async () => {
       </p>
     </ConfigSection>
 
-    <ConfigSection v-show="activeConfigSection === 'demo'" title="辅助操作" :description="demoStatus" badge="按需使用" :default-open="true">
-      <div class="manual-grid">
+    <ConfigSection v-show="activeConfigSection === 'demo'" title="比赛记录" :description="demoStatus" badge="按需使用" :default-open="true">
+      <div class="match-record-grid">
         <div class="manual-item">
-          <strong>创意工坊地图启动项</strong>
+          <strong>录制开关</strong>
+          <div class="copy-row">
+            <code>tv_enable 1; tv_autorecord 1</code>
+            <CopyButton text="tv_enable 1; tv_autorecord 1" label="复制" copied-label="已复制" @copied="handleDemoCommandCopied" />
+          </div>
+          <p class="muted">控制台粘贴后每次对局自动录像。Demo保存在 csgo/replays。</p>
+        </div>
+
+        <div class="manual-item">
+          <strong>创意工坊地图</strong>
           <div class="copy-row">
             <code>-disable_workshop_command_filtering</code>
             <CopyButton text="-disable_workshop_command_filtering" @copied="handleWorkshopCopied" />
           </div>
+          <p class="muted">加入 Steam 启动项才能正常加载创意工坊地图。</p>
         </div>
 
         <div class="manual-item">
-          <strong>切换在线 / Bot 模式后的 Steam 启动项</strong>
+          <strong>在线/Bot 模式切换</strong>
           <p class="muted">在线比赛删除 <code>-insecure</code>，继续打 Bot 时重新加回。</p>
         </div>
 
         <div class="manual-item">
-          <strong>查找最近 Demo</strong>
-          <div class="copy-row">
-            <code>tv_enable 1; tv_autorecord 1</code>
-            <CopyButton text="tv_enable 1; tv_autorecord 1" label="复制命令" copied-label="已复制命令" @copied="handleDemoCommandCopied" />
-            <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshRecentDemoAndShow">
-              查找并查看详情
-            </button>
-            <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="openRecentDemoDirectory">
-              打开 Demo 目录
-            </button>
+          <div class="section-head">
+            <strong>最近录像</strong>
+            <div class="demo-actions">
+              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshRecentDemoAndShow">刷新</button>
+              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="openRecentDemoDirectory">打开目录</button>
+            </div>
           </div>
+          <div v-if="recentDemo" class="recent-demo-card">
+            <div class="demo-info">
+              <code>{{ recentDemo.fileName }}</code>
+              <span class="muted">{{ recentDemo.modifiedAt }}</span>
+            </div>
+            <div class="demo-actions">
+              <CopyButton :text="recentDemo.path" @copied="handleDemoPathCopied(recentDemo.path)" />
+              <button class="ghost-button" @click="openRecentDemoFolder">打开位置</button>
+            </div>
+          </div>
+          <p v-else class="muted">暂无录像。复制上方命令后打一局即可自动录制。</p>
         </div>
       </div>
     </ConfigSection>
@@ -533,3 +550,16 @@ onMounted(async () => {
     </ActionModal>
   </section>
 </template>
+
+<style scoped>
+.demo-actions { display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap; }
+.recent-demo-card {
+  display: flex; flex-direction: column; gap: 0.5rem;
+  padding: 0.75rem; margin-top: 0.5rem;
+  border: 1px solid var(--panel-border); border-radius: var(--radius-sm);
+  background: var(--ghost-bg);
+}
+.demo-info { display: flex; flex-direction: column; gap: 0.15rem; }
+.demo-info code { font-size: var(--fs-sm); word-break: break-all; }
+.match-record-grid { display: flex; flex-direction: column; gap: 1rem; }
+</style>
