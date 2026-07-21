@@ -351,6 +351,16 @@ export const teamPresets: TeamPreset[] = [
     ct: 'bot_add_ct "tabseN";bot_add_ct "JDC";bot_add_ct "faveN";bot_add_ct "blameF";bot_add_ct "gr1ks";mp_teamlogo_1 big;mp_teamname_1 BIG',
     t: 'bot_add_t "tabseN";bot_add_t "JDC";bot_add_t "faveN";bot_add_t "blameF";bot_add_t "gr1ks";mp_teamlogo_2 big;mp_teamname_2 BIG',
   },
+  {
+    name: 'BC.Game',
+    ct: 'bot_add_ct "s1mple";bot_add_ct "electroNic";bot_add_ct "Senzu";bot_add_ct "Magisk";bot_add_ct "mzinho";mp_teamlogo_1 bcg;mp_teamname_1 BC.Game',
+    t: 'bot_add_t "s1mple";bot_add_t "electroNic";bot_add_t "Senzu";bot_add_t "Magisk";bot_add_t "mzinho";mp_teamlogo_2 bcg;mp_teamname_2 BC.Game',
+  },
+  {
+    name: '9z Team',
+    ct: 'bot_add_ct "max";bot_add_ct "HUASOPEEK";bot_add_ct "luchov";bot_add_ct "meyern";bot_add_ct "dgt";mp_teamlogo_1 9z;mp_teamname_1 9z Team',
+    t: 'bot_add_t "max";bot_add_t "HUASOPEEK";bot_add_t "luchov";bot_add_t "meyern";bot_add_t "dgt";mp_teamlogo_2 9z;mp_teamname_2 9z Team',
+  },
 ]
 
 export const guideSections = [
