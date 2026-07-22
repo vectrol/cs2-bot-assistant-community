@@ -1,15 +1,18 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
 import { latestReleaseNote } from '@/features/release-notes/data'
 import { openExternalUrl } from '@/services/tauri/app'
 
+const { t } = useI18n()
+
 const storageKey = `${appConfig.projectId}.release-notes-seen`
 const openMessage = ref('')
 const visible = ref(window.localStorage.getItem(storageKey) !== appConfig.appVersion)
 
-const title = computed(() => `${appConfig.appName} v${appConfig.appVersion} 更新内容`)
+const title = computed(() => t('releaseNotesModal.title', { appName: appConfig.appName, version: appConfig.appVersion }))
 
 function closeModal() {
   window.localStorage.setItem(storageKey, appConfig.appVersion)
@@ -21,7 +24,7 @@ async function openReleaseLink(url: string) {
     await openExternalUrl(url)
     openMessage.value = ''
   } catch {
-    openMessage.value = '打开 GitHub 链接失败，请稍后手动访问。'
+    openMessage.value = t('releaseNotesModal.openFailed')
   }
 }
 </script>
@@ -31,7 +34,7 @@ async function openReleaseLink(url: string) {
     <article class="release-modal">
       <div class="section-head">
         <div>
-          <p class="eyebrow">更新说明</p>
+          <p class="eyebrow">{{ t('releaseNotesModal.eyebrow') }}</p>
           <h3>{{ title }}</h3>
         </div>
       </div>
@@ -56,7 +59,7 @@ async function openReleaseLink(url: string) {
       <p v-if="openMessage" class="message-line">{{ openMessage }}</p>
 
       <div class="actions-row release-actions">
-        <button class="primary-button" @click="closeModal">我知道了</button>
+        <button class="primary-button" @click="closeModal">{{ t('releaseNotesModal.close') }}</button>
       </div>
     </article>
   </div>

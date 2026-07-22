@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { getCurrentWindow } from '@tauri-apps/api/window'
 
+const { t } = useI18n()
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
 async function minimizeWindow() {
@@ -41,12 +43,12 @@ async function closeWindow() {
 </script>
 
 <template>
-  <div v-if="appWindow" class="window-controls" aria-label="窗口控制">
+  <div v-if="appWindow" class="window-controls" :aria-label="t('windowControls.region')">
     <button
       class="window-control"
       type="button"
-      title="最小化"
-      aria-label="最小化"
+      :title="t('windowControls.minimize')"
+      :aria-label="t('windowControls.minimize')"
       @mousedown.stop
       @click.stop="minimizeWindow"
     >
@@ -57,8 +59,8 @@ async function closeWindow() {
     <button
       class="window-control"
       type="button"
-      title="最大化或还原"
-      aria-label="最大化或还原"
+      :title="t('windowControls.maximize')"
+      :aria-label="t('windowControls.maximize')"
       @mousedown.stop
       @click.stop="toggleMaximizeWindow"
     >
@@ -69,8 +71,8 @@ async function closeWindow() {
     <button
       class="window-control window-control--close"
       type="button"
-      title="关闭"
-      aria-label="关闭"
+      :title="t('windowControls.close')"
+      :aria-label="t('windowControls.close')"
       @mousedown.stop
       @click.stop="closeWindow"
     >

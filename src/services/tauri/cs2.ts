@@ -91,35 +91,35 @@ export function launchCs2Direct(rootPath: string, insecure: boolean, extraArgs: 
 
 export function installBotPackage(rootPath: string) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能安装资源包。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot install packages. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('install_bot_package', { rootPath })
 }
 
 export function applyDifficultyProfile(rootPath: string, preset: DifficultyPreset) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能切换难度：${preset}。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot switch difficulty: ${preset}. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('apply_difficulty_profile', { rootPath, preset })
 }
 
 export function setUpstreamAimPreset(rootPath: string, value: 'head' | 'mixed' | 'body') {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能写入 Aim 预设：${value}。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot write Aim preset: ${value}. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('set_upstream_aim_preset', { rootPath, value })
 }
 
 export function setUpstreamNadesPreset(rootPath: string, value: 'max' | 'more' | 'normal' | 'off') {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能写入投掷物预设：${value}。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot write grenade preset: ${value}. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('set_upstream_nades_preset', { rootPath, value })
 }
 
 export function setGameModeProfile(rootPath: string, preset: GameModePreset) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能切换模式：${preset}。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot switch mode: ${preset}. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('set_game_mode_profile', { rootPath, preset })
 }
@@ -130,7 +130,7 @@ export function getAiApiConfig(rootPath: string) {
       aiApiUrl: '',
       aiApiKey: '',
       botRivalryEnabled: false,
-      configPath: `${rootPath || 'CS2 目录'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\BotTaunt\\BotTaunt.json`,
+      configPath: `${rootPath || '(no CS2 dir)'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\BotTaunt\\BotTaunt.json`,
       exists: false,
     })
   }
@@ -140,7 +140,7 @@ export function getAiApiConfig(rootPath: string) {
 export function saveAiApiConfig(rootPath: string, config: AiApiConfig) {
   if (!isTauriRuntime()) {
     void config
-    return webOnlyOperation(`Web 预览不能保存 AI 聊天配置。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot save AI Chat config. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('save_ai_api_config', { rootPath, config })
 }
@@ -164,7 +164,7 @@ export function getBotTauntsConfig(rootPath: string) {
       multiKillTaunt: 'Triple kill.',
       clutchTaunt: 'Clutch.',
       saveTaunt: 'Saving.',
-      configPath: `${rootPath || 'CS2 目录'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\BotTaunt\\Taunts.json`,
+      configPath: `${rootPath || '(no CS2 dir)'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\BotTaunt\\Taunts.json`,
       exists: false,
     })
   }
@@ -174,7 +174,7 @@ export function getBotTauntsConfig(rootPath: string) {
 export function saveBotTauntsConfig(rootPath: string, config: BotTauntsConfig) {
   if (!isTauriRuntime()) {
     void config
-    return webOnlyOperation(`Web 预览不能保存嘲讽文本。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot save taunt text. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('save_bot_taunts_config', { rootPath, config })
 }
@@ -195,7 +195,7 @@ export function getNadeRecoveryConfig(rootPath: string) {
       molotov: 0.8,
       incgrenade: 0.8,
       decoy: 0.55,
-      configPath: `${rootPath || 'CS2 目录'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\NadeSystem\\NadeSystem.json`,
+      configPath: `${rootPath || '(no CS2 dir)'}\\game\\csgo\\addons\\counterstrikesharp\\configs\\plugins\\NadeSystem\\NadeSystem.json`,
       exists: false,
     })
   }
@@ -205,7 +205,7 @@ export function getNadeRecoveryConfig(rootPath: string) {
 export function saveNadeRecoveryConfig(rootPath: string, config: NadeRecoveryConfig) {
   if (!isTauriRuntime()) {
     void config
-    return webOnlyOperation(`Web 预览不能保存道具压制开火时间。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot save nade recovery fire suppression time. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('save_nade_recovery_config', { rootPath, config })
 }
@@ -220,7 +220,7 @@ export function resetNadeRecoveryConfig(rootPath: string) {
 export function getCommandsTxt() {
   if (!isTauriRuntime()) {
     return Promise.resolve<CommandsTxtPayload>({
-      content: 'Web 预览环境无法读取内置资源包中的 Commands.txt。',
+      content: 'Web preview cannot read Commands.txt from the built-in resource pack.',
       sourcePath: 'web-preview',
     })
   }
@@ -232,7 +232,7 @@ export function discoverDemos(rootPath: string) {
     return Promise.resolve<DemoDiscoveryPayload>({
       candidates: [],
       recentDemo: null,
-      defaultDirectory: `${rootPath || 'CS2 目录'}\\game\\csgo\\replays`,
+      defaultDirectory: `${rootPath || '(no CS2 dir)'}\\game\\csgo\\replays`,
     })
   }
   return invoke<DemoDiscoveryPayload>('discover_demos', { rootPath })
@@ -240,35 +240,35 @@ export function discoverDemos(rootPath: string) {
 
 export function openRecentDemoDirectory(rootPath: string) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能打开 Demo 目录。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot open demo directory. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('open_recent_demo_directory', { rootPath })
 }
 
 export function openDemoDirectory(rootPath: string, directoryPath: string) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能打开 Demo 目录：${directoryPath}。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot open demo directory: ${directoryPath}. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('open_demo_directory', { rootPath, directoryPath })
 }
 
 export function openReplaysDirectory(rootPath: string) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能打开 replays 目录。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot open replays directory. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('open_replays_directory', { rootPath })
 }
 
 export function openDiagnosticsLogDirectory() {
   if (!isTauriRuntime()) {
-    return webOnlyOperation('Web 预览不能打开日志位置。桌面应用中会打开本机日志目录。')
+    return webOnlyOperation(`Web preview cannot open log location. Desktop app will open native log directory.`)
   }
   return invoke<OperationResult>('open_diagnostics_log_directory')
 }
 
 export function uninstallBotPackage(rootPath: string) {
   if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web 预览不能卸载插件包。目标目录：${rootPath}`)
+    return webOnlyOperation(`Web preview cannot uninstall plugin pack. Target: ${rootPath}`)
   }
   return invoke<OperationResult>('uninstall_bot_package', { rootPath })
 }
@@ -289,16 +289,17 @@ export function togglePlugin(rootPath: string, pluginName: string): Promise<Plug
 
 export function getDiagnosticsPayload(rootPath?: string) {
   if (!isTauriRuntime()) {
-    const logPath = 'Web 预览环境没有本机运行日志'
+    const logPath = 'Web preview has no native runtime logs'
     const summary = [
-              '应用：CS2人机助手社区版',
-      `生成时间：${new Date().toLocaleString()}`,
-      `日志文件：${logPath}`,
-      'cs2.exe 正在运行：否',
-      rootPath ? `已选择目录：${rootPath}` : '尚未选择 CS2 目录。',
+
+      `App: CS2 Bot Assistant Community Edition`,
+      `Generated: ${new Date().toLocaleString()}`,
+      `Log File: ${logPath}`,
+      'cs2.exe running: No',
+      rootPath ? `Selected directory: ${rootPath}` : 'No CS2 directory selected.',
       '',
-      '最近日志预览：',
-      'Web 预览只能验证界面，安装、写入、打开目录等能力需要在 Tauri 桌面环境中使用。',
+      'Recent log preview:',
+      'Web preview can only validate the UI. Install, write, and open directory features require the Tauri desktop environment.',
     ].join('\n')
     return Promise.resolve<DiagnosticsPayload>({
       summary,

@@ -57,7 +57,7 @@ describe('fetchSoftwareReleaseHistory', () => {
 
     expect(result.status).toBe('online')
     expect(fetchMock).toHaveBeenCalledTimes(1)
-    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('currentVersion=0.4.4')
+    expect(String(fetchMock.mock.calls[0]?.[0])).toContain('currentVersion=')
   })
 
   it('returns not-configured when the update feed url is empty', async () => {

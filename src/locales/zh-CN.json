@@ -24,7 +24,8 @@
     "manage": "管理",
     "clear": "清空",
     "copied": "已复制",
-    "copy": "复制"
+    "copy": "复制",
+    "backToDashboard": "返回仪表盘"
   },
   "nav": {
     "control": "控制",
@@ -37,7 +38,37 @@
     "guideHelp": "使用帮助",
     "system": "系统",
     "settings": "设置",
-    "plugins": "插件管理"
+    "plugins": "插件管理",
+    "projects": "项目",
+    "tasks": "任务",
+    "logs": "日志"
+  },
+  "workspace": {
+    "projects": {
+      "title": "已注册项目",
+      "current": "当前项目",
+      "select": "选择",
+      "fieldId": "ID",
+      "fieldStatus": "状态",
+      "fieldChannel": "通道",
+      "fieldRootDir": "源码目录",
+      "fieldDistDir": "前端产物",
+      "fieldBundleDir": "安装包",
+      "fieldLogDir": "日志",
+      "fieldTauriConfig": "Tauri 配置"
+    },
+    "tasks": {
+      "title": "执行队列",
+      "assignedTo": "负责人",
+      "statusQueued": "排队中",
+      "statusRunning": "运行中",
+      "statusBlocked": "已阻塞",
+      "statusDone": "已完成"
+    },
+    "logs": {
+      "title": "日志路由",
+      "content": "前端：Vite 开发服务器和浏览器控制台\n桌面端：Tauri CLI 和 Rust 命令输出\n工作区：每次构建前的注册表验证\n当前项目日志：{logDir}\n当前项目安装包：{bundleDir}"
+    }
   },
   "guide": {
     "title": "使用帮助",
@@ -486,6 +517,18 @@
     "openFailed": "打开外部链接失败，请稍后手动访问。",
     "cloudDefaultItem": "这个版本已经可以下载。",
     "entries": {
+      "3_0_0": {
+        "title": "3.0.0 工作区中心与插件管理",
+        "summary": "全新工作区模块，项目注册、任务队列、日志查看器等。插件管理支持搜索与筛选。仪表盘升级为九宫格导航。全面本地化完成。",
+        "items": {
+          "0": "工作区模块：项目注册、任务队列和日志流页面，支持完整中英双语。",
+          "1": "插件管理：搜索/筛选插件，开启/关闭带错误处理，支持全部/已启用/已禁用视图。",
+          "2": "仪表盘升级：9 张功能卡片覆盖所有特性，包含工作区入口。",
+          "3": "死代码清理：移除 6 个废弃组件（RuntimePanel、InstallView、QuickActionsBar 等）。",
+          "4": "存储层 i18n：cs2.ts、ui-preferences.ts 和 Tauri 服务层全面本地化。",
+          "5": "测试基建：配置 vitest 支持 i18n/Pinia/环境变量，12/12 项测试全部通过。"
+        }
+      },
       "2_1_0": {
         "title": "2.1.0 全面国际化完成",
         "summary": "所有视图已完成中英双语本地化，路由匹配修复，更新日志翻译，指令库本地化，配置消息国际化。",
@@ -1043,6 +1086,24 @@
     "autostartDisabled": "开机自启动已关闭。",
     "operationFailed": "操作失败，请稍后重试。"
   },
+  "startupAutomation": {
+    "checking": "正在检查是否可以自动安装当前内置插件包。",
+    "skippedCs2Running": "检测到 CS2 正在运行，本次没有自动安装。退出游戏后可在准备环境页面手动安装。",
+    "skippedNoDir": "没有识别到 CS2 目录，本次没有自动安装。请先到准备环境页面选择目录。",
+    "installed": "自动安装已完成。",
+    "failed": "自动安装失败：{message}"
+  },
+  "windowControls": {
+    "region": "窗口控制",
+    "minimize": "最小化",
+    "maximize": "最大化或还原",
+    "close": "关闭"
+  },
+  "launchGame": {
+    "ariaLabel": "启动游戏",
+    "close": "关闭",
+    "modeLegend": "启动模式"
+  },
   "launchModal": {
     "title": "启动 Counter-Strike 2",
     "selectMode": "选择启动方式",
@@ -1081,7 +1142,14 @@
     "unknownVersion": "未知版本",
     "enabled": "已启用",
     "disabled": "已禁用",
-    "hasConfig": "有配置文件"
+    "hasConfig": "有配置文件",
+    "searchPlaceholder": "搜索插件...",
+    "filterAll": "全部",
+    "filterEnabled": "已启用",
+    "filterDisabled": "已禁用",
+    "noMatch": "没有找到匹配的插件。",
+    "toggleError": "切换插件失败。{message}",
+    "loadError": "加载插件失败。{message}"
   },
   "actionModal": {
     "title": "操作",
@@ -1102,5 +1170,53 @@
     "ready": "就绪",
     "busy": "处理中...",
     "error": "错误"
+  },
+  "store": {
+    "noRoot": "请先选择 CS2 游戏目录。",
+    "installedRecord": "安装记录",
+    "scanFailed": "没有自动找到 CS2 目录，请手动选择。",
+    "currentSelection": "当前选择",
+    "recentDemo": "最近 Demo：{fileName}",
+    "noDemoFile": "没有找到 Demo 文件。",
+    "launchRequestSent": "已向 Steam 发送启动 CS2 请求。",
+    "launchDirect": "已直接启动 CS2{extra}。",
+    "launchDirectInsecure": "已直接启动 CS2（-insecure{extra}）。",
+    "resetAiApi": "AI 聊天 API 已恢复默认。重启 CS2 或服务器后生效。",
+    "resetNadeRecovery": "道具压制开火时间已恢复默认。重启 CS2 或服务器后生效。",
+    "resetBotTaunts": "BotTaunt 嘲讽文本已恢复默认。重启 CS2 或服务器后生效。",
+    "operationFailed": "操作失败，请保留当前页面截图和诊断日志，方便继续排查。",
+    "notChecked": "还没有进行自动安装检查。",
+    "dirNotSelected": "未选择目录",
+    "generalOperation": "通用操作"
+  },
+  "releaseNotesModal": {
+    "title": "{appName} v{version} 更新内容",
+    "openFailed": "打开 GitHub 链接失败，请稍后手动访问。",
+    "eyebrow": "更新说明",
+    "close": "我知道了"
+  },
+  "webOnly": {
+    "install": "Web 预览不能安装资源包。目标目录：{path}",
+    "difficulty": "Web 预览不能切换难度：{preset}。目标目录：{path}",
+    "aimPreset": "Web 预览不能写入 Aim 预设：{value}。目标目录：{path}",
+    "nadePreset": "Web 预览不能写入投掷物预设：{value}。目标目录：{path}",
+    "modeSwitch": "Web 预览不能切换模式：{preset}。目标目录：{path}",
+    "aiChat": "Web 预览不能保存 AI 聊天配置。目标目录：{path}",
+    "botTaunt": "Web 预览不能保存嘲讽文本。目标目录：{path}",
+    "nadeRecovery": "Web 预览不能保存道具压制开火时间。目标目录：{path}",
+    "commandFile": "Web 预览环境无法读取内置资源包中的 Commands.txt。",
+    "openDemoDir": "Web 预览不能打开 Demo 目录。目标目录：{path}",
+    "openReplays": "Web 预览不能打开 replays 目录。目标目录：{path}",
+    "openLogDir": "Web 预览不能打开日志位置。桌面应用中会打开本机日志目录。",
+    "uninstall": "Web 预览不能卸载插件包。目标目录：{path}",
+    "diagnostics": "Web 预览环境没有本机运行日志",
+    "diagnosticsApp": "应用：{appName}",
+    "diagnosticsGenerated": "生成时间：{time}",
+    "diagnosticsLogFile": "日志文件：{logPath}",
+    "diagnosticsCs2Running": "cs2.exe 正在运行：否",
+    "diagnosticsDir": "已选择目录：{path}",
+    "diagnosticsNoDir": "尚未选择 CS2 目录。",
+    "diagnosticsRecentLogs": "最近日志预览：",
+    "diagnosticsWebOnly": "Web 预览只能验证界面，安装、写入、打开目录等能力需要在 Tauri 桌面环境中使用。"
   }
 }

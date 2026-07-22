@@ -11,15 +11,32 @@ const store = useCs2Store()
 const plugins = ref<PluginInfo[]>([])
 const loading = ref(false)
 const toggling = ref<string | null>(null)
+const searchQuery = ref('')
+const filterMode = ref<'all' | 'enabled' | 'disabled'>('all')
+
+const filterModes = ['all', 'enabled', 'disabled'] as const
 
 const installedCount = computed(() => plugins.value.filter(p => p.enabled).length)
 const totalCount = computed(() => plugins.value.length)
+
+const filteredPlugins = computed(() => {
+  let list = plugins.value
+  if (filterMode.value === 'enabled') list = list.filter(p => p.enabled)
+  if (filterMode.value === 'disabled') list = list.filter(p => !p.enabled)
+  if (searchQuery.value.trim()) {
+    const q = searchQuery.value.trim().toLowerCase()
+    list = list.filter(p => p.name.toLowerCase().includes(q))
+  }
+  return list
+})
 
 async function load() {
   if (!store.selectedRoot) return
   loading.value = true
   try {
     plugins.value = await listPlugins(store.selectedRoot)
+  } catch (e) {
+    store.setMessage(t('plugins.loadError', { message: store.normalizeError(e) }))
   } finally {
     loading.value = false
   }
@@ -33,6 +50,8 @@ async function toggle(p: PluginInfo) {
       const idx = plugins.value.findIndex(x => x.name === p.name)
       if (idx >= 0) plugins.value[idx] = updated
     }
+  } catch (e) {
+    store.setMessage(t('plugins.toggleError', { message: store.normalizeError(e) }))
   } finally {
     toggling.value = null
   }
@@ -53,10 +72,34 @@ onMounted(load)
       </div>
       <div class="plugins-hero__actions">
         <button class="ghost-button" type="button" :disabled="loading" @click="load">
-           {{ t('plugins.refresh') }}
+          {{ t('plugins.refresh') }}
         </button>
       </div>
     </article>
+
+    <div class="plugins-toolbar">
+      <div class="plugins-search">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input
+          v-model="searchQuery"
+          type="search"
+          class="search-input"
+          :placeholder="t('plugins.searchPlaceholder')"
+        />
+      </div>
+      <div class="plugins-filters">
+        <button
+          v-for="mode in filterModes"
+          :key="mode"
+          class="filter-pill"
+          :class="{ active: filterMode === mode }"
+          type="button"
+          @click="filterMode = mode"
+        >
+          {{ t(`plugins.filter${mode.charAt(0).toUpperCase()}${mode.slice(1)}`) }}
+        </button>
+      </div>
+    </div>
 
     <div v-if="loading" class="plugins-grid">
       <div v-for="i in 6" :key="i" class="plugin-card glass">
@@ -69,9 +112,13 @@ onMounted(load)
       <p class="muted">{{ t('plugins.empty') }}</p>
     </div>
 
+    <div v-else-if="filteredPlugins.length === 0" class="plugins-empty glass">
+      <p class="muted">{{ t('plugins.noMatch') }}</p>
+    </div>
+
     <div v-else class="plugins-grid stagger-enter">
       <article
-        v-for="p in plugins"
+        v-for="p in filteredPlugins"
         :key="p.name"
         class="plugin-card glass"
         :class="{ 'plugin-card--disabled': !p.enabled }"
@@ -122,6 +169,74 @@ onMounted(load)
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+.plugins-toolbar {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.plugins-search {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+}
+
+.search-icon {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem 0.5rem 2.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--ghost-bg);
+  color: var(--text);
+  font-size: var(--fs-sm);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+}
+
+.plugins-filters {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.filter-pill {
+  padding: 0.35rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: var(--fs-xs);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-pill:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.filter-pill.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
 }
 
 .plugins-grid {

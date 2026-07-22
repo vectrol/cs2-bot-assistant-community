@@ -1,24 +1,26 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useWorkspaceStore } from '@/stores/workspace'
 
+const { t } = useI18n()
 const workspace = useWorkspaceStore()
 
 const statusLabels: Record<string, string> = {
-  queued: '排队中',
-  running: '运行中',
-  blocked: '已阻塞',
-  done: '已完成',
+  queued: t('workspace.tasks.statusQueued'),
+  running: t('workspace.tasks.statusRunning'),
+  blocked: t('workspace.tasks.statusBlocked'),
+  done: t('workspace.tasks.statusDone'),
 }
 </script>
 
 <template>
   <section class="panel">
-    <p class="eyebrow">执行队列</p>
+    <p class="eyebrow">{{ t('workspace.tasks.title') }}</p>
     <ul class="queue-list">
       <li v-for="item in workspace.queue" :key="item.id" class="queue-item">
         <div>
           <strong>{{ item.title }}</strong>
-          <p class="muted">{{ item.id }} / {{ item.projectId }} / 负责人：{{ item.owner }}</p>
+          <p class="muted">{{ item.id }} / {{ item.projectId }} / {{ t('workspace.tasks.assignedTo') }}：{{ item.owner }}</p>
         </div>
         <span class="pill" :data-status="item.status">{{ statusLabels[item.status] ?? item.status }}</span>
       </li>

@@ -22,6 +22,20 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '3.0.0',
+    date: '2026-07-23',
+    title: '3.0.0 Workspace Hub & Plugin Manager',
+    summary: 'New workspace module with projects, tasks and log viewer. Plugin management with search and filter. Dashboard overhaul with 9-card grid. Full i18n completion.',
+    items: [
+      { text: 'Workspace module: Project registry, task queue, and log stream views with full i18n.' },
+      { text: 'Plugin Manager: Search/filter plugins, toggle with error handling, enabled/disabled/all views.' },
+      { text: 'Dashboard overhaul: 9-card grid covering all features including workspace items.' },
+      { text: 'Dead code cleanup: Removed 6 unused components (RuntimePanel, InstallView, QuickActionsBar, etc).' },
+      { text: 'Store i18n: cs2.ts, ui-preferences.ts, and tauri service fully localized.' },
+      { text: 'Test infrastructure: vitest setup with i18n/Pinia/environment, 12/12 tests passing.' },
+    ],
+  },
+  {
     version: '2.1.0',
     date: '2026-07-23',
     title: '2.1.0 Full i18n Completion',

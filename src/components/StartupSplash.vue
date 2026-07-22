@@ -1,9 +1,11 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import appIconUrl from '../../src-tauri/icons/icon.png?url'
 import { ensureSoftwareUpdateChecked } from '@/features/software-updates/state'
 
+const { t } = useI18n()
 const emit = defineEmits<{
   done: []
 }>()
@@ -27,7 +29,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div v-if="visible" class="startup-splash" role="status" aria-live="polite" aria-label="正在启动">
+  <div v-if="visible" class="startup-splash" role="status" aria-live="polite" :aria-label="t('status.starting')">
     <div class="startup-splash__mark">
       <img :src="appIconUrl" alt="" />
     </div>

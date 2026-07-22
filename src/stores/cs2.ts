@@ -1,5 +1,6 @@
 import { computed, onMounted, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { useI18n } from 'vue-i18n'
 import { listen } from '@tauri-apps/api/event'
 
 import { appConfig } from '@/config/app'
@@ -82,13 +83,8 @@ function mergeCandidates(...groups: Cs2RootCandidate[][]): Cs2RootCandidate[] {
   return merged
 }
 
-function requireSelectedRoot(rootPath: string) {
-  if (!rootPath) {
-    throw new Error('请先选择 CS2 游戏目录。')
-  }
-}
-
 export const useCs2Store = defineStore('cs2', () => {
+  const { t } = useI18n()
   const candidates = ref<Cs2RootCandidate[]>([])
   const selectedRoot = ref('')
   const environment = ref<Cs2EnvironmentStatus | null>(null)
@@ -118,7 +114,7 @@ export const useCs2Store = defineStore('cs2', () => {
     savePersistedRoots(nextPaths)
 
     candidates.value = mergeCandidates(
-      [{ path: rootPath, source: '安装记录' }],
+      [{ path: rootPath, source: t('store.installedRecord') }],
       candidates.value,
     )
   }
@@ -128,12 +124,12 @@ export const useCs2Store = defineStore('cs2', () => {
     try {
       const persistedCandidates = loadPersistedRoots().map((path) => ({
         path,
-        source: '安装记录',
+        source: t('store.installedRecord'),
       }))
       const discoveredCandidates = await discoverCs2Roots()
       candidates.value = mergeCandidates(persistedCandidates, discoveredCandidates)
       message.value =
-        candidates.value.length > 0 ? '' : '没有自动找到 CS2 目录，请手动选择。'
+        candidates.value.length > 0 ? '' : t('store.scanFailed')
 
       const firstCandidate = candidates.value[0]
       if (!selectedRoot.value && firstCandidate) {
@@ -155,7 +151,7 @@ export const useCs2Store = defineStore('cs2', () => {
 
     candidates.value = mergeCandidates(
       candidates.value,
-      [{ path: environmentStatus.rootPath, source: '当前选择' }],
+      [{ path: environmentStatus.rootPath, source: t('store.currentSelection') }],
     )
   }
 
@@ -216,13 +212,13 @@ export const useCs2Store = defineStore('cs2', () => {
 
     demoDiscovery.value = await discoverDemos(selectedRoot.value)
     message.value = demoDiscovery.value.recentDemo
-      ? `最近 Demo：${demoDiscovery.value.recentDemo.fileName}`
-      : '没有找到 Demo 文件。'
+      ? t('store.recentDemo', { fileName: demoDiscovery.value.recentDemo.fileName })
+      : t('store.noDemoFile')
     return demoDiscovery.value
   }
 
   async function install() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -239,7 +235,7 @@ export const useCs2Store = defineStore('cs2', () => {
   async function launchGame() {
     try {
       await launchCs2Game()
-      message.value = '已向 Steam 发送启动 CS2 请求。'
+      message.value = t('store.launchRequestSent')
     } catch (error) {
       message.value = normalizeError(error)
       throw error
@@ -247,14 +243,14 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function launchGameDirect(insecure: boolean, extraArgs: string[] = []) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     try {
       await launchCs2Direct(selectedRoot.value!, insecure, extraArgs)
       const extra = extraArgs.length ? ` (${extraArgs.join(' ')})` : ''
       message.value = insecure
-        ? `已直接启动 CS2（-insecure${extra}）。`
-        : `已直接启动 CS2${extra}。`
+        ? t('store.launchDirectInsecure', { extra })
+        : t('store.launchDirect', { extra })
     } catch (error) {
       message.value = normalizeError(error)
       throw error
@@ -262,7 +258,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function applyDifficulty(preset: DifficultyPreset) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -275,7 +271,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function switchGameMode(preset: GameModePreset) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -289,7 +285,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function applyUpstreamAim(value: 'head' | 'mixed' | 'body') {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
     busy.value = true
     try {
       const result = await setUpstreamAimPreset(selectedRoot.value, value)
@@ -301,7 +297,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function applyUpstreamNades(value: 'max' | 'more' | 'normal' | 'off') {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
     busy.value = true
     try {
       const result = await setUpstreamNadesPreset(selectedRoot.value, value)
@@ -313,7 +309,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function saveAiApi(nextConfig: Pick<AiApiConfig, 'aiApiUrl' | 'aiApiKey' | 'botRivalryEnabled'>) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -334,12 +330,12 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function resetAiApi() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
       aiApiConfig.value = await resetAiApiConfig(selectedRoot.value)
-      message.value = 'AI 聊天 API 已恢复默认。重启 CS2 或服务器后生效。'
+      message.value = t('store.resetAiApi')
       return aiApiConfig.value
     } finally {
       busy.value = false
@@ -347,7 +343,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function saveNadeRecovery(nextConfig: Pick<NadeRecoveryConfig, 'flash' | 'smoke' | 'he' | 'molotov' | 'incgrenade' | 'decoy'>) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -371,12 +367,12 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function resetNadeRecovery() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
       nadeRecoveryConfig.value = await resetNadeRecoveryConfig(selectedRoot.value)
-      message.value = '道具压制开火时间已恢复默认。重启 CS2 或服务器后生效。'
+      message.value = t('store.resetNadeRecovery')
       return nadeRecoveryConfig.value
     } finally {
       busy.value = false
@@ -397,7 +393,7 @@ export const useCs2Store = defineStore('cs2', () => {
   >
 
   async function saveBotTaunts(nextConfig: EditableBotTauntsConfig) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -424,12 +420,12 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function resetBotTaunts() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
       botTauntsConfig.value = await resetBotTauntsConfig(selectedRoot.value)
-      message.value = 'BotTaunt 嘲讽文本已恢复默认。重启 CS2 或服务器后生效。'
+      message.value = t('store.resetBotTaunts')
       return botTauntsConfig.value
     } finally {
       busy.value = false
@@ -437,7 +433,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function openReplays() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     const result = await openRecentDemoDirectory(selectedRoot.value)
     message.value = result.message
@@ -446,7 +442,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function openDemoFolder(directoryPath: string) {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     const result = await openDemoDirectory(selectedRoot.value, directoryPath)
     message.value = result.message
@@ -454,7 +450,7 @@ export const useCs2Store = defineStore('cs2', () => {
   }
 
   async function uninstall() {
-    requireSelectedRoot(selectedRoot.value)
+    if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
@@ -487,7 +483,7 @@ export const useCs2Store = defineStore('cs2', () => {
       }
     }
 
-    return '操作失败，请保留当前页面截图和诊断日志，方便继续排查。'
+    return t('store.operationFailed')
   }
 
   return {

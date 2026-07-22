@@ -5,31 +5,31 @@ import registry from '@/config/workspace/projects.json'
 import type { NavItem, ProjectProfile, WorkQueueItem, WorkspaceRegistry } from '@/types/app'
 
 const navItems: NavItem[] = [
-  { label: '仪表盘', to: '/', description: '工作区运行时和隔离状态概览' },
-  { label: '项目', to: '/projects', description: '项目注册表和路径隔离关系' },
-  { label: '任务', to: '/tasks', description: '活跃项目的执行队列' },
-  { label: '日志', to: '/logs', description: '项目诊断和命令输出' },
-  { label: '设置', to: '/settings', description: '工作区和环境控制' },
+  { label: 'Dashboard', to: '/', description: 'Workspace runtime and isolation status overview' },
+  { label: 'Projects', to: '/projects', description: 'Project registry and path isolation relationships' },
+  { label: 'Tasks', to: '/tasks', description: 'Active project execution queue' },
+  { label: 'Logs', to: '/logs', description: 'Project diagnostics and command output' },
+  { label: 'Settings', to: '/settings', description: 'Workspace and environment controls' },
 ]
 
 const seedQueue: WorkQueueItem[] = [
   {
     id: 'cs2-installer-hardening',
-    title: '验证 CS2 Bot 安装和配置流程',
+    title: 'Verify CS2 bot install and config pipeline',
     status: 'done',
     owner: 'codex',
     projectId: 'cs2-bot-improver',
   },
   {
     id: 'cs2-release-notes',
-    title: '保持应用内更新日志与打包版本一致',
+    title: 'Keep in-app changelog in sync with package version',
     status: 'done',
-    owner: '人工',
+    owner: 'manual',
     projectId: 'cs2-bot-improver',
   },
   {
     id: 'cs2-workspace-guardrails',
-    title: '构建前验证 CS2 工作区路径隔离',
+    title: 'Validate CS2 workspace path isolation before build',
     status: 'done',
     owner: 'codex',
     projectId: 'cs2-bot-improver',

@@ -1,5 +1,6 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { useI18n } from 'vue-i18n'
 
 const STORAGE_KEY = 'cs2-bot-improver.ui-preferences.v1'
 const DEFAULT_PINNED_COMMANDS = ['bot_kick', 'bot_nades more', '-insecure']
@@ -72,7 +73,7 @@ function defaultState(): UiPreferencesState {
     autoInstallAttemptedVersions: [],
     lastAutoInstall: {
       status: 'idle',
-      message: '还没有进行自动安装检查。',
+      message: 'Auto-install check not yet performed.',
       at: '',
     },
   }
@@ -178,6 +179,7 @@ function makeRestoreId() {
 }
 
 export const useUiPreferencesStore = defineStore('uiPreferences', () => {
+  const { t } = useI18n()
   const state = ref<UiPreferencesState>(defaultState())
   const loaded = ref(false)
 
@@ -266,7 +268,7 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
       id: makeRestoreId(),
       at: nowIso(),
       operation,
-      rootPath: rootPath || '未选择目录',
+      rootPath: rootPath || t('store.dirNotSelected'),
       scope,
       rollbackAvailable,
     }
@@ -275,11 +277,11 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     return point
   }
 
-  function recordError(message: string, context = '通用操作') {
+  function recordError(message: string, context?: string) {
     load()
     state.value.lastError = {
       message,
-      context,
+      context: context || t('store.generalOperation'),
       at: nowIso(),
     }
     persist()

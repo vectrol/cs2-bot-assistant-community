@@ -46,4 +46,19 @@ export const routes: RouteRecordRaw[] = [
     name: 'plugins',
     component: () => import('@/views/PluginsView.vue'),
   },
+  {
+    path: '/projects',
+    name: 'projects',
+    component: () => import('@/views/ProjectsView.vue'),
+  },
+  {
+    path: '/tasks',
+    name: 'tasks',
+    component: () => import('@/views/TasksView.vue'),
+  },
+  {
+    path: '/logs',
+    name: 'logs',
+    component: () => import('@/views/LogsView.vue'),
+  },
 ]

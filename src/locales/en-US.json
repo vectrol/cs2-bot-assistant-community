@@ -28,7 +28,8 @@
     "enter": "Enter",
     "clear": "Clear",
     "copied": "Copied",
-    "copy": "Copy"
+    "copy": "Copy",
+    "backToDashboard": "Back to Dashboard"
   },
   "nav": {
     "control": "Control",
@@ -41,7 +42,37 @@
     "guideHelp": "Guide and Help",
     "system": "System",
     "settings": "Settings",
-    "plugins": "Plugins"
+    "plugins": "Plugins",
+    "projects": "Projects",
+    "tasks": "Tasks",
+    "logs": "Logs"
+  },
+  "workspace": {
+    "projects": {
+      "title": "Registered Projects",
+      "current": "Active",
+      "select": "Select",
+      "fieldId": "ID",
+      "fieldStatus": "Status",
+      "fieldChannel": "Channel",
+      "fieldRootDir": "Source Dir",
+      "fieldDistDir": "Frontend Output",
+      "fieldBundleDir": "Bundle",
+      "fieldLogDir": "Logs",
+      "fieldTauriConfig": "Tauri Config"
+    },
+    "tasks": {
+      "title": "Execution Queue",
+      "assignedTo": "Assigned to",
+      "statusQueued": "Queued",
+      "statusRunning": "Running",
+      "statusBlocked": "Blocked",
+      "statusDone": "Done"
+    },
+    "logs": {
+      "title": "Log Routes",
+      "content": "Frontend: Vite dev server and browser console\nDesktop: Tauri CLI and Rust command output\nWorkspace: Registry validation before each build\nActive project logs: {logDir}\nActive project bundle: {bundleDir}"
+    }
   },
   "guide": {
     "title": "Guide and Help",
@@ -470,6 +501,18 @@
     "openFailed": "Failed to open external link. Please try manually later.",
     "cloudDefaultItem": "This version is ready for download.",
     "entries": {
+      "3_0_0": {
+        "title": "3.0.0 Workspace Hub & Plugin Manager",
+        "summary": "New workspace module with projects, tasks and log viewer. Plugin management with search and filter. Dashboard overhaul with 9-card grid. Full i18n completion.",
+        "items": {
+          "0": "Workspace module: Project registry, task queue, and log stream views with full i18n.",
+          "1": "Plugin Manager: Search/filter plugins, toggle with error handling, enabled/disabled/all views.",
+          "2": "Dashboard overhaul: 9-card grid covering all features including workspace items.",
+          "3": "Dead code cleanup: Removed 6 unused components (RuntimePanel, InstallView, QuickActionsBar, etc).",
+          "4": "Store i18n: cs2.ts, ui-preferences.ts, and tauri service fully localized.",
+          "5": "Test infrastructure: vitest setup with i18n/Pinia/environment, 12/12 tests passing."
+        }
+      },
       "2_1_0": {
         "title": "2.1.0 Full i18n Completion",
         "summary": "All views fully localized (EN/CN), route matching fixed, release notes translated, command library localized, config messages internationalized.",
@@ -1027,6 +1070,24 @@
     "autostartDisabled": "Autostart disabled.",
     "operationFailed": "Operation failed. Please try again."
   },
+  "startupAutomation": {
+    "checking": "Checking if the built-in plugin pack can be auto-installed.",
+    "skippedCs2Running": "CS2 is running, auto-install skipped. Close the game and install manually from the setup page.",
+    "skippedNoDir": "No CS2 directory detected, auto-install skipped. Select a directory on the setup page first.",
+    "installed": "Auto-install completed.",
+    "failed": "Auto-install failed: {message}"
+  },
+  "windowControls": {
+    "region": "Window Controls",
+    "minimize": "Minimize",
+    "maximize": "Maximize / Restore",
+    "close": "Close"
+  },
+  "launchGame": {
+    "ariaLabel": "Launch Game",
+    "close": "Close",
+    "modeLegend": "Launch Mode"
+  },
   "launchModal": {
     "title": "Launch Counter-Strike 2",
     "selectMode": "Select Launch Mode",
@@ -1065,7 +1126,14 @@
     "unknownVersion": "Unknown",
     "enabled": "Enabled",
     "disabled": "Disabled",
-    "hasConfig": "Has Config"
+    "hasConfig": "Has Config",
+    "searchPlaceholder": "Search plugins...",
+    "filterAll": "All",
+    "filterEnabled": "Enabled",
+    "filterDisabled": "Disabled",
+    "noMatch": "No plugins match your search.",
+    "toggleError": "Failed to toggle plugin. {message}",
+    "loadError": "Failed to load plugins. {message}"
   },
   "actionModal": {
     "title": "Action",
@@ -1106,5 +1174,53 @@
     "ready": "Ready",
     "busy": "Processing...",
     "error": "Error"
+  },
+  "store": {
+    "noRoot": "Please select the CS2 game directory first.",
+    "installedRecord": "Install Record",
+    "scanFailed": "No CS2 directory found automatically. Please select manually.",
+    "currentSelection": "Current Selection",
+    "recentDemo": "Recent Demo: {fileName}",
+    "noDemoFile": "No demo files found.",
+    "launchRequestSent": "Steam launch request for CS2 has been sent.",
+    "launchDirect": "CS2 launched directly{extra}.",
+    "launchDirectInsecure": "CS2 launched directly (-insecure{extra}).",
+    "resetAiApi": "AI Chat API has been reset to defaults. Restart CS2 or the server for changes to take effect.",
+    "resetNadeRecovery": "Nade recovery fire suppression time has been reset. Restart CS2 or the server for changes to take effect.",
+    "resetBotTaunts": "BotTaunt taunt text has been reset to defaults. Restart CS2 or the server for changes to take effect.",
+    "operationFailed": "Operation failed. Please keep a screenshot and diagnostic logs for troubleshooting.",
+    "notChecked": "Auto-install check not yet performed.",
+    "dirNotSelected": "No directory selected",
+    "generalOperation": "General Operation"
+  },
+  "releaseNotesModal": {
+    "title": "{appName} v{version} What's New",
+    "openFailed": "Failed to open GitHub link. Please visit manually later.",
+    "eyebrow": "Release Notes",
+    "close": "Got it"
+  },
+  "webOnly": {
+    "install": "Web preview cannot install packages. Target: {path}",
+    "difficulty": "Web preview cannot switch difficulty: {preset}. Target: {path}",
+    "aimPreset": "Web preview cannot write Aim preset: {value}. Target: {path}",
+    "nadePreset": "Web preview cannot write grenade preset: {value}. Target: {path}",
+    "modeSwitch": "Web preview cannot switch mode: {preset}. Target: {path}",
+    "aiChat": "Web preview cannot save AI Chat config. Target: {path}",
+    "botTaunt": "Web preview cannot save taunt text. Target: {path}",
+    "nadeRecovery": "Web preview cannot save nade recovery fire suppression time. Target: {path}",
+    "commandFile": "Web preview cannot read Commands.txt from the built-in resource pack.",
+    "openDemoDir": "Web preview cannot open demo directory. Target: {path}",
+    "openReplays": "Web preview cannot open replays directory. Target: {path}",
+    "openLogDir": "Web preview cannot open log location. Desktop app will open the native log directory.",
+    "uninstall": "Web preview cannot uninstall plugin pack. Target: {path}",
+    "diagnostics": "Web preview has no native runtime logs",
+    "diagnosticsApp": "App: {appName}",
+    "diagnosticsGenerated": "Generated: {time}",
+    "diagnosticsLogFile": "Log File: {logPath}",
+    "diagnosticsCs2Running": "cs2.exe running: No",
+    "diagnosticsDir": "Selected directory: {path}",
+    "diagnosticsNoDir": "No CS2 directory selected.",
+    "diagnosticsRecentLogs": "Recent log preview:",
+    "diagnosticsWebOnly": "Web preview can only validate the UI. Install, write, and open directory features require the Tauri desktop environment."
   }
 }

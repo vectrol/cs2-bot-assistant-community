@@ -39,6 +39,9 @@ const icons: Record<string, string> = {
   help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke-linecap="round"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
   sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
   plugins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6h3M4 12h3M4 18h3"/><rect x="7" y="4" width="13" height="16" rx="2"/><path d="M12 10h5M12 14h5"/></svg>',
+  folder: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M2 6a2 2 0 012-2h5l2 2h9a2 2 0 012 2v10a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="10"/></svg>',
+  file: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>',
 }
 
 const navItems = computed(() => [
@@ -46,6 +49,9 @@ const navItems = computed(() => [
   { label: t('nav.inventory'), to: '/inventory', icon: 'grid' },
   { label: t('nav.commands'), to: '/commands', icon: 'terminal' },
   { label: t('nav.configConsole'), to: '/config', icon: 'gear' },
+  { label: t('nav.projects'), to: '/projects', icon: 'folder' },
+  { label: t('nav.tasks'), to: '/tasks', icon: 'check' },
+  { label: t('nav.logs'), to: '/logs', icon: 'file' },
   { label: t('nav.guideHelp'), to: '/guide', icon: 'help' },
   { label: t('nav.settings'), to: '/settings', icon: 'sliders' },
   { label: t('nav.plugins'), to: '/plugins', icon: 'plugins' },
@@ -87,7 +93,7 @@ watch(() => route.fullPath, (routePath) => {
   <div class="app-chrome">
     <header class="app-titlebar">
       <div class="app-titlebar-brand" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize">
-        <RouterLink v-if="!isDashboard" to="/" class="back-button" title="返回仪表盘">
+        <RouterLink v-if="!isDashboard" to="/" class="back-button" :title="t('app.backToDashboard')">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
         </RouterLink>
         <span>{{ appConfig.appName }}</span>

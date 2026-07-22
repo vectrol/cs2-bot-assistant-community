@@ -1,12 +1,25 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { useWorkspaceStore } from '@/stores/workspace'
 
+const { t } = useI18n()
 const workspace = useWorkspaceStore()
+
+const detailFields: Array<{ key: keyof typeof t; field: string }> = [
+  { key: 'workspace.projects.fieldId', field: 'id' },
+  { key: 'workspace.projects.fieldStatus', field: 'status' },
+  { key: 'workspace.projects.fieldChannel', field: 'channel' },
+  { key: 'workspace.projects.fieldRootDir', field: 'rootDir' },
+  { key: 'workspace.projects.fieldDistDir', field: 'distDir' },
+  { key: 'workspace.projects.fieldBundleDir', field: 'bundleDir' },
+  { key: 'workspace.projects.fieldLogDir', field: 'logDir' },
+  { key: 'workspace.projects.fieldTauriConfig', field: 'tauriConfig' },
+]
 </script>
 
 <template>
   <section class="panel">
-    <p class="eyebrow">已注册项目</p>
+    <p class="eyebrow">{{ t('workspace.projects.title') }}</p>
     <div class="project-grid">
       <article
         v-for="project in workspace.projects"
@@ -20,42 +33,14 @@ const workspace = useWorkspaceStore()
             <p class="muted">{{ project.description }}</p>
           </div>
           <button type="button" class="project-button" @click="workspace.setActiveProject(project.id)">
-            {{ workspace.activeProject?.id === project.id ? '当前项目' : '选择' }}
+            {{ workspace.activeProject?.id === project.id ? t('workspace.projects.current') : t('workspace.projects.select') }}
           </button>
         </div>
 
         <dl class="project-meta">
-          <div>
-            <dt>ID</dt>
-            <dd>{{ project.id }}</dd>
-          </div>
-          <div>
-            <dt>状态</dt>
-            <dd>{{ project.status }}</dd>
-          </div>
-          <div>
-            <dt>通道</dt>
-            <dd>{{ project.channel }}</dd>
-          </div>
-          <div>
-            <dt>源码目录</dt>
-            <dd><code>{{ project.rootDir }}</code></dd>
-          </div>
-          <div>
-            <dt>前端产物</dt>
-            <dd><code>{{ project.distDir }}</code></dd>
-          </div>
-          <div>
-            <dt>安装包</dt>
-            <dd><code>{{ project.bundleDir }}</code></dd>
-          </div>
-          <div>
-            <dt>日志</dt>
-            <dd><code>{{ project.logDir }}</code></dd>
-          </div>
-          <div>
-            <dt>Tauri 配置</dt>
-            <dd><code>{{ project.tauriConfig }}</code></dd>
+          <div v-for="f in detailFields" :key="f.field">
+            <dt>{{ t(f.key) }}</dt>
+            <dd><code>{{ (project as any)[f.field] }}</code></dd>
           </div>
         </dl>
       </article>

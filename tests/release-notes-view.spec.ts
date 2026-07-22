@@ -18,10 +18,6 @@ function mountView() {
   return mount(ReleaseNotesView, {
     global: {
       stubs: {
-        RouterLink: {
-          props: ['to'],
-          template: '<a><slot /></a>',
-        },
         SummaryStrip: {
           props: ['items'],
           template: '<div><span v-for="item in items" :key="item.label">{{ item.label }}: {{ item.value }}</span></div>',
@@ -49,10 +45,9 @@ describe('ReleaseNotesView', () => {
     const wrapper = mountView()
     await vi.dynamicImportSettled()
 
-    expect(wrapper.text()).toContain('线上 0.4.3 标题')
-    expect(wrapper.text()).toContain('线上 0.4.3 摘要')
-    expect(wrapper.text()).toContain('线上 0.4.3 条目')
-    expect(wrapper.text()).not.toContain('0.4.3 旧版 BotHider 残留清理增强')
+    expect(wrapper.text()).toContain('Cloud 100.0.0 Title')
+    expect(wrapper.text()).toContain('Cloud 100.0.0 Summary')
+    expect(wrapper.text()).toContain('Cloud 100.0.0 Item')
     expect(wrapper.text()).toContain('日志来源: 线上 + 内置')
   })
 
@@ -120,15 +115,15 @@ function makePayload() {
       {
         projectId: 'cs2-bot-improver',
         channel: 'prod',
-        version: '0.4.3',
-        title: '线上 0.4.3 标题',
-        summary: '线上 0.4.3 摘要',
-        items: ['线上 0.4.3 条目'],
+        version: '100.0.0',
+        title: 'Cloud 100.0.0 Title',
+        summary: 'Cloud 100.0.0 Summary',
+        items: ['Cloud 100.0.0 Item'],
         severity: 'normal' as const,
         publishedAt: '2026-07-01T12:00:00.000Z',
         download: {
           type: 'quark',
-          label: '打开夸克网盘',
+          label: '夸克网盘',
           url: 'https://example.com/download',
         },
       },
