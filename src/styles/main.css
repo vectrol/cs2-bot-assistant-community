@@ -58,6 +58,10 @@
   --field-bg: rgba(2, 6, 23, 0.42);
   --scrollbar-thumb: rgba(56, 189, 248, 0.34);
   --scrollbar-track: rgba(148, 163, 184, 0.08);
+  --glass-bg: rgba(15, 23, 42, 0.58);
+  --glass-border: rgba(148, 163, 184, 0.10);
+  --glass-blur: 18px;
+  --glass-shadow: 0 8px 36px rgba(0,0,0,0.24);
   --theme-toggle-bg: rgba(148, 163, 184, 0.08);
   --theme-toggle-border: rgba(148, 163, 184, 0.16);
   --theme-toggle-shadow: none;
@@ -3412,6 +3416,55 @@ code {
   }
 }
 
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+
+@keyframes fade-in-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slide-in-right {
+  from { opacity: 0; transform: translateX(12px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.page-enter-active {
+  animation: fade-in-up 0.25s ease both;
+}
+
+.page-leave-active {
+  animation: fade-in 0.15s ease reverse both;
+}
+
+.stagger-enter > * {
+  animation: fade-in-up 0.3s ease both;
+}
+.stagger-enter > *:nth-child(1) { animation-delay: 0ms; }
+.stagger-enter > *:nth-child(2) { animation-delay: 60ms; }
+.stagger-enter > *:nth-child(3) { animation-delay: 120ms; }
+.stagger-enter > *:nth-child(4) { animation-delay: 180ms; }
+.stagger-enter > *:nth-child(5) { animation-delay: 240ms; }
+.stagger-enter > *:nth-child(6) { animation-delay: 300ms; }
+
 @media (prefers-reduced-motion: reduce) {
-  .skeleton-line { animation: none; }
+  .skeleton-line,
+  .stagger-enter > *,
+  .page-enter-active,
+  .page-leave-active { animation: none; }
 }

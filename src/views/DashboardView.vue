@@ -11,11 +11,20 @@ const { t } = useI18n()
 const store = useCs2Store()
 const openLaunchModal = inject<() => void>('openLaunchGameModal')
 
+const icons: Record<string, string> = {
+  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
+  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>',
+  terminal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>',
+  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-linecap="round"/></svg>',
+  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke-linecap="round"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
+  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
+}
+
 const cards = computed(() => [
   {
     title: t('nav.quickControl'),
     desc: t('quickControl.oneClickFlow'),
-    icon: '⚡',
+    icon: 'play',
     to: '/quick-control',
     color: 'var(--accent)',
     actions: openLaunchModal ? [
@@ -25,35 +34,35 @@ const cards = computed(() => [
   {
     title: t('nav.inventory'),
     desc: t('inventory.hint'),
-    icon: '🎒',
+    icon: 'grid',
     to: '/inventory',
     color: '#a855f7',
   },
   {
     title: t('nav.commands'),
     desc: t('commands.title'),
-    icon: '⌨',
+    icon: 'terminal',
     to: '/commands',
     color: '#22c55e',
   },
   {
     title: t('nav.configConsole'),
     desc: t('config.nadeRecovery'),
-    icon: '⚙',
+    icon: 'gear',
     to: '/config',
     color: '#f59e0b',
   },
   {
     title: t('nav.guideHelp'),
     desc: t('guide.environmentTitle'),
-    icon: '📖',
+    icon: 'help',
     to: '/guide',
     color: '#06b6d4',
   },
   {
     title: t('nav.settings'),
     desc: t('settings.appearance'),
-    icon: '🎨',
+    icon: 'sliders',
     to: '/settings',
     color: '#ec4899',
   },
@@ -66,11 +75,15 @@ const statusItems = computed(() => [
   { label: t('quickControl.gameMode'), value: envStatus.value?.activeGameMode === 'withBots' ? t('quickControl.botMode') : t('quickControl.onlineMode'), state: 'info' as const },
   { label: t('guide.environmentTitle'), value: envStatus.value ? (envStatus.value.baseEnvironmentReady ? t('guide.environmentReady') : t('guide.environmentIncomplete')) : t('guide.notChecked'), state: envStatus.value?.baseEnvironmentReady ? 'ready' as const : 'warn' as const },
 ])
+
+function getIcon(name: string): string {
+  return icons[name] || ''
+}
 </script>
 
 <template>
   <section class="page-grid dashboard-page">
-    <article class="hero-banner dashboard-hero">
+    <article class="hero-banner dashboard-hero glass stagger-enter" style="animation: fade-in-up 0.25s ease;">
       <div>
         <p class="eyebrow">{{ t('app.brandLabel') }}</p>
         <h2>{{ t('app.name') }}</h2>
@@ -88,15 +101,15 @@ const statusItems = computed(() => [
       </div>
     </article>
 
-    <div class="dashboard-grid">
+    <div class="dashboard-grid stagger-enter">
       <article
         v-for="card in cards"
         :key="card.title"
-        class="dashboard-card"
+        class="dashboard-card glass"
         :style="{ '--card-color': card.color }"
       >
         <div class="dashboard-card__header">
-          <span class="dashboard-card__icon">{{ card.icon }}</span>
+          <span class="dashboard-card__icon" v-html="getIcon(card.icon)" />
           <div>
             <h3>{{ card.title }}</h3>
             <p class="muted">{{ card.desc }}</p>
@@ -149,19 +162,18 @@ const statusItems = computed(() => [
 }
 
 .dashboard-card {
-  background: var(--panel-bg);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius-lg);
   padding: 1.25rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  transition: box-shadow 0.2s, border-color 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
   border-left: 3px solid var(--card-color);
+  border-radius: var(--radius-lg);
 }
 
 .dashboard-card:hover {
-  box-shadow: var(--elevation-2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
   border-color: var(--card-color);
 }
 
@@ -172,10 +184,18 @@ const statusItems = computed(() => [
 }
 
 .dashboard-card__icon {
-  font-size: 1.75rem;
-  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
-  margin-top: 0.1rem;
+  width: 40px;
+  height: 40px;
+  color: var(--card-color);
+}
+
+.dashboard-card__icon :deep(svg) {
+  width: 28px;
+  height: 28px;
 }
 
 .dashboard-card__header h3 {
@@ -187,5 +207,14 @@ const statusItems = computed(() => [
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-card {
+    transition: none;
+  }
+  .dashboard-card:hover {
+    transform: none;
+  }
 }
 </style>

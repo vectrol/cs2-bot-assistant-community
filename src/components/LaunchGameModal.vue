@@ -72,12 +72,11 @@ const launchLabel = computed(() => {
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="modal-backdrop launch-game-backdrop" role="dialog" aria-modal="true" aria-label="启动游戏">
-      <article class="launch-game-modal">
+    <div v-if="open" class="modal-backdrop launch-game-backdrop" style="animation: fade-in 0.15s ease;" role="dialog" aria-modal="true" aria-label="启动游戏">
+      <article class="launch-game-modal glass" style="backdrop-filter: blur(28px); animation: scale-in 0.2s ease;">
         <button class="launch-game-modal__close" type="button" aria-label="关闭" @click="emit('close')">
-          <svg aria-hidden="true" viewBox="0 0 24 24">
-            <path d="m7 7 10 10" />
-            <path d="m17 7-10 10" />
+          <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <path d="M18 6L6 18M6 6l12 12" />
           </svg>
         </button>
         <div class="launch-game-modal__scanline" aria-hidden="true" />
