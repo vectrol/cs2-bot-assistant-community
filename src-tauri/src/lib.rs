@@ -67,6 +67,10 @@ pub fn run() {
             commands::cs2::get_diagnostics_payload,
             commands::cs2::list_plugins,
             commands::cs2::toggle_plugin,
+            commands::resource::get_resource_pack_info,
+            commands::resource::create_backup,
+            commands::resource::list_backups,
+            commands::resource::restore_backup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

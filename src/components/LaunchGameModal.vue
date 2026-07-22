@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 
 import { useCs2Store } from '@/stores/cs2'
 
+
 const { t } = useI18n()
 
 defineProps<{

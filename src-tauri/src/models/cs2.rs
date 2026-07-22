@@ -49,6 +49,25 @@ pub struct PluginInfo {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct ResourcePackInfo {
+    pub version: String,
+    pub file_size: u64,
+    pub plugin_count: usize,
+    pub bundled_version: String,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BackupEntry {
+    pub id: String,
+    pub created_at: String,
+    pub root_path: String,
+    pub label: String,
+    pub file_count: usize,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OperationResult {
     pub success: bool,
     pub message: String,
