@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import CollapsiblePanel from '@/components/CollapsiblePanel.vue'
 import SummaryStrip from '@/components/SummaryStrip.vue'
@@ -9,6 +10,8 @@ import type { ReleaseNoteEntry } from '@/features/release-notes/data'
 import type { SoftwareRelease } from '@/features/software-updates/types'
 import { fetchSoftwareReleaseHistory } from '@/services/software-updates'
 import { openExternalUrl } from '@/services/tauri/app'
+
+const { t } = useI18n()
 
 const openMessage = ref('')
 const cloudEntries = ref<ReleaseNoteEntry[] | null>(null)
@@ -31,36 +34,31 @@ const entries = computed(() => {
   return [...mergedByVersion.values()].sort(compareReleaseNotes)
 })
 const entrySourceLabel = computed(() => {
-  if (cloudStatus.value === 'failed') {
-    return '内置日志'
-  }
-  if (cloudStatus.value === 'not-configured') {
-    return '线上源未配置'
-  }
-  if (cloudStatus.value === 'loading') {
-    return '读取中'
-  }
-  if (cloudStatus.value === 'builtin') {
-    return '线上无记录'
-  }
-  return '线上 + 内置'
+  const key = {
+    failed: 'sourceFailed',
+    'not-configured': 'sourceNotConfigured',
+    loading: 'sourceLoading',
+    builtin: 'sourceBuiltin',
+    online: 'sourceOnline',
+  }[cloudStatus.value] || 'sourceOnline'
+  return t(`releaseNotes.${key}`)
 })
 const latestEntry = computed(() => entries.value[0] ?? null)
 const historyEntries = computed(() => entries.value.slice(1))
 const summaryItems = computed(() => [
   {
-    label: '最新版本',
-    value: latestEntry.value ? `v${latestEntry.value.version}` : '暂无',
+    label: t('releaseNotes.latestVersion'),
+    value: latestEntry.value ? `v${latestEntry.value.version}` : t('releaseNotes.none'),
     state: latestEntry.value ? 'ready' as const : 'warn' as const,
   },
   {
-    label: '日志来源',
+    label: t('releaseNotes.logSource'),
     value: entrySourceLabel.value,
     state: cloudStatus.value === 'failed' || cloudStatus.value === 'not-configured' ? 'warn' as const : 'ready' as const,
   },
   {
-    label: '历史版本',
-    value: `${historyEntries.value.length} 条`,
+    label: t('releaseNotes.historyCount'),
+    value: `${historyEntries.value.length} ${t('releaseNotes.count')}`,
     state: 'ready' as const,
   },
 ])
@@ -136,12 +134,12 @@ async function openLink(url: string) {
   <section class="page-grid">
     <article class="hero-banner">
       <div>
-        <p class="eyebrow">更新日志</p>
-        <h2>查看每个版本具体更新了什么。</h2>
+        <p class="eyebrow">{{ t('releaseNotes.title') }}</p>
+        <h2>{{ t('releaseNotes.description') }}</h2>
       </div>
       <div class="hero-status">
         <RouterLink class="ghost-button" to="/settings">
-          返回设置
+          {{ t('releaseNotes.backToSettings') }}
         </RouterLink>
         <span class="status-badge" data-state="ready">最新版本 v{{ latestEntry?.version }}</span>
       </div>

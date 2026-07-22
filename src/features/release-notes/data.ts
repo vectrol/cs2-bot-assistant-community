@@ -22,6 +22,18 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '1.3.1',
+    date: '2026-07-22',
+    title: '1.3.1 紧急修复：导航精简、i18n补充',
+    summary: '删除废弃的「我的指令」导航；ReleaseNotesView 改用 i18n；补全英文翻译。',
+    items: [
+      { text: '删除「我的指令」导航项、路由和视图（CustomCommandsView 仅为 /commands 重定向）。' },
+      { text: 'ReleaseNotesView 中文化字符串替换为 i18n 调用，支持中英文显示。' },
+      { text: '补全英文翻译，包括 releaseNotes 等缺失的 key。' },
+      { text: '修复 JSON 编码问题导致类型检查失败。' },
+    ],
+  },
+  {
     version: '1.3.0',
     date: '2026-07-22',
     title: '1.3.0 多语言、启动参数、插件版本诊断',

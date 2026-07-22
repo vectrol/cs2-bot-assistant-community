@@ -26,11 +26,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/CommandsView.vue'),
   },
   {
-    path: '/custom-commands',
-    name: 'custom-commands',
-    component: () => import('@/views/CustomCommandsView.vue'),
-  },
-  {
     path: '/settings',
     name: 'settings',
     component: () => import('@/views/SettingsView.vue'),

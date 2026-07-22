@@ -41,7 +41,6 @@ const navGroups = computed(() => [
       { label: t('nav.quickControl'), to: '/quick-control', description: t('nav.quickControl') },
       { label: t('nav.inventory'), to: '/inventory', description: t('nav.inventory') },
       { label: t('nav.commands'), to: '/commands', description: t('nav.commands') },
-      { label: t('nav.customCommands'), to: '/custom-commands', description: t('nav.customCommands') },
     ],
   },
   {

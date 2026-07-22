@@ -16,7 +16,6 @@
     "quickControl": "作战总览",
     "inventory": "库存模拟",
     "commands": "指令库",
-    "customCommands": "我的指令",
     "config": "配置",
     "configConsole": "配置控制台",
     "guide": "资料",
@@ -116,6 +115,21 @@
       "developer": "开发者",
       "misc": "其他"
     }
+  },
+  "releaseNotes": {
+    "title": "更新日志",
+    "description": "查看每个版本具体更新了什么。",
+    "backToSettings": "返回设置",
+    "latestVersion": "最新版本",
+    "logSource": "日志来源",
+    "historyCount": "历史版本",
+    "count": "条",
+    "none": "暂无",
+    "sourceOnline": "线上 + 内置",
+    "sourceBuiltin": "线上无记录",
+    "sourceFailed": "内置日志",
+    "sourceNotConfigured": "线上源未配置",
+    "sourceLoading": "读取中"
   },
   "config": {
     "title": "配置控制台",

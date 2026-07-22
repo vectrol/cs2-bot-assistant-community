@@ -16,16 +16,15 @@
     "quickControl": "Quick Control",
     "inventory": "Inventory",
     "commands": "Commands",
-    "customCommands": "My Commands",
     "config": "Config",
     "configConsole": "Config Console",
     "guide": "Help",
-    "guideHelp": "Guide & Help",
+    "guideHelp": "Guide and Help",
     "system": "System",
     "settings": "Settings"
   },
   "guide": {
-    "title": "Guide & Help",
+    "title": "Guide and Help",
     "selectRoot": "Select CS2 Directory",
     "selectRootHint": "Choose your Counter-Strike Global Offensive installation folder",
     "browse": "Browse",
@@ -96,9 +95,9 @@
     "copyCt": "Copy CT",
     "copyT": "Copy T",
     "copySuccess": "Copied to clipboard",
-    "oneClickFlow": "One-Click Install & Launch",
+    "oneClickFlow": "One-Click Install and Launch",
     "oneClick": "One-Click Launch",
-    "oneClickHint": "Install plugin pack → Set Bot Mode → Launch CS2"
+    "oneClickHint": "Install plugin pack - Set Bot Mode - Launch CS2"
   },
   "commands": {
     "title": "Command Library",
@@ -116,6 +115,21 @@
       "developer": "Developer",
       "misc": "Misc"
     }
+  },
+  "releaseNotes": {
+    "title": "Release Notes",
+    "description": "See what's new in each version.",
+    "backToSettings": "Back to Settings",
+    "latestVersion": "Latest Version",
+    "logSource": "Log Source",
+    "historyCount": "History",
+    "count": "entries",
+    "none": "None",
+    "sourceOnline": "Online + Built-in",
+    "sourceBuiltin": "No Online Records",
+    "sourceFailed": "Built-in Only",
+    "sourceNotConfigured": "Online Source Not Configured",
+    "sourceLoading": "Loading"
   },
   "config": {
     "title": "Config Console",
@@ -181,7 +195,7 @@
   },
   "theme": {
     "customize": "Customize Theme",
-    "accentHint": "Drag the slider to adjust the accent color (0-360° hue)"
+    "accentHint": "Drag the slider to adjust the accent color (0-360 hue)"
   },
   "status": {
     "cs2Running": "CS2 is running",
