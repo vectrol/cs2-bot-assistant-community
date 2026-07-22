@@ -18,8 +18,8 @@ pub fn launch_cs2_game() -> Result<(), String> {
 }
 
 #[tauri::command]
-pub fn launch_cs2_direct(cs2_root: String, insecure: bool) -> Result<(), String> {
-    app_runtime::launch_cs2_direct(&cs2_root, insecure).map_err(AppError::into_string)
+pub fn launch_cs2_direct(cs2_root: String, insecure: bool, extra_args: Vec<String>) -> Result<(), String> {
+    app_runtime::launch_cs2_direct(&cs2_root, insecure, extra_args).map_err(AppError::into_string)
 }
 
 #[tauri::command]

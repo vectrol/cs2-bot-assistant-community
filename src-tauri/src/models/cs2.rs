@@ -1,4 +1,6 @@
 
+use std::collections::HashMap;
+
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize)]
@@ -30,6 +32,8 @@ pub struct Cs2EnvironmentStatus {
     pub ray_trace_impl_exists: bool,
     pub round_damage_recap_exists: bool,
     pub inventory_simulator_exists: bool,
+    pub plugin_versions: HashMap<String, String>,
+    pub css_version: String,
     pub active_game_mode: String,
     pub base_environment_ready: bool,
 }

@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::fs::{self, File, OpenOptions};
 use std::io::{self, Write};
 use std::path::{Path, PathBuf};
@@ -134,6 +134,30 @@ pub fn discover_cs2_roots() -> Result<Vec<Cs2RootCandidate>, AppError> {
     Ok(candidates)
 }
 
+fn read_plugin_version(plugins_dir: &Path, plugin_name: &str) -> String {
+    let deps_path = plugins_dir
+        .join(plugin_name)
+        .join(format!("{plugin_name}.deps.json"));
+    let content = match fs::read_to_string(&deps_path) {
+        Ok(c) => c,
+        Err(_) => return String::new(),
+    };
+    let json: serde_json::Value = match serde_json::from_str(&content) {
+        Ok(v) => v,
+        Err(_) => return String::new(),
+    };
+    let Some(libraries) = json.get("libraries").and_then(|v| v.as_object()) else {
+        return String::new();
+    };
+    let prefix = format!("{plugin_name}/");
+    for key in libraries.keys() {
+        if let Some(version) = key.strip_prefix(&prefix) {
+            return version.to_string();
+        }
+    }
+    String::new()
+}
+
 pub fn inspect_cs2_root(root_path: &str) -> Result<Cs2EnvironmentStatus, AppError> {
     let root = normalize_root(root_path)?;
     let game_dir = root.join("game");
@@ -190,6 +214,36 @@ pub fn inspect_cs2_root(root_path: &str) -> Result<Cs2EnvironmentStatus, AppErro
         .join("counterstrikesharp")
         .join("plugins")
         .join("InventorySimulator");
+    let plugins_dir = csgo_dir
+        .join("addons")
+        .join("counterstrikesharp")
+        .join("plugins");
+    let plugin_names = [
+        "BotAI",
+        "BotAimImprover",
+        "BotBuy",
+        "BotState",
+        "BotRandomizer",
+        "NadeSystem",
+        "BotHiderImpl",
+        "BotControllerImpl",
+        "RayTraceImpl",
+        "RoundDamageRecap",
+        "InventorySimulator",
+    ];
+    let mut plugin_versions = HashMap::new();
+    for name in &plugin_names {
+        let v = read_plugin_version(&plugins_dir, name);
+        if !v.is_empty() {
+            plugin_versions.insert(name.to_string(), v);
+        }
+    }
+
+    let css_version = read_plugin_version(
+        &csgo_dir.join("addons").join("counterstrikesharp").join("api"),
+        "CounterStrikeSharp.API",
+    );
+
     let active_gameinfo = fs::read(csgo_dir.join(GAMEINFO_FILE_NAME)).unwrap_or_default();
     let active_game_mode = if contains_metamod_search_path(&active_gameinfo) {
         "withBots".to_string()
@@ -217,6 +271,12 @@ pub fn inspect_cs2_root(root_path: &str) -> Result<Cs2EnvironmentStatus, AppErro
         ray_trace_impl_exists: ray_trace_impl.exists(),
         round_damage_recap_exists: round_damage_recap.exists(),
         inventory_simulator_exists: inventory_simulator.exists(),
+        plugin_versions,
+        css_version: if css_version.is_empty() {
+            String::new()
+        } else {
+            css_version
+        },
         active_game_mode,
         base_environment_ready: metamod.exists()
             && counterstrike_sharp.exists()

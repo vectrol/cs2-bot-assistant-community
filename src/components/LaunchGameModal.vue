@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useCs2Store } from '@/stores/cs2'
+
+const { t } = useI18n()
 
 defineProps<{
   open: boolean
@@ -11,24 +14,45 @@ const emit = defineEmits<{
   close: []
 }>()
 
+const STORAGE_KEY = 'cs2-custom-launch-args'
+
 const store = useCs2Store()
 const launching = ref(false)
 const launchMode = ref<'steam' | 'direct'>('steam')
 const insecureEnabled = ref(true)
+const customArgs = ref('')
 
 const hasSelectedRoot = computed(() => !!store.selectedRoot)
 const cs2Running = computed(() => store.cs2Running)
 
-const modeOptions = [
-  { value: 'steam' as const, label: 'Steam 协议', detail: '通过 steam:// 启动，Steam 管理启动项和-insecure。' },
-  { value: 'direct' as const, label: '直接启动', detail: '绕过 Steam 直接运行 cs2.exe，需自行处理启动参数。' },
-]
+const modeOptions = computed(() => [
+  { value: 'steam' as const, label: t('launchModal.steam'), detail: t('launchModal.steamDetail') },
+  { value: 'direct' as const, label: t('launchModal.direct'), detail: t('launchModal.directDetail') },
+])
+
+function loadCustomArgs() {
+  if (typeof window !== 'undefined') {
+    customArgs.value = window.localStorage.getItem(STORAGE_KEY) || ''
+  }
+}
+
+function saveCustomArgs() {
+  if (typeof window !== 'undefined') {
+    window.localStorage.setItem(STORAGE_KEY, customArgs.value)
+  }
+}
+
+loadCustomArgs()
 
 async function launchGame() {
   launching.value = true
   try {
     if (launchMode.value === 'direct') {
-      await store.launchGameDirect(insecureEnabled.value)
+      const extra = customArgs.value.trim()
+        ? customArgs.value.trim().split(/\s+/).filter(Boolean)
+        : []
+      await store.launchGameDirect(insecureEnabled.value, extra)
+      saveCustomArgs()
     } else {
       await store.launchGame()
     }
@@ -39,9 +63,10 @@ async function launchGame() {
 }
 
 const launchLabel = computed(() => {
-  if (launching.value) return '正在发送启动请求'
-  if (launchMode.value === 'steam') return '启动 CS2 (Steam)'
-  return insecureEnabled.value ? '启动 CS2 (-insecure)' : '启动 CS2'
+  if (launching.value) return t('launchModal.launching')
+  if (launchMode.value === 'steam') return t('launchModal.launchSteam')
+  const extra = customArgs.value.trim()
+  return extra ? `${t('launchModal.launchDirect')} (${extra})` : insecureEnabled.value ? `${t('launchModal.launchDirect')} (-insecure)` : t('launchModal.launchDirect')
 })
 </script>
 
@@ -57,8 +82,8 @@ const launchLabel = computed(() => {
         </button>
         <div class="launch-game-modal__scanline" aria-hidden="true" />
         <div class="launch-game-modal__content">
-          <p class="eyebrow">选择启动方式</p>
-          <h3>启动 Counter-Strike 2</h3>
+          <p class="eyebrow">{{ t('launchModal.selectMode') }}</p>
+          <h3>{{ t('launchModal.title') }}</h3>
 
           <fieldset class="launch-mode-group">
             <legend class="sr-only">启动模式</legend>
@@ -90,12 +115,27 @@ const launchLabel = computed(() => {
               v-model="insecureEnabled"
               :disabled="!hasSelectedRoot || cs2Running"
             />
-            <span class="insecure-toggle__label">添加 -insecure 启动参数</span>
-            <span class="insecure-toggle__hint">Bot 模式需要此参数，在线模式请关闭。</span>
+            <span class="insecure-toggle__label">{{ t('launchModal.insecure') }}</span>
+            <span class="insecure-toggle__hint">{{ t('launchModal.insecureHint') }}</span>
           </label>
 
-          <p v-if="cs2Running" class="inline-warn">CS2 正在运行，请先退出游戏再启动。</p>
-          <p v-if="launchMode === 'direct' && !hasSelectedRoot" class="inline-warn">需要先选择 CS2 游戏目录才能直接启动。</p>
+          <label
+            v-if="launchMode === 'direct'"
+            class="custom-args-field"
+          >
+            <span class="custom-args-field__label">{{ t('launchModal.customArgs') }}</span>
+            <input
+              type="text"
+              v-model="customArgs"
+              class="custom-args-field__input"
+              :placeholder="t('launchModal.customArgsPlaceholder')"
+              :disabled="!hasSelectedRoot || cs2Running"
+            />
+            <span class="custom-args-field__hint">{{ t('launchModal.customArgsHint') }}</span>
+          </label>
+
+          <p v-if="cs2Running" class="inline-warn">{{ t('launchModal.cs2Running') }}</p>
+          <p v-if="launchMode === 'direct' && !hasSelectedRoot" class="inline-warn">{{ t('launchModal.noRoot') }}</p>
 
           <button
             class="launch-game-button"
@@ -192,6 +232,46 @@ const launchLabel = computed(() => {
 .insecure-toggle__label {
   font-weight: 600;
   font-size: 0.875rem;
+}
+
+.custom-args-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--border-muted);
+  border-radius: 6px;
+}
+
+.custom-args-field__label {
+  font-weight: 600;
+  font-size: 0.875rem;
+  width: 100%;
+}
+
+.custom-args-field__input {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid var(--border-muted);
+  border-radius: 4px;
+  background: var(--field-bg);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.custom-args-field__input:focus {
+  border-color: var(--accent);
+}
+
+.custom-args-field__hint {
+  width: 100%;
+  font-size: 0.75rem;
+  color: var(--text-muted);
 }
 
 .insecure-toggle__hint {

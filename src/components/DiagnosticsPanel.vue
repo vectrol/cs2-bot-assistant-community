@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
 import CopyButton from '@/components/CopyButton.vue'
 import type { Cs2EnvironmentStatus, DiagnosticsPayload } from '@/types/cs2'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   rootPath: string | null
@@ -21,38 +24,50 @@ defineEmits<{
 
 const checks = computed(() => {
   if (!props.environment) return []
+  const l = (key: string) => t(`diagnostics.checks.${key}`)
   return [
-    { label: 'game 文件夹', ok: props.environment.gameDirExists },
-    { label: 'csgo 文件夹', ok: props.environment.csgoDirExists },
-    { label: 'gameinfo.gi', ok: props.environment.gameinfoExists },
-    { label: 'MetaMod', ok: props.environment.metamodExists },
-    { label: 'CounterStrikeSharp', ok: props.environment.counterstrikeSharpExists },
-    { label: 'CSS core.json', ok: props.environment.coreConfigExists },
-    { label: 'BotHider', ok: props.environment.botHiderExists },
-    { label: 'BotHiderImpl', ok: props.environment.botHiderImplExists },
-    { label: 'RayTrace', ok: props.environment.rayTraceExists },
-    { label: 'RayTraceImpl', ok: props.environment.rayTraceImplExists },
-    { label: 'RoundDamageRecap', ok: props.environment.roundDamageRecapExists },
-    { label: 'InventorySimulator', ok: props.environment.inventorySimulatorExists },
-    { label: '难度-低', ok: props.environment.lowProfileExists },
-    { label: '难度-中', ok: props.environment.mediumProfileExists },
-    { label: '难度-高', ok: props.environment.highProfileExists },
-    { label: 'botprofile.vpk', ok: props.environment.activeBotprofileExists },
-    { label: '备份-Online', ok: props.environment.backupOnlineGameinfoExists },
-    { label: '备份-WithBots', ok: props.environment.backupWithbotsGameinfoExists },
+    { label: l('gameDir'), ok: props.environment.gameDirExists },
+    { label: l('csgoDir'), ok: props.environment.csgoDirExists },
+    { label: l('gameinfo'), ok: props.environment.gameinfoExists },
+    { label: l('metamod'), ok: props.environment.metamodExists },
+    { label: l('css'), ok: props.environment.counterstrikeSharpExists },
+    { label: l('coreConfig'), ok: props.environment.coreConfigExists },
+    { label: l('botHider'), ok: props.environment.botHiderExists },
+    { label: l('botHiderImpl'), ok: props.environment.botHiderImplExists },
+    { label: l('rayTrace'), ok: props.environment.rayTraceExists },
+    { label: l('rayTraceImpl'), ok: props.environment.rayTraceImplExists },
+    { label: l('roundDamageRecap'), ok: props.environment.roundDamageRecapExists },
+    { label: l('inventorySimulator'), ok: props.environment.inventorySimulatorExists },
+    { label: l('difficultyLow'), ok: props.environment.lowProfileExists },
+    { label: l('difficultyMid'), ok: props.environment.mediumProfileExists },
+    { label: l('difficultyHigh'), ok: props.environment.highProfileExists },
+    { label: l('botprofile'), ok: props.environment.activeBotprofileExists },
+    { label: l('backupOnline'), ok: props.environment.backupOnlineGameinfoExists },
+    { label: l('backupWithBots'), ok: props.environment.backupWithbotsGameinfoExists },
   ]
 })
 
 const readyCount = computed(() => checks.value.filter((c) => c.ok).length)
 
 const copyText = computed(() => {
+  const env = props.environment
+  const pluginLines: string[] = []
+  if (env?.cssVersion) {
+    pluginLines.push(`  CounterStrikeSharp v${env.cssVersion}`)
+  }
+  if (env?.pluginVersions) {
+    for (const [name, ver] of Object.entries(env.pluginVersions)) {
+      pluginLines.push(`  ${name} v${ver}`)
+    }
+  }
   const lines = [
     `CS2人机助手社区版 v${appConfig.appVersion}`,
     `目录：${props.rootPath || '未选择'}`,
-    `游戏模式：${props.environment?.activeGameMode === 'withBots' ? 'Bot模式' : props.environment?.activeGameMode === 'online' ? '在线模式' : '未知'}`,
+    `游戏模式：${env?.activeGameMode === 'withBots' ? 'Bot模式' : env?.activeGameMode === 'online' ? '在线模式' : '未知'}`,
     `CS2运行中：${props.cs2Running ? '是' : '否'}`,
     `环境检查：${readyCount.value}/${checks.value.length}`,
     ...checks.value.map((c) => `  ${c.ok ? '[OK]' : '[--]'} ${c.label}`),
+    ...(pluginLines.length ? ['插件版本：', ...pluginLines] : []),
     `日志路径：${props.diagnostics?.logPath || '-'}`,
     props.lastError ? `最近错误：${props.lastError.message} (${props.lastError.context})` : '',
   ]
@@ -65,28 +80,28 @@ const copyText = computed(() => {
     <div class="section-head">
       <div>
         <p class="eyebrow">Diagnostics</p>
-        <h3>环境诊断</h3>
+        <h3>{{ t('diagnostics.title') }}</h3>
       </div>
       <div class="diagnostics-actions">
         <button class="ghost-button" type="button" :disabled="busy" @click="$emit('refresh')">
-          刷新
+          {{ t('app.refresh') }}
         </button>
         <button class="ghost-button" type="button" @click="$emit('openLogs')">
-          打开日志
+          {{ t('guide.openLogs') }}
         </button>
-        <CopyButton :text="copyText" label="复制诊断" copied-label="已复制" />
+        <CopyButton :text="copyText" :label="t('guide.copyDiagnostics')" :copied-label="t('guide.copied')" />
       </div>
     </div>
 
     <div class="diagnostics-status-row">
       <span class="status-pill" :data-state="cs2Running ? 'warn' : 'ready'">
-        {{ cs2Running ? 'CS2运行中' : 'CS2未运行' }}
+        {{ cs2Running ? t('app.cs2Running') : t('app.cs2NotRunning') }}
       </span>
       <span class="status-pill" :data-state="!environment ? 'warn' : environment.baseEnvironmentReady ? 'ready' : 'warn'">
-        {{ !environment ? '未检查' : environment.baseEnvironmentReady ? `环境就绪 (${readyCount}/${checks.length})` : `环境不完整 (${readyCount}/${checks.length})` }}
+        {{ !environment ? t('guide.notChecked') : environment.baseEnvironmentReady ? `${t('guide.environmentReady')} (${readyCount}/${checks.length})` : `${t('guide.environmentIncomplete')} (${readyCount}/${checks.length})` }}
       </span>
       <span v-if="environment" class="status-pill" data-state="info">
-        {{ environment.activeGameMode === 'withBots' ? 'Bot模式' : '在线模式' }}
+        {{ environment.activeGameMode === 'withBots' ? t('quickControl.botMode') : t('quickControl.onlineMode') }}
       </span>
     </div>
 
@@ -102,13 +117,34 @@ const copyText = computed(() => {
       </article>
     </div>
 
+    <template v-if="environment && environment.cssVersion">
+      <hr class="diagnostics-divider">
+      <div class="version-section">
+        <p class="eyebrow">{{ t('diagnostics.pluginVersions') }}</p>
+        <div class="version-grid">
+          <article class="version-row">
+            <span>CounterStrikeSharp</span>
+            <code>{{ environment.cssVersion }}</code>
+          </article>
+          <article
+            v-for="(ver, name) in environment.pluginVersions"
+            :key="name"
+            class="version-row"
+          >
+            <span>{{ name }}</span>
+            <code>{{ ver }}</code>
+          </article>
+        </div>
+      </div>
+    </template>
+
     <div v-if="diagnostics?.summary" class="diagnostics-log">
-      <p class="eyebrow">详细日志摘要</p>
+      <p class="eyebrow">{{ t('guide.logSummary') }}</p>
       <pre>{{ diagnostics.summary }}</pre>
     </div>
 
     <div v-if="lastError" class="diagnostics-error">
-      <p class="eyebrow">最近错误</p>
+      <p class="eyebrow">{{ t('guide.lastError') }}</p>
       <code>{{ lastError.message }} ({{ lastError.context }})</code>
     </div>
   </article>
@@ -183,6 +219,43 @@ const copyText = computed(() => {
   max-height: 300px;
   overflow: auto;
   white-space: pre-wrap;
+}
+
+.diagnostics-divider {
+  margin: 1rem 0;
+  border: none;
+  border-top: 1px solid var(--border-muted);
+}
+
+.version-section {
+  margin: 0.5rem 0;
+}
+
+.version-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.3rem;
+  margin-top: 0.4rem;
+}
+
+.version-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--radius-sm);
+  background: var(--ghost-bg);
+  font-size: var(--fs-sm);
+}
+
+.version-row code {
+  font-size: var(--fs-xs);
+  font-family: var(--font-mono);
+  color: var(--accent-text);
+  background: var(--field-bg);
+  padding: 0.1rem 0.35rem;
+  border-radius: var(--radius-xs);
 }
 
 .diagnostics-error {

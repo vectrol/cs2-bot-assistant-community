@@ -23,6 +23,8 @@ export interface Cs2EnvironmentStatus {
   rayTraceImplExists: boolean
   roundDamageRecapExists: boolean
   inventorySimulatorExists: boolean
+  pluginVersions: Record<string, string>
+  cssVersion: string
   activeGameMode: string
   baseEnvironmentReady: boolean
 }

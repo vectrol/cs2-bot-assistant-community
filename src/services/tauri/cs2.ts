@@ -39,6 +39,8 @@ function emptyEnvironment(rootPath: string): Cs2EnvironmentStatus {
     rayTraceImplExists: false,
     roundDamageRecapExists: false,
     inventorySimulatorExists: false,
+    pluginVersions: {},
+    cssVersion: '',
     activeGameMode: '',
     baseEnvironmentReady: false,
   }
@@ -79,11 +81,11 @@ export function launchCs2Game() {
   return invoke<void>('launch_cs2_game')
 }
 
-export function launchCs2Direct(rootPath: string, insecure: boolean) {
+export function launchCs2Direct(rootPath: string, insecure: boolean, extraArgs: string[] = []) {
   if (!isTauriRuntime()) {
     return Promise.resolve()
   }
-  return invoke<void>('launch_cs2_direct', { cs2Root: rootPath, insecure })
+  return invoke<void>('launch_cs2_direct', { cs2Root: rootPath, insecure, extraArgs })
 }
 
 export function installBotPackage(rootPath: string) {

@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { disableAutostart, enableAutostart, isAutostartEnabled } from '@/services/tauri/autostart'
 import { openExternalUrl } from '@/services/tauri/app'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
+import { saveLocale } from '@/app/i18n'
 
 const preferences = useUiPreferencesStore()
+const { locale } = useI18n()
 const { theme, themeLabel, accentHue, applyTheme, setAccent, initializeTheme } = useThemePreference()
 const autostartEnabled = ref(false)
 const autostartLoading = ref(false)
@@ -139,6 +142,22 @@ onMounted(() => {
             @input="setAccent(Number(($event.target as HTMLInputElement).value))"
           />
           <span class="accent-swatch" :style="{ background: `hsl(${accentHue},85%,55%)` }" />
+        </div>
+      </div>
+
+      <div class="accent-picker">
+        <p class="eyebrow">语言 / Language</p>
+        <div class="segmented-control" aria-label="语言">
+          <button
+            :data-active="locale === 'zh-CN'"
+            type="button"
+            @click="locale = 'zh-CN'; saveLocale('zh-CN')"
+          >中文</button>
+          <button
+            :data-active="locale === 'en-US'"
+            type="button"
+            @click="locale = 'en-US'; saveLocale('en-US')"
+          >English</button>
         </div>
       </div>
     </article>

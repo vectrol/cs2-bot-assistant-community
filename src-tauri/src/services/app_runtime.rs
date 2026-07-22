@@ -65,7 +65,7 @@ pub fn launch_cs2_game() -> Result<(), AppError> {
         .map_err(|error| AppError::runtime(format!("打开 CS2 失败：{}", error)))
 }
 
-pub fn launch_cs2_direct(cs2_root: &str, insecure: bool) -> Result<(), AppError> {
+pub fn launch_cs2_direct(cs2_root: &str, insecure: bool, extra_args: Vec<String>) -> Result<(), AppError> {
     let root = std::path::Path::new(cs2_root);
     let exe_path = root
         .join("game")
@@ -83,6 +83,12 @@ pub fn launch_cs2_direct(cs2_root: &str, insecure: bool) -> Result<(), AppError>
     let mut cmd = std::process::Command::new(exe_path);
     if insecure {
         cmd.arg("-insecure");
+    }
+    for arg in &extra_args {
+        let trimmed = arg.trim();
+        if !trimmed.is_empty() {
+            cmd.arg(trimmed);
+        }
     }
 
     cmd.spawn()

@@ -235,14 +235,15 @@ export const useCs2Store = defineStore('cs2', () => {
     }
   }
 
-  async function launchGameDirect(insecure: boolean) {
+  async function launchGameDirect(insecure: boolean, extraArgs: string[] = []) {
     requireSelectedRoot(selectedRoot.value)
 
     try {
-      await launchCs2Direct(selectedRoot.value!, insecure)
+      await launchCs2Direct(selectedRoot.value!, insecure, extraArgs)
+      const extra = extraArgs.length ? ` (${extraArgs.join(' ')})` : ''
       message.value = insecure
-        ? '已直接启动 CS2（-insecure 模式）。'
-        : '已直接启动 CS2。'
+        ? `已直接启动 CS2（-insecure${extra}）。`
+        : `已直接启动 CS2${extra}。`
     } catch (error) {
       message.value = normalizeError(error)
       throw error

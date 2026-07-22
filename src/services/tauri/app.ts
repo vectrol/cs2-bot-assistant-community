@@ -14,8 +14,8 @@ export async function launchCs2Game() {
   return invoke<void>('launch_cs2_game')
 }
 
-export async function launchCs2Direct(cs2Root: string, insecure: boolean) {
-  return invoke<void>('launch_cs2_direct', { cs2Root, insecure })
+export async function launchCs2Direct(cs2Root: string, insecure: boolean, extraArgs: string[] = []) {
+  return invoke<void>('launch_cs2_direct', { cs2Root, insecure, extraArgs })
 }
 
 export async function openInventoryWindow() {

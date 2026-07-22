@@ -58,6 +58,10 @@ __screenshots__/
 video-output/
 video-cs2-*/
 
+# NSIS installer binaries
+CS2*_setup.exe
+CS2*_x64-setup.exe
+
 # Large binary release resources
 src-tauri/resources/CS2BotImprover.zip
 src-tauri/resources/*.bak*

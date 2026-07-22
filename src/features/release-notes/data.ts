@@ -22,6 +22,20 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '1.3.0',
+    date: '2026-07-22',
+    title: '1.3.0 多语言、启动参数、插件版本诊断',
+    summary: '引入中英文双语界面，支持自定义 CS2 启动参数，显示插件版本号，应用内更新提示，上游资源包同步提醒。',
+    items: [
+      { text: '多语言支持：集成 vue-i18n，中英文界面切换（设置页）。' },
+      { text: '自定义启动参数：启动弹窗增加额外参数输入框，自动保存。' },
+      { text: '插件版本诊断：诊断面板显示 CounterStrikeSharp 及各插件版本号（读取 deps.json）。' },
+      { text: '应用内更新提示：启动时检查 GitHub Release，有新版本弹窗引导下载。' },
+      { text: '上游资源包同步：检测 ed0ard/CS2-Bot-Improver 新版本，侧栏显示更新提示。' },
+      { text: 'Git 清理：NSIS 安装包加入 .gitignore，不再追踪 62MB 二进制文件。' },
+    ],
+  },
+  {
     version: '1.2.1',
     date: '2026-07-21',
     title: '1.2.1 模式切换修复、比赛记录',
