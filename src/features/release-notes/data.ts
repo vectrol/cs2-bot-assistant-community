@@ -22,6 +22,16 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '3.0.1',
+    date: '2026-07-23',
+    title: '3.0.1 Remove workspace panels',
+    summary: 'Removed unnecessary projects, tasks, and logs workspace panels, routes, and sidebar entries. Cleaned up dead code.',
+    items: [
+      { text: 'Removed /projects, /tasks, /logs routes and sidebar entries.' },
+      { text: 'Cleaned up workspace store, locale keys, and feature components.' },
+    ],
+  },
+  {
     version: '3.0.0',
     date: '2026-07-23',
     title: '3.0.0 Workspace Hub & Plugin Manager',

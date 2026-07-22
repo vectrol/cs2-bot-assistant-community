@@ -38,37 +38,7 @@
     "guideHelp": "使用帮助",
     "system": "系统",
     "settings": "设置",
-    "plugins": "插件管理",
-    "projects": "项目",
-    "tasks": "任务",
-    "logs": "日志"
-  },
-  "workspace": {
-    "projects": {
-      "title": "已注册项目",
-      "current": "当前项目",
-      "select": "选择",
-      "fieldId": "ID",
-      "fieldStatus": "状态",
-      "fieldChannel": "通道",
-      "fieldRootDir": "源码目录",
-      "fieldDistDir": "前端产物",
-      "fieldBundleDir": "安装包",
-      "fieldLogDir": "日志",
-      "fieldTauriConfig": "Tauri 配置"
-    },
-    "tasks": {
-      "title": "执行队列",
-      "assignedTo": "负责人",
-      "statusQueued": "排队中",
-      "statusRunning": "运行中",
-      "statusBlocked": "已阻塞",
-      "statusDone": "已完成"
-    },
-    "logs": {
-      "title": "日志路由",
-      "content": "前端：Vite 开发服务器和浏览器控制台\n桌面端：Tauri CLI 和 Rust 命令输出\n工作区：每次构建前的注册表验证\n当前项目日志：{logDir}\n当前项目安装包：{bundleDir}"
-    }
+    "plugins": "插件管理"
   },
   "guide": {
     "title": "使用帮助",
@@ -517,6 +487,14 @@
     "openFailed": "打开外部链接失败，请稍后手动访问。",
     "cloudDefaultItem": "这个版本已经可以下载。",
     "entries": {
+      "3_0_1": {
+        "title": "3.0.1 移除工作区面板",
+        "summary": "移除多余的项目、任务和日志工作区面板、路由和侧栏入口。清理死代码。",
+        "items": {
+          "0": "移除 /projects、/tasks、/logs 路由和侧栏入口。",
+          "1": "清理工作区 store、本地化键和功能组件。"
+        }
+      },
       "3_0_0": {
         "title": "3.0.0 工作区中心与插件管理",
         "summary": "全新工作区模块，项目注册、任务队列、日志查看器等。插件管理支持搜索与筛选。仪表盘升级为九宫格导航。全面本地化完成。",

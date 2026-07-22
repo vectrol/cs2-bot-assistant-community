@@ -30,7 +30,7 @@ dependencies = [
 
 [[package]]
 name = "ai_pc_fac"
-version = "2.1.0"
+version = "3.0.1"
 dependencies = [
  "chrono",
  "log",

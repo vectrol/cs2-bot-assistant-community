@@ -42,37 +42,7 @@
     "guideHelp": "Guide and Help",
     "system": "System",
     "settings": "Settings",
-    "plugins": "Plugins",
-    "projects": "Projects",
-    "tasks": "Tasks",
-    "logs": "Logs"
-  },
-  "workspace": {
-    "projects": {
-      "title": "Registered Projects",
-      "current": "Active",
-      "select": "Select",
-      "fieldId": "ID",
-      "fieldStatus": "Status",
-      "fieldChannel": "Channel",
-      "fieldRootDir": "Source Dir",
-      "fieldDistDir": "Frontend Output",
-      "fieldBundleDir": "Bundle",
-      "fieldLogDir": "Logs",
-      "fieldTauriConfig": "Tauri Config"
-    },
-    "tasks": {
-      "title": "Execution Queue",
-      "assignedTo": "Assigned to",
-      "statusQueued": "Queued",
-      "statusRunning": "Running",
-      "statusBlocked": "Blocked",
-      "statusDone": "Done"
-    },
-    "logs": {
-      "title": "Log Routes",
-      "content": "Frontend: Vite dev server and browser console\nDesktop: Tauri CLI and Rust command output\nWorkspace: Registry validation before each build\nActive project logs: {logDir}\nActive project bundle: {bundleDir}"
-    }
+    "plugins": "Plugins"
   },
   "guide": {
     "title": "Guide and Help",
@@ -501,6 +471,14 @@
     "openFailed": "Failed to open external link. Please try manually later.",
     "cloudDefaultItem": "This version is ready for download.",
     "entries": {
+      "3_0_1": {
+        "title": "3.0.1 Remove workspace panels",
+        "summary": "Removed unnecessary projects, tasks, and logs workspace panels, routes, and sidebar entries. Cleaned up dead code.",
+        "items": {
+          "0": "Removed /projects, /tasks, /logs routes and sidebar entries.",
+          "1": "Cleaned up workspace store, locale keys, and feature components."
+        }
+      },
       "3_0_0": {
         "title": "3.0.0 Workspace Hub & Plugin Manager",
         "summary": "New workspace module with projects, tasks and log viewer. Plugin management with search and filter. Dashboard overhaul with 9-card grid. Full i18n completion.",

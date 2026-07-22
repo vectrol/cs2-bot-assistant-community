@@ -1,6 +1,6 @@
 {
   "name": "cs2-bot-improver-assistant",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "license": "AGPL-3.0-or-later",
   "private": true,
   "type": "module",
