@@ -20,82 +20,39 @@ const { initializeTheme } = useThemePreference()
 const { t } = useI18n()
 const {
   updateInfo,
-  resourceInfo,
   checkForUpdates,
-  checkResourceUpdates,
   isDismissed,
   dismissVersion,
 } = useUpdateChecker()
 const launchGameModalOpen = ref(false)
 const updateModalOpen = ref(false)
+const sidebarCollapsed = ref(false)
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
 provide('openLaunchGameModal', () => {
   launchGameModalOpen.value = true
 })
 
-const navGroups = computed(() => [
-  {
-    label: t('nav.control'),
-    items: [
-      { label: t('nav.quickControl'), to: '/quick-control', description: t('nav.quickControl') },
-      { label: t('nav.inventory'), to: '/inventory', description: t('nav.inventory') },
-      { label: t('nav.commands'), to: '/commands', description: t('nav.commands') },
-    ],
-  },
-  {
-    label: t('nav.config'),
-    items: [
-      { label: t('nav.configConsole'), to: '/config', description: t('nav.configConsole') },
-    ],
-  },
-  {
-    label: t('nav.guide'),
-    items: [
-      { label: t('nav.guideHelp'), to: '/guide', description: t('nav.guideHelp') },
-    ],
-  },
-  {
-    label: t('nav.system'),
-    items: [
-      { label: t('nav.settings'), to: '/settings', description: t('nav.settings') },
-    ],
-  },
+const navItems = computed(() => [
+  { label: t('nav.quickControl'), to: '/quick-control', icon: '⚡' },
+  { label: t('nav.inventory'), to: '/inventory', icon: '🎒' },
+  { label: t('nav.commands'), to: '/commands', icon: '⌨' },
+  { label: t('nav.configConsole'), to: '/config', icon: '⚙' },
+  { label: t('nav.guideHelp'), to: '/guide', icon: '📖' },
+  { label: t('nav.settings'), to: '/settings', icon: '🎨' },
 ])
 
-const pageDescription = computed(
-  () => navGroups.value.flatMap((g) => g.items).find((item) => item.to === route.path)?.description ?? appConfig.appName,
-)
+const isDashboard = computed(() => route.path === '/')
 
-const pageTitle = computed(
-  () => navGroups.value.flatMap((g) => g.items).find((item) => item.to === route.path)?.label ?? String(route.name ?? appConfig.appName),
-)
 async function startWindowDrag(event: MouseEvent) {
-  if (event.button !== 0 || event.detail > 1) {
-    return
-  }
-
-  if (!appWindow) {
-    return
-  }
-
-  try {
-    await appWindow.startDragging()
-  } catch (error) {
-    console.error('start window dragging failed', error)
-  }
+  if (event.button !== 0 || event.detail > 1) return
+  if (!appWindow) return
+  try { await appWindow.startDragging() } catch { /* noop */ }
 }
 
 async function toggleWindowMaximize() {
-  if (!appWindow) {
-    return
-  }
-
-  try {
-    await appWindow.toggleMaximize()
-  } catch (error) {
-    console.error('toggle maximize window failed', error)
-  }
+  if (!appWindow) return
+  try { await appWindow.toggleMaximize() } catch { /* noop */ }
 }
 
 async function refreshGlobalStatus() {
@@ -116,102 +73,62 @@ onMounted(async () => {
   if (info && !isDismissed(info.latestVersion)) {
     updateModalOpen.value = true
   }
-  void checkResourceUpdates()
 })
 
-watch(
-  () => route.fullPath,
-  (routePath) => {
-    preferences.setLastRoute(routePath)
-  },
-  { immediate: true },
-)
+watch(() => route.fullPath, (routePath) => {
+  preferences.setLastRoute(routePath)
+}, { immediate: true })
 </script>
 
 <template>
   <div class="app-chrome">
     <header class="app-titlebar">
       <div class="app-titlebar-brand" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize">
+        <RouterLink v-if="!isDashboard" to="/" class="back-button" title="返回仪表盘">‹</RouterLink>
         <span>{{ appConfig.appName }}</span>
         <small>v{{ appConfig.appVersion }}</small>
       </div>
-
       <div class="app-titlebar-drag" aria-hidden="true" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize" />
-
+      <div class="app-titlebar-actions">
+        <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshGlobalStatus">
+          {{ t('app.refresh') }}
+        </button>
+        <button class="primary-button" type="button" @click="launchGameModalOpen = true">
+          {{ t('app.openCs2') }}
+        </button>
+      </div>
       <WindowControls />
     </header>
 
     <div class="shell chrome-shell">
-      <aside class="sidebar">
-        <div class="brand-panel">
-          <p class="eyebrow">{{ t('app.brandLabel') }}</p>
-          <div class="brand-title-row">
-            <h1>{{ t('app.name') }}</h1>
-            <span class="version-badge">{{ t('app.version') }} v{{ appConfig.appVersion }}</span>
-          </div>
-          <p class="muted">
-            {{ t('guide.title') }}
-          </p>
-        </div>
-
+      <aside class="sidebar" :data-collapsed="sidebarCollapsed">
         <nav class="nav">
-          <section v-for="group in navGroups" :key="group.label" class="nav-group">
-            <p class="nav-group__label">{{ group.label }}</p>
-            <RouterLink
-              v-for="item in group.items"
-              :key="item.to"
-              :to="item.to"
-              class="nav-link"
-            >
-              <span>{{ item.label }}</span>
-              <small>{{ item.description }}</small>
-            </RouterLink>
-          </section>
+          <RouterLink
+            v-for="item in navItems"
+            :key="item.to"
+            :to="item.to"
+            class="nav-link"
+            :class="{ active: route.path.startsWith(item.to) }"
+          >
+            <span class="nav-link__icon">{{ item.icon }}</span>
+            <span class="nav-link__label">{{ item.label }}</span>
+          </RouterLink>
         </nav>
 
-        <div class="sidebar-card sidebar-card--compact">
-          <p class="eyebrow">{{ t('app.cs2Running') }}</p>
-          <strong>{{ t('guide.environmentReady') }}</strong>
-          <p class="muted">{{ t('guide.installPackageHint') }}</p>
-        </div>
-
-        <a
-          v-if="resourceInfo"
-          :href="resourceInfo.htmlUrl"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="sidebar-card sidebar-card--resource"
-        >
-          <p class="eyebrow">{{ t('update.resourceUpdate') }}</p>
-          <strong>{{ resourceInfo.title }}</strong>
-          <p class="muted">v{{ resourceInfo.currentVersion }} → v{{ resourceInfo.upstreamVersion }}</p>
-        </a>
-
+        <button class="sidebar-toggle" type="button" @click="sidebarCollapsed = !sidebarCollapsed">
+          {{ sidebarCollapsed ? '►' : '◄' }}
+        </button>
       </aside>
 
       <main class="content">
-        <header class="titlebar console-titlebar">
-          <div class="titlebar-main">
-            <p class="eyebrow">{{ t('quickControl.title') }}</p>
-            <h2>{{ pageTitle }}</h2>
-            <p class="muted">{{ pageDescription }}</p>
-          </div>
-
-          <div class="titlebar-actions">
-            <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshGlobalStatus">
-              {{ t('app.refresh') }}
-            </button>
-            <button class="primary-button" type="button" @click="launchGameModalOpen = true">
-              {{ t('app.openCs2') }}
-            </button>
-          </div>
+        <header v-if="!isDashboard" class="page-header">
+          <h2>{{ navItems.find(i => route.path.startsWith(i.to))?.label || '' }}</h2>
         </header>
-
-        <GlobalStatusBar />
 
         <RouterView />
       </main>
     </div>
+
     <LaunchGameModal :open="launchGameModalOpen" @close="launchGameModalOpen = false" />
 
     <Teleport to="body">
@@ -231,24 +148,9 @@ watch(
             </p>
             <pre class="update-modal__body">{{ updateInfo.body }}</pre>
             <div class="update-modal__actions">
-              <a
-                v-if="updateInfo.downloadUrl"
-                :href="updateInfo.downloadUrl"
-                class="primary-button"
-                target="_blank"
-                rel="noopener noreferrer"
-              >{{ t('update.download') }}</a>
-              <a
-                :href="updateInfo.htmlUrl"
-                class="ghost-button"
-                target="_blank"
-                rel="noopener noreferrer"
-              >{{ t('update.viewOnGithub') }}</a>
-              <button
-                class="ghost-button"
-                type="button"
-                @click="dismissVersion(updateInfo.latestVersion); updateModalOpen = false"
-              >{{ t('update.remindLater') }}</button>
+              <a v-if="updateInfo.downloadUrl" :href="updateInfo.downloadUrl" class="primary-button" target="_blank" rel="noopener noreferrer">{{ t('update.download') }}</a>
+              <a :href="updateInfo.htmlUrl" class="ghost-button" target="_blank" rel="noopener noreferrer">{{ t('update.viewOnGithub') }}</a>
+              <button class="ghost-button" type="button" @click="dismissVersion(updateInfo.latestVersion); updateModalOpen = false">{{ t('update.remindLater') }}</button>
             </div>
           </div>
         </article>
@@ -258,6 +160,114 @@ watch(
 </template>
 
 <style scoped>
+.back-button {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: 1.4rem;
+  padding: 0 0.25rem;
+  line-height: 1;
+}
+.back-button:hover {
+  color: var(--text-primary);
+}
+
+.app-titlebar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: auto;
+}
+
+.sidebar {
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+  background: var(--panel-bg);
+  border-right: 1px solid var(--panel-border);
+  padding: 0.75rem 0;
+  transition: width 0.2s;
+  overflow: hidden;
+}
+
+.sidebar[data-collapsed='true'] {
+  width: 56px;
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0 0.5rem;
+  flex: 1;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 0.625rem;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  color: var(--text-muted);
+  font-size: var(--fs-sm);
+  transition: background 0.15s, color 0.15s;
+}
+
+.nav-link:hover {
+  background: var(--ghost-bg);
+  color: var(--text-primary);
+}
+
+.nav-link.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+}
+
+.nav-link__icon {
+  font-size: 1.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.nav-link__label {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar[data-collapsed='true'] .nav-link__label {
+  display: none;
+}
+
+.sidebar-toggle {
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  border-radius: var(--radius-sm);
+  font-size: var(--fs-sm);
+  text-align: center;
+}
+
+.sidebar-toggle:hover {
+  background: var(--ghost-bg);
+  color: var(--text-primary);
+}
+
+.page-header {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--panel-border);
+}
+
+.page-header h2 {
+  margin: 0;
+  font-size: var(--fs-lg);
+}
+
 .update-backdrop {
   position: fixed;
   inset: 0;
@@ -299,24 +309,9 @@ watch(
   z-index: 1;
 }
 
-.update-modal__close svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  stroke-width: 2;
-  fill: none;
-}
-
-.update-modal__close:hover {
-  background: var(--ghost-bg);
-  color: var(--text-primary);
-}
-
-.update-modal__content {
-  padding: 1.5rem;
-  overflow-y: auto;
-}
-
+.update-modal__close svg { width: 16px; height: 16px; stroke: currentColor; stroke-width: 2; fill: none; }
+.update-modal__close:hover { background: var(--ghost-bg); color: var(--text-primary); }
+.update-modal__content { padding: 1.5rem; overflow-y: auto; }
 .update-modal__body {
   margin: 0.75rem 0;
   padding: 0.75rem;
@@ -330,23 +325,5 @@ watch(
   white-space: pre-wrap;
   word-break: break-word;
 }
-
-.update-modal__actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  flex-wrap: wrap;
-}
-
-.sidebar-card--resource {
-  display: block;
-  text-decoration: none;
-  cursor: pointer;
-  border-color: var(--accent);
-  transition: opacity 0.15s;
-}
-
-.sidebar-card--resource:hover {
-  opacity: 0.85;
-}
+.update-modal__actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
 </style>

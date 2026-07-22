@@ -3,7 +3,8 @@ import type { RouteRecordRaw } from 'vue-router'
 export const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/quick-control',
+    name: 'dashboard',
+    component: () => import('@/views/DashboardView.vue'),
   },
   {
     path: '/config',
