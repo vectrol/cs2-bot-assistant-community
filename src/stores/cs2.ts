@@ -1,5 +1,6 @@
-import { computed, ref } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { defineStore } from 'pinia'
+import { listen } from '@tauri-apps/api/event'
 
 import { appConfig } from '@/config/app'
 import {
@@ -101,6 +102,16 @@ export const useCs2Store = defineStore('cs2', () => {
   const demoDiscovery = ref<DemoDiscoveryPayload | null>(null)
 
   const readyForConfig = computed(() => environment.value?.baseEnvironmentReady ?? false)
+
+  if ('__TAURI_INTERNALS__' in window) {
+    listen<{ running: boolean; timestamp: string }>('cs2-process-changed', (event) => {
+      const wasRunning = cs2Running.value
+      cs2Running.value = event.payload.running
+      if (wasRunning && !event.payload.running && selectedRoot.value) {
+        refreshEnvironment()
+      }
+    })
+  }
 
   function rememberInstalledRoot(rootPath: string) {
     const nextPaths = [rootPath, ...loadPersistedRoots().filter((item) => item !== rootPath)]

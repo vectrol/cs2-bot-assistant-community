@@ -24,6 +24,9 @@ pub fn run() {
                         .build(),
                 )?;
             }
+
+            crate::services::monitor::start_monitor(app.handle());
+
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![

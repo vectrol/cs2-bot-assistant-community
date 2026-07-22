@@ -10,11 +10,9 @@ import LaunchGameModal from '@/components/LaunchGameModal.vue'
 import WindowControls from '@/components/layout/WindowControls.vue'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { useUpdateChecker } from '@/composables/useUpdateChecker'
-import { useCs2Store } from '@/stores/cs2'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const route = useRoute()
-const store = useCs2Store()
 const preferences = useUiPreferencesStore()
 const { initializeTheme } = useThemePreference()
 const { t } = useI18n()
@@ -68,19 +66,9 @@ async function toggleWindowMaximize() {
   try { await appWindow.toggleMaximize() } catch { /* noop */ }
 }
 
-async function refreshGlobalStatus() {
-  try {
-    await store.refreshCs2Running()
-    await store.refreshEnvironment()
-  } catch (error) {
-    store.setMessage(store.normalizeError(error))
-  }
-}
-
 onMounted(async () => {
   preferences.load()
   initializeTheme()
-  void refreshGlobalStatus()
 
   const info = await checkForUpdates()
   if (info && !isDismissed(info.latestVersion)) {
@@ -105,9 +93,6 @@ watch(() => route.fullPath, (routePath) => {
       </div>
       <div class="app-titlebar-drag" aria-hidden="true" @mousedown="startWindowDrag" @dblclick="toggleWindowMaximize" />
       <div class="app-titlebar-actions">
-        <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshGlobalStatus">
-          {{ t('app.refresh') }}
-        </button>
         <button class="primary-button" type="button" @click="launchGameModalOpen = true">
           {{ t('app.openCs2') }}
         </button>

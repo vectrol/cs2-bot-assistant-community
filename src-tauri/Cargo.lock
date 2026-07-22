@@ -42,6 +42,7 @@ dependencies = [
  "tauri-plugin-dialog",
  "tauri-plugin-log",
  "tauri-plugin-single-instance",
+ "tokio",
  "winreg",
  "zip",
 ]
