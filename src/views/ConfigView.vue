@@ -303,6 +303,7 @@ onMounted(async () => {
       title="配置控制台"
       :description="blockedReason || 'Bot 难度、游戏模式、投掷物恢复、Demo 录制。写入前请退出 CS2。'"
       tone="strong"
+      class="glass"
     >
       <template #actions>
         <button class="ghost-button" @click="store.refreshCs2Running()">刷新游戏状态</button>
@@ -318,7 +319,7 @@ onMounted(async () => {
       </div>
     </ConsolePanel>
 
-    <article class="card config-section-tabs" aria-label="配置分区">
+    <article class="card config-section-tabs glass" aria-label="配置分区">
       <button
         v-for="section in configSections"
         :key="section.key"
@@ -332,7 +333,7 @@ onMounted(async () => {
       </button>
     </article>
 
-    <article v-if="recentConfigItems.length > 0" class="card recent-config-card">
+    <article v-if="recentConfigItems.length > 0" class="card recent-config-card glass">
       <div class="section-head">
         <div>
           <p class="eyebrow">最近改动</p>
@@ -349,7 +350,7 @@ onMounted(async () => {
     </article>
 
     <div v-show="activeConfigSection === 'base'" class="config-quick-grid">
-      <article class="card config-quick-card">
+      <article class="card config-quick-card glass">
         <div class="section-head">
           <div>
             <p class="eyebrow">Bot 难度</p>
@@ -361,7 +362,7 @@ onMounted(async () => {
           <button
             v-for="card in difficultyCards"
             :key="card.preset"
-            class="segmented-card"
+            class="segmented-card glass"
             type="button"
             :disabled="Boolean(blockedReason) || store.busy"
             @click="applyDifficulty(card.preset)"
@@ -372,7 +373,7 @@ onMounted(async () => {
         </div>
       </article>
 
-      <article class="card config-quick-card">
+      <article class="card config-quick-card glass">
         <div class="section-head">
           <div>
             <p class="eyebrow">模式切换</p>
@@ -384,7 +385,7 @@ onMounted(async () => {
           <button
             v-for="card in modeCards"
             :key="card.preset"
-            class="segmented-card"
+            class="segmented-card glass"
             type="button"
             :disabled="Boolean(blockedReason) || store.busy"
             @click="switchMode(card.preset)"

@@ -102,7 +102,7 @@ onMounted(async () => {
 
 <template>
   <section class="page-grid">
-    <article class="hero-banner install-hero">
+    <article class="hero-banner install-hero glass">
       <div>
         <p class="eyebrow">环境管理</p>
         <h2>{{ store.selectedRoot ? 'CS2 目录已选择' : '选择 CS2 目录' }}</h2>
@@ -145,7 +145,7 @@ onMounted(async () => {
       state="warn"
     />
 
-    <article v-if="store.environment" class="card env-status-card">
+    <article v-if="store.environment" class="card env-status-card glass">
       <div class="section-head">
         <div>
           <p class="eyebrow">环境检查</p>
@@ -175,14 +175,14 @@ onMounted(async () => {
     />
 
     <section class="faq-grid">
-      <article v-for="section in guideSections" :key="section.title" class="card faq-item">
+      <article v-for="section in guideSections" :key="section.title" class="card faq-item glass">
         <p class="eyebrow">场景帮助</p>
         <h3>{{ section.title }}</h3>
         <p class="muted">{{ section.body }}</p>
       </article>
     </section>
 
-    <section class="danger-zone card">
+    <section class="danger-zone card glass">
       <div class="section-head">
         <div>
           <p class="eyebrow">危险操作</p>

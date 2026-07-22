@@ -271,6 +271,7 @@ onBeforeUnmount(() => {
       title="指令库"
       description="按场景筛选命令，复制后粘贴到 CS2 控制台或 Steam 启动项。"
       tone="strong"
+      class="glass"
     >
       <template #actions>
       </template>
@@ -285,7 +286,7 @@ onBeforeUnmount(() => {
       </div>
     </ConsolePanel>
 
-    <article class="card command-center-toolbar">
+    <article class="card command-center-toolbar glass">
       <label class="field search-field">
         <span>搜索命令或说明</span>
         <input v-model="searchQuery" type="search" placeholder="例如 bot_kick、sv_cheats、cl_crosshair、启动项" />
@@ -308,7 +309,7 @@ onBeforeUnmount(() => {
 
     <p v-if="hintVisible" class="tip-box">点击任意命令卡即可复制。</p>
 
-    <article v-if="isTeamsTab" class="card command-center-panel">
+    <article v-if="isTeamsTab" class="card command-center-panel glass">
       <div class="section-head">
         <div>
           <p class="eyebrow">职业队伍</p>
@@ -317,7 +318,7 @@ onBeforeUnmount(() => {
       </div>
 
       <div v-if="visibleTeams.length > 0" class="team-preset-grid">
-        <article v-for="team in visibleTeams" :key="team.name" class="team-preset-card">
+        <article v-for="team in visibleTeams" :key="team.name" class="team-preset-card glass">
           <strong>{{ team.name }}</strong>
           <div class="actions-row">
             <CopyButton
@@ -341,7 +342,7 @@ onBeforeUnmount(() => {
       <EmptyState v-else title="没有匹配的队伍" description="换一个队伍名或队员名继续搜索。" state="warn" />
     </article>
 
-    <article v-else-if="!isCustomTab" class="card command-center-panel">
+    <article v-else-if="!isCustomTab" class="card command-center-panel glass">
       <div class="section-head">
         <div>
           <p class="eyebrow">{{ currentCommandTab?.label }}</p>
@@ -353,12 +354,12 @@ onBeforeUnmount(() => {
         <article
           v-for="item in visibleCommands"
           :key="`${activeTab}:${item.command}`"
-          class="command-card"
+          class="command-card glass"
           @click="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)"
         >
           <code>{{ item.command }}</code>
           <span>{{ item.summary }}</span>
-          <button class="command-card__copy" type="button" @click="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">
+          <button class="command-card__copy" type="button" @click.stop="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">
             {{ copiedKey === `${activeTab}:${item.command}` ? '已复制' : '复制' }}
           </button>
         </article>
@@ -368,7 +369,7 @@ onBeforeUnmount(() => {
     </article>
 
     <article v-else class="custom-commands-layout command-center-custom">
-      <section class="card custom-commands-list-card">
+      <section class="card custom-commands-list-card glass">
         <div class="section-head">
           <div>
             <p class="eyebrow">自定义</p>
@@ -384,7 +385,7 @@ onBeforeUnmount(() => {
         />
 
         <div v-else-if="visibleCustomCommands.length > 0" class="command-card-grid">
-          <article v-for="item in visibleCustomCommands" :key="item.id" class="custom-command-card">
+          <article v-for="item in visibleCustomCommands" :key="item.id" class="custom-command-card glass">
             <div class="custom-command-head">
               <div>
                 <strong>{{ item.title || '未命名命令' }}</strong>
@@ -411,7 +412,7 @@ onBeforeUnmount(() => {
         <EmptyState v-else title="没有匹配的自定义指令" description="可以清空搜索词，或保存一条新的常用命令。" state="warn" />
       </section>
 
-      <aside class="card custom-commands-editor-card">
+      <aside class="card custom-commands-editor-card glass">
         <div class="section-head">
           <div>
             <p class="eyebrow">{{ isEditing ? '编辑命令' : '新建命令' }}</p>
