@@ -67,7 +67,141 @@
     "lastError": "Last Error",
     "openLogs": "Open Logs",
     "copyDiagnostics": "Copy Diagnostics",
-    "copied": "Copied"
+    "copied": "Copied",
+    "faqItems": [
+      { "title": "How to choose the right directory", "body": "Select the CS2 game root, usually SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive. The page will check if game, csgo, MetaMod and CounterStrikeSharp are present." },
+      { "title": "How to switch Bot / Online mode", "body": "Use the mode switch on the Config page. Bot Mode for local plugin practice, Online Mode for normal matches. Exit CS2 first to avoid file locks." },
+      { "title": "How to add -insecure", "body": "Right-click CS2 in Steam, open Properties, add -insecure to Launch Options. Before going back to online matches, switch back to Online Mode and remove this flag." },
+      { "title": "How to play with friends", "body": "Type status in console, find the address after steamid:, prepend connect with a space, and send it to your friend to paste in console." },
+      { "title": "How to find demos", "body": "Copy tv_enable 1; tv_autorecord 1 from Config page, play a match, then click Find Recent Demo. The page will show the file, directory, and full path." },
+      { "title": "How to uninstall", "body": "Use the Danger Zone at the bottom of this page. Uninstalling will remove addons, plugins, cfg/plugins and MetaMod loaders including all third-party plugin configs. CS2 itself will not be affected." },
+      { "title": "What gets cleaned during install", "body": "Each install first completely removes the existing plugin pack and all plugin configs, then installs the built-in package. cfg/autoexec.cfg, game mode configs, overrides, gameinfo.gi and CS2 itself are preserved." }
+    ],
+    "installedReinstall": "Installed (reinstallable)",
+    "notInstalled": "Not Installed",
+    "cs2RunningMsg": "CS2 is running. Please exit the game before writing.",
+    "selectDirFirst": "Please select a CS2 directory first.",
+    "dirSelected": "CS2 Directory Selected",
+    "scanDirectories": "Scan Directories",
+    "foundDirectories": "Found CS2 Directories",
+    "cs2RunningWarn": "CS2 is running. Please exit the game before installing, uninstalling, or switching modes.",
+    "envCheckTitle": "Plugin Installation Status",
+    "refreshAction": "Refresh Environment",
+    "notSelected": "Not Selected",
+    "dangerZone": "Danger Zone",
+    "uninstallTitle": "Uninstall Plugin Pack",
+    "uninstallDesc": "Uninstalling will completely remove addons/plugins/cfg/plugins and MetaMod loaders. CS2 itself will not be affected.",
+    "uninstallPackage": "Uninstall Plugin Pack",
+    "installConfirmTitle": "Confirm Install Plugin Pack",
+    "installConfirmSub": "Old plugins and residual files will be cleaned before installation. CS2 must be exited.",
+    "installConfirm": "Confirm Install",
+    "confirmExited": "I have exited CS2",
+    "confirmRoot": "I have confirmed the directory is correct",
+    "uninstallConfirmTitle": "Confirm Uninstall Plugin Pack",
+    "uninstallConfirmSub": "This action cannot be undone. The existing plugin pack and all plugin configs will be permanently deleted.",
+    "uninstallConfirm": "Confirm Uninstall",
+    "uninstallDetail": "This will delete addons, plugins, cfg\\plugins and MetaMod loader files. The game itself will not be affected."
+  },
+  "install": {
+    "title": "Preparation",
+    "pageTitle": "Prepare Environment",
+    "selectRoot": "Select CS2 Root Dir",
+    "reselectRoot": "Re-select CS2 Root",
+    "scanNow": "Scan",
+    "recheck": "Re-check",
+    "installPack": "Install Bot Plugin Pack",
+    "installing": "Installing...",
+    "checklistTitle": "Installation Safety Check",
+    "checklistDesc": "Confirm directory, process, and launch options before installing.",
+    "noRootMsg": "Select a CS2 game directory first.",
+    "cs2RunningMsg": "CS2 is running. Please exit the game before installing or writing config.",
+    "dirReady": "Directory confirmed, ready to install the bot plugin pack.",
+    "envReady": "Base plugin environment is installed. You can still overwrite with the current package.",
+    "envNotReady": "Install the plugin pack when the environment is incomplete.",
+    "installSafeDesc": "Installation will enter a safety confirmation flow first.",
+    "overwriteHint": "A reinstall can be done even if checks pass.",
+    "installBtn": "Install Plugin Pack",
+    "summaryRoot": "CS2 Root Dir",
+    "summaryEnv": "Base Plugin Env",
+    "summaryProcess": "Game Process",
+    "summaryAction": "Current Action",
+    "ready": "Ready",
+    "notSelected": "Not Selected",
+    "complete": "Complete",
+    "pending": "Pending Install",
+    "running": "Running",
+    "notRunning": "Not Running",
+    "installAction": "Install Plugin Pack",
+    "stepperTitle1": "Select CS2 Root Dir",
+    "stepperDesc1": "Choose the Counter-Strike Global Offensive folder, not the game or csgo subdirectory.",
+    "stepperTitle2": "Install Bot Plugin Pack",
+    "stepperDesc2": "Confirm the directory and proceed with installation.",
+    "stepperDesc2Ready": "Base plugin environment is installed, but the old package should still be overwritten with the current version.",
+    "stepperTitle3": "Add Steam Launch Option",
+    "stepperDesc3": "Copy -insecure and manually add it to CS2's Steam launch options.",
+    "currentDir": "Current Directory",
+    "currentDirValue": "Current directory: {path}",
+    "noDirAuto": "No CS2 directory found automatically. Please select it manually.",
+    "manualSelect": "Select Manually",
+    "autoScan": "Auto Scan",
+    "envSummary": "Install Summary",
+    "cs2RunningNotice": "CS2 is running. Please exit before installing or writing config.",
+    "envRecommend": "Base plugin environment is installed. If you previously installed an old package, reinstalling is still recommended.",
+    "envFirstScreen": "The first screen shows key status. Expand below for full file checks.",
+    "nextStep": "Next Step",
+    "nextStepDesc": "After installation, add the launch option and configure the game.",
+    "nextStepHint": "Bot Mode requires adding -insecure to CS2's Steam launch options. Then go to Config to adjust the experience.",
+    "copyInsecure": "Copy -insecure",
+    "copiedInsecure": "Copied -insecure",
+    "viewLaunchHelp": "View Launch Options Help",
+    "goToConfig": "Go to Config",
+    "candidateTitle": "Candidate Directory List",
+    "candidateSubtitle": "{n} candidate(s)",
+    "candidateEmpty": "No directories found automatically",
+    "candidateSwitch": "Switchable",
+    "repairTitle": "Repair & Recovery",
+    "repairSubtitle": "Fix directory, environment, or installation issues here",
+    "repairBadge": "Self-Check",
+    "repairAction1": "Re-check Directory",
+    "repairAction1Desc": "Re-read the current directory's file status.",
+    "repairAction1NoDir": "Select a CS2 root directory first, then do a full check.",
+    "repairAction2": "Re-scan Environment",
+    "repairAction2Desc": "Re-scan Steam common install paths and history selections.",
+    "repairAction3": "Fix Missing Items",
+    "repairAction3Desc": "Clean existing plugin pack and configs, then reinstall the built-in package.",
+    "recentRestore": "Recent Restore Points",
+    "fullCheckTitle": "Full Check Results",
+    "fullCheckSubtitle": "Expand to see each file and directory status",
+    "fullCheckBadgeChecked": "Checked",
+    "fullCheckBadgePending": "Pending",
+    "found": "Found",
+    "notFound": "Not Found",
+    "showMore": "Show More",
+    "collapse": "Collapse",
+    "shownCount": "Showing {visible} / {total} items",
+    "noCheckResults": "Results will appear here once a directory is selected.",
+    "logsAndDiagnostics": "View Logs & Diagnostics",
+    "installConfirmTitle": "Confirm Installation",
+    "installConfirmSub": "Installation will write to the current CS2 directory. Steam launch options still need to be handled manually.",
+    "installConfirmBtn": "Confirm Install",
+    "confirmExited": "I confirm I have exited CS2.",
+    "confirmRoot": "I confirm the selected path is the CS2 root, not a game or csgo subdirectory.",
+    "confirmLaunchOption": "I understand Bot Mode requires -insecure in Steam launch options.",
+    "installNotice1": "Installation will write to the current CS2 directory.",
+    "installNotice2": "Each installation first completely removes the existing plugin pack and all plugin configs, then installs the built-in package.",
+    "installNotice3": "Steam launch options need to be handled manually after installation.",
+    "targetPath": "Target: {path}",
+    "diagnosticsTitle": "Log Location & Diagnostics",
+    "diagnosticsClose": "Close",
+    "logPath": "Log path: {path}",
+    "noLogPath": "No log path available.",
+    "selectDir": "Select CS2 Directory",
+    "dirSelected": "Selected",
+    "envFull": "Complete",
+    "envPending": "Pending Install",
+    "cs2Status": "Game Status",
+    "currentAction": "Current Action",
+    "currentPackage": "Current built-in package"
   },
   "diagnostics": {
     "title": "Environment Diagnostics",
@@ -91,7 +225,13 @@
       "backupOnline": "Backup-Online",
       "backupWithBots": "Backup-WithBots"
     },
-    "pluginVersions": "Plugin Versions"
+    "pluginVersions": "Plugin Versions",
+    "dirLabel": "Directory",
+    "notSelected": "Not Selected",
+    "gameModeLabel": "Game Mode",
+    "unknown": "Unknown",
+    "yes": "Yes",
+    "no": "No"
   },
   "quickControl": {
     "title": "Quick Control",
@@ -117,7 +257,72 @@
     "copySuccess": "Copied to clipboard",
     "oneClickFlow": "One-Click Install and Launch",
     "oneClick": "One-Click Launch",
-    "oneClickHint": "Install plugin pack - Set Bot Mode - Launch CS2"
+    "oneClickHint": "Install plugin pack - Set Bot Mode - Launch CS2",
+    "description": "Mode, difficulty, and launch use desktop native capabilities; Aim, Nades, Knife and Teams copy via Commands.txt.",
+    "launchCs2": "Launch CS2",
+    "oneClickCheck": "One-Click Check",
+    "refresh": "Refresh",
+    "directory": "Directory",
+    "installation": "Installation",
+    "process": "Process",
+    "notSelected": "Not Selected",
+    "ready": "Ready",
+    "checkPending": "Check Pending",
+    "running": "Running",
+    "notRunning": "Not Running",
+    "teamCount": "{n} teams",
+    "noRootMsg": "Select a CS2 root directory on the Guide page first. Quick Control reuses the same directory and installation status.",
+    "modeSection": "Bot / Online Mode",
+    "modeBot": "Bot Mode",
+    "modeBotDetail": "Load local plugins for practice. Steam launch option needs -insecure.",
+    "modeOnline": "Online Mode",
+    "modeOnlineDetail": "Restore normal online play. Removes -insecure after switching.",
+    "diffSection": "Bot Difficulty",
+    "diffLow": "Low",
+    "diffLowDetail": "Great for warmup and beginners.",
+    "diffMedium": "Medium",
+    "diffMediumDetail": "Close to default training intensity.",
+    "diffHigh": "High",
+    "diffHighDetail": "Better for intense aim training.",
+    "aimPresets": "Aim / Nades",
+    "aimMixed": "Mixed",
+    "aimMixedDetail": "Aims based on situation.",
+    "aimHead": "Head",
+    "aimHeadDetail": "Prioritizes headshots.",
+    "aimBody": "Body",
+    "aimBodyDetail": "Prioritizes body shots.",
+    "nadesNormal": "Normal",
+    "nadesNormalDetail": "Close to real player limits.",
+    "nadesMore": "More",
+    "nadesMoreDetail": "Recommended training setting.",
+    "nadesMax": "Max",
+    "nadesMaxDetail": "Throws more frequently.",
+    "nadesOff": "Off",
+    "nadesOffDetail": "Completely disables bot nades.",
+    "botItems": "Bot Items",
+    "botItemsTitle": "Item Capabilities",
+    "botItemsSkin": "Skins",
+    "botItemsSkinDetail": "Weapon skins, knives and gloves provided by CounterStrikeSharp item plugins.",
+    "botItemsProfile": "Profiles",
+    "botItemsProfileDetail": "Bot avatars and profiles from addons/BotHider.",
+    "botItemsAgent": "Agents",
+    "botItemsAgentDetail": "Agent models loaded with the plugin pack.",
+    "botItemsMusic": "Music",
+    "botItemsMusicDetail": "Music kits loaded with the bot item system.",
+    "botItemsTip": "The current pack includes BotHider, RayTrace, BotHiderImpl, RayTraceImpl and RoundDamageRecap. The assistant handles full-package install and status checking; individual toggles still follow upstream core.json / directory rename conventions.",
+    "teamsSection": "Pro Team Presets",
+    "teamsSearch": "Search teams or players",
+    "teamsSearchPlaceholder": "e.g. Vitality, donk, TYLOO",
+    "goToCommands": "Go to Commands",
+    "help": "Help",
+    "manual": "Manual",
+    "currentPackage": "Current package",
+    "copiedLabel": "Copied: {label}",
+    "statusRefreshed": "Status refreshed.",
+    "noRootGuide": "Please select a CS2 root directory on the Guide page first.",
+    "envNotReady": "The environment is not ready yet. Please complete the installation on the Guide page.",
+    "cs2RunningMsg": "CS2 is running. Please exit the game before writing config.",
+    "checkPassed": "Status check passed. You can switch modes, difficulty, or copy commands."
   },
   "commands": {
     "title": "Command Library",
@@ -170,7 +375,81 @@
     "resultCount": "{n} results",
     "teamsCount": "{n} teams",
     "categoryCount": "Category",
-    "categoryCountValue": "{n} items"
+    "categoryCountValue": "{n} items",
+    "tabs": {
+      "common": "Common",
+      "commonDesc": "Most frequently used launch options and match controls.",
+      "bot": "Bot Control",
+      "botDesc": "Bot count, aim, buy, and match restart.",
+      "nades": "Nades",
+      "nadesDesc": "Control bot nade usage frequency.",
+      "teams": "Teams",
+      "teamsDesc": "40 pro teams, copy presets to CT or T side.",
+      "weapons": "Weapons",
+      "weaponsDesc": "Copy weapon names and bots will prioritize them next round."
+    },
+    "weapons": {
+      "elite": "Dual Berettas",
+      "p250": "P250",
+      "fn57": "FN57",
+      "deagle": "Desert Eagle",
+      "cz75a": "CZ75",
+      "r8": "R8 Revolver",
+      "bizon": "PP-Bizon",
+      "p90": "P90",
+      "mp5sd": "MP5-SD",
+      "mp9": "MP9",
+      "mp7": "MP7",
+      "mac10": "MAC-10",
+      "ump45": "UMP-45",
+      "mag7": "MAG-7",
+      "sawedoff": "Sawed-Off",
+      "nova": "Nova",
+      "xm1014": "XM1014",
+      "famas": "FAMAS",
+      "galilar": "Galil AR",
+      "m4a1": "M4A4",
+      "m4a1s": "M4A1-S",
+      "ak47": "AK-47",
+      "aug": "AUG",
+      "sg556": "SG 553",
+      "ssg08": "SSG 08",
+      "awp": "AWP",
+      "scar20": "SCAR-20",
+      "g3sg1": "G3SG1",
+      "negev": "Negev",
+      "m249": "M249"
+    },
+    "groups": {
+      "aim": {
+        "bot_aim_mixed": "Default mode. Bots will aim flexibly based on the situation.",
+        "bot_aim_head": "Bots prioritize headshots.",
+        "bot_aim_body": "Bots prioritize body shots.",
+        "bot_aim": "Check current bot aim mode."
+      },
+      "nades": {
+        "bot_nades_off": "Bots will not throw any nades.",
+        "bot_nades_normal": "Default mode. Bots follow normal player-like nade limits.",
+        "bot_nades_more": "Recommended mode. Same logic as normal but allows more nades.",
+        "bot_nades_max": "Minimal restrictions. Bots use nades more frequently.",
+        "bot_nades": "Check current bot nade mode."
+      },
+      "controls": {
+        "bot_kick": "Kick all bots.",
+        "bot_kick_t": "Kick one T-side bot.",
+        "bot_kick_ct": "Kick one CT-side bot.",
+        "bot_add_t": "Add a T-side bot.",
+        "bot_add_ct": "Add a CT-side bot.",
+        "bot_randombuy_1": "Let bots buy random weapons. Set to 0 to disable.",
+        "bot_quota": "Fill the server to the specified number of bots.",
+        "mp_restartgame_1": "Restart the match while keeping current settings."
+      },
+      "startup": {
+        "bot_buy": "Restore default bot buy logic.",
+        "insecure": "Add to Steam launch options to load local plugins.",
+        "disable_workshop": "Add to Steam launch options when playing workshop maps."
+      }
+    }
   },
   "releaseNotes": {
     "title": "Release Notes",
@@ -185,7 +464,383 @@
     "sourceBuiltin": "No Online Records",
     "sourceFailed": "Built-in Only",
     "sourceNotConfigured": "Online Source Not Configured",
-    "sourceLoading": "Loading"
+    "sourceLoading": "Loading",
+    "cloudUpdate": "v{version} Update",
+    "cloudDownload": "Download",
+    "openFailed": "Failed to open external link. Please try manually later.",
+    "cloudDefaultItem": "This version is ready for download.",
+    "entries": {
+      "2_1_0": {
+        "title": "2.1.0 Full i18n Completion",
+        "summary": "All views fully localized (EN/CN), route matching fixed, release notes translated, command library localized, config messages internationalized.",
+        "items": {
+          "0": "Full i18n: QuickControl, Guide, Install, Settings, SoftwareUpdateModal, GlobalToast, DiagnosticsPanel fully localized.",
+          "1": "Route fix: AppShell.vue startsWith replaced with exact path matching.",
+          "2": "Command library: weapon names, bot commands, pro teams tab labels and descriptions all translatable.",
+          "3": "Release notes: all 24 historical entries translated to English, with cloud-entry fallback.",
+          "4": "Config console: all toast messages, action labels, and diagnostic strings localized."
+        }
+      },
+      "1_4_0": {
+        "title": "1.4.0 Dashboard + Inventory Simulator Overhaul",
+        "summary": "Brand new dashboard homepage, streamlined sidebar navigation, complete inventory simulator page redesign, modernized UI layout.",
+        "items": {
+          "0": "New dashboard homepage: card-based navigation, quick access to each feature module, real-time status summaries.",
+          "1": "Streamlined sidebar: icon + text navigation, supports collapse/expand, removed redundant descriptions.",
+          "2": "Title bar optimization: back button on non-dashboard pages, action buttons moved to title bar.",
+          "3": "Inventory simulator overhaul: feature cards grid showcasing six major features, configuration items displayed at bottom.",
+          "4": "Global UI modernization: unified spacing, rounded corners, color system, cleaner and more concise."
+        }
+      },
+      "1_3_1": {
+        "title": "1.3.1 Hotfix: Navigation Streamline, i18n Supplement",
+        "summary": "Removed deprecated 'My Commands' navigation; ReleaseNotesView now uses i18n; completed English translations.",
+        "items": {
+          "0": "Removed 'My Commands' navigation item, route, and view (CustomCommandsView is now a redirect to /commands).",
+          "1": "Replaced hardcoded Chinese strings in ReleaseNotesView with i18n calls, supporting both Chinese and English display.",
+          "2": "Completed English translations, including missing keys like releaseNotes.",
+          "3": "Fixed JSON encoding issue causing type-check failure."
+        }
+      },
+      "1_3_0": {
+        "title": "1.3.0 Multi-language, Launch Parameters, Plugin Version Diagnostics",
+        "summary": "Introduced bilingual Chinese/English interface, support for custom CS2 launch parameters, plugin version display, in-app update notification, upstream resource pack sync reminder.",
+        "items": {
+          "0": "Multi-language support: integrated vue-i18n, Chinese/English interface switching (settings page).",
+          "1": "Custom launch parameters: added extra parameter input field in launch dialog, auto-save.",
+          "2": "Plugin version diagnostics: diagnostic panel shows CounterStrikeSharp and plugin versions (reads deps.json).",
+          "3": "In-app update notification: checks GitHub Release on startup, popup guides download when a new version is available.",
+          "4": "Upstream resource pack sync: detects new versions of ed0ard/CS2-Bot-Improver, shows update hint in sidebar.",
+          "5": "Git cleanup: added NSIS installer to .gitignore, no longer tracking 62MB binaries."
+        }
+      },
+      "1_2_1": {
+        "title": "1.2.1 Mode Switch Fix, Match Records",
+        "summary": "Fixed state not refreshing after Bot/Online mode switch. Added match record feature for managing Demo recordings and match results.",
+        "items": {
+          "0": "Fixed panel state not updating after mode switch: auto-refresh environment state after switchMode and applyDifficulty operations.",
+          "1": "Added match record module: lists recent match Demos, displays map, time, path, supports opening directory and copying path.",
+          "2": "Fixed 'Prepare Environment' dead link: 'Directory & Installation' button in QuickControl now points to help page."
+        }
+      },
+      "1_2_0": {
+        "title": "1.2.0 Custom Theme, Panel Integration",
+        "summary": "Removed 11 team color schemes, replaced with dark/light dual mode + HSL hue slider for customization. Merged 'Prepare Environment' into 'Help Guide'.",
+        "items": {
+          "0": "Theme system overhaul: dark/light dual mode toggle, HSL slider 0-360 free color customization, instant preview and save.",
+          "1": "Panel integration: Prepare Environment (InstallView) merged into Help Guide (GuideView), navigation from 4 groups to 3 groups.",
+          "2": "Inventory simulator: embedded inventory.cstrike.app via WebView, click to open external window.",
+          "3": "Environment diagnostics upgrade: 18 checks (including InventorySimulator and game mode), copy diagnostics with full status.",
+          "4": "Command library streamlined: removed 24 lbtv_* invalid commands, chat/taunt and map rotation tabs, pinned/recent panels.",
+          "5": "Config console streamlined: removed AI chat and Bot taunt UI (LBTV plugin does not exist).",
+          "6": "Removed Panel v1.4.2.exe: eliminated dual-management conflict with assistant's gameinfo.gi.",
+          "7": "Removed official website embed, donation QR code, and community group links."
+        }
+      },
+      "1_1_0": {
+        "title": "1.1.0 Code Refactor: Theme Engine Independent, Command Library Streamlined, ConfigView Slimmed",
+        "summary": "Theme system separated into data file, added Green Dragon/G2 color schemes. ConfigView slimmed by 40%. Command library cleaned of all LBTV invalid commands. Upstream resource synced.",
+        "items": {
+          "0": "Code refactor: theme system separated into src/features/theme/themes.ts, adding a new team scheme only requires modifying one file.",
+          "1": "Theme streamlined to 7 sets: Dark, Light, Falcons, Tyloo, Team Vitality, G2, Green Dragon.",
+          "2": "Config console streamlined: removed AI chat and Bot taunt (plugin does not exist), only keep difficulty/mode/nades/Demo.",
+          "3": "Command library cleanup: removed all lbtv_* invalid commands (24 items), deleted chat/taunt and map rotation tabs.",
+          "4": "Battle overview cleanup: removed knife template panel, cleaned default pinned commands.",
+          "5": "Upstream resource sync: built-in Commands.txt pulled from ed0ard/CS2-Bot-Improver v1.4.2.",
+          "6": "Added inventory simulator: embedded inventory.cstrike.app, integrated InventorySimulator CSS plugin.",
+          "7": "Removed Panel v1.4.2.exe conflict: resource pack no longer includes upstream launcher, avoiding gameinfo.gi dual management.",
+          "8": "Install/uninstall optimization: auto-clean old Panel.exe remnants, fixed online/bot mode confusion issue.",
+          "9": "Rust backend dead code cleanup: removed PlayerCosmetics/DropKnives/BotItems/PlusRuntime related functions."
+        }
+      },
+      "1_0_0": {
+        "title": "1.0.0 Community Edition: Fork Honoring the Original Author",
+        "summary": "This version is a fork of YuGeYu/cs2-bot-improver-assistant. Thanks to the original author YuGeYu for the pioneering work, and to all contributors of the upstream projects ed0ard/CS2-Bot-Improver and numakkiyu/CS2-Bot-Improver-Plus. Without their dedication, this community edition would not exist.",
+        "sourceLabel": "Original Upstream Project",
+        "items": {
+          "0": "Acknowledgments: This project is a fork of YuGeYu's CS2 Bot Improvement Assistant (AGPL-3.0), fully retaining all features of the upstream CS2-Bot-Improver and CS2-Bot-Improver-Plus.",
+          "1": "Acknowledgments: Built-in plugin resources sourced from ed0ard/CS2-Bot-Improver v1.4.2, thanks to ed0ard and all plugin contributors for their outstanding contributions to the CS2 Bot enhancement community.",
+          "2": "New dual launch channels: Steam protocol (steam://rungameid/730) and direct launch (cs2.exe + -insecure) can be switched anytime in the launch dialog.",
+          "3": "New inventory simulator page: embedded inventory.cstrike.app, supports skin browsing, case opening, stickers, name tags and all features. Thanks to ianlucas/cs2-inventory-simulator.",
+          "4": "New CSS inventory sync plugin: packaged InventorySimulator v3.0.1 into resource pack, auto-loads after installation, players can use !ws command to sync inventory in-game. Thanks to ianlucas/cs2-css-inventory-simulator.",
+          "5": "New team theme colors: Falcons (green), Tyloo (red), Team Vitality (yellow), plus the original dark and light, total 5 appearance themes.",
+          "6": "Project renamed: CS2 Bot Assistant Community Edition, maintained independently from the original upstream project.",
+          "7": "Removed official website embed and in-app browser, streamlined interface to focus on core features.",
+          "8": "Removed donation entry, community edition fully free with no payment options.",
+          "9": "Inventory simulator page replaces original player appearance page, providing a more complete skin preview and management experience.",
+          "10": "Upstream plugin resources updated to ed0ard/CS2-Bot-Improver v1.4.2."
+        }
+      },
+      "0_4_5": {
+        "title": "0.4.5 Plus Full GUI, Resource Safety & Player Cosmetics",
+        "summary": "Based on the CS2-Bot-Improver-Plus v1.4.2.1 full package, fully migrated high-frequency GUI operations to the existing assistant, and fixed blank rendering on the player cosmetics page before data load.",
+        "items": {
+          "0": "Added full CS2 command library entry, searchable for console commands, CVars, launch options and developer commands.",
+          "1": "Commands kept in original English, confirmed features described in Chinese where possible, retaining source data descriptions for future refinement.",
+          "2": "Synced Plus v1.4.2.1 full package base, retaining side selection, appearance stability and existing AI, BotTaunt, NadeSystem, Demo, command library capabilities.",
+          "3": "Thoroughly deletes old plugins, third-party plugins and plugin configs before installation; applies Bot mode gameinfo.gi after new resource installation, retains Online/Bot template switch validation.",
+          "4": "Bot/Online mode, difficulty, Aim, Nades, teams, directory status and launch experience continue to be presented in the existing battle overview; does not fake Steam persistent launch item sync.",
+          "5": "Player cosmetics page restructured with state machine, fixed empty object causing entire page blank below title before data load; reading, failed, not installed, CS2 running, and normal config all have fixed page states.",
+          "6": "Added structured knife, glove, weapon, music kit, name tag, StatTrak, souvenir and pickup-time application editing; saves retaining unknown JSON fields, supports BOM cleanup, atomic writes, value validation and write rejection while CS2 is running.",
+          "7": "Drop knife supports key binding entry, knife multi-select and full directory preview; only writes assistant-specific marker blocks, does not replace player's existing binds.",
+          "8": "BOT skins, profiles, agents and music kit toggles consistent with Plus, only saves assistant local preferences, does not fake game or plugin appearance toggles.",
+          "9": "Imported complete knife, weapon, glove, skin and music kit data directories, using lazy loading and image lazy loading to control first-page overhead.",
+          "10": "In-app retains CS2-Bot-Improver and CS2-Bot-Improver-Plus AGPL-3.0-or-later source attribution and upstream links.",
+          "11": "Fixed player cosmetics reading compatibility: now directly reads Plus original player_knife_presets.json, compatible with legacy config fields; existing knife, weapon, glove and music kit presets require no manual modification."
+        }
+      },
+      "0_4_4": {
+        "title": "0.4.4 Settings Page, Auto-start & First-time Install Optimization",
+        "summary": "Added a settings page, consolidating theme switching, storage info, auto-start, and first-time auto-install in one place, making the program more focused on CS2 bot enhancement installation and control.",
+        "items": {
+          "0": "Added settings page, centralized management of appearance themes and program behavior.",
+          "1": "Appearance theme switching moved to settings page, dark and light modes still remember the last selection.",
+          "2": "Added storage description, clearly explaining what settings are saved locally, in browser cache, and in the CS2 plugin directory.",
+          "3": "Added auto-start on boot toggle, disabled by default, requires user to enable manually.",
+          "4": "Added first-time plugin pack installation option, enabled by default; when detecting a safe and installable CS2 directory, helps new users reduce manual installation steps.",
+          "5": "Removed Major prediction entry and page, navigation now more focused on Prepare Environment, Battle Control, Config and Help.",
+          "6": "Updated built-in plugin pack to 2026-07-03 new package.",
+          "7": "Fixed issue where BOT headshot rate was still high when body targeting was set; hit performance will now better match settings.",
+          "8": "Optimized nade system sound information processing, reduced footstep and sound trail recording overhead, improved bot performance stability in multi-player scenarios.",
+          "9": "Fixed NadeSystem issue where multiple BOTs repeatedly queued similar fast smokes on the same tick, making throw judgment more stable for VIP fast smoke scenarios."
+        }
+      },
+      "0_4_3": {
+        "title": "0.4.3 Legacy BotHider Cleanup Enhancement",
+        "summary": "Enhanced uninstall cleanup to remove legacy BotHider 0.1.9 remnants, preventing BOT avatars from showing as question marks after overwrite installation.",
+        "items": {
+          "0": "Uninstalling the plugin pack now also cleans up legacy BotHider 0.1.9 remnants: BotHider.vdf, 0Harmony and BotHiderApi.",
+          "1": "Uninstall results now differentiate between deleted directories count, deleted files count, and not-found count for easier cleanup scope confirmation.",
+          "2": "Current version changed to full-package cleanup: deletes addons, plugins, cfg/plugins and MetaMod load files; does not delete or restore gameinfo.gi and pak01_*.vpk."
+        }
+      },
+      "0_4_2": {
+        "title": "0.4.2 BotHider & NadeSystem Update",
+        "summary": "Synced new BotHiderImpl and tightened BOT grenade count per round, improving compatibility with newer game versions while reducing excessive grenade throws by a single BOT in the same round.",
+        "items": {
+          "0": "Synced BotHider to upstream new BotHiderImpl 0.2.5, updated BOT hiding related signatures and offsets, improved compatibility with newer game environments.",
+          "1": "Adjusted BOT hosting logic, auto-revive hosted BOTs after round start, removed old match-end kick/refill flow.",
+          "2": "NadeSystem added hard limit per BOT per round: fire/incendiary, HE, smoke max 1 each, flash max 2 per round.",
+          "3": "Limits cover normal throws, counter nades, bomb plant, bomb defuse, fire extinguishing and other special throw paths, preventing excessive throws by the same BOT in a single round.",
+          "4": "Fixed issue where special smoke/flash throws were incorrectly marked as used even when quota was insufficient."
+        }
+      },
+      "0_4_1": {
+        "title": "0.4.1 Map Rotation Restored & AI Chat Settings Optimization",
+        "summary": "Restored the auto map rotation ability missing in 0.4.0, and made AI chat settings easier to enable. Default settings unchanged, upgrade will not actively modify your server and chat configuration.",
+        "items": {
+          "0": "Restored map rotation plugin; the auto map rotation ability missing in 0.4.0 has been restored.",
+          "1": "Map rotation is still off by default and will not affect your current server settings.",
+          "2": "To use auto map rotation, copy 'lbtv_map_rotation 1' from the command center to enable; 'lbtv_map_next' can immediately switch to the next map for testing.",
+          "3": "AI Chat settings added one-click free Key enablement. No Key is written by default; it only takes effect after you click enable and save in the edit dialog.",
+          "4": "You can still manually enter your own API URL and API Key; the free Key is just a quick fill and will not overwrite a custom Key you've already entered.",
+          "5": "Current installation strategy cleans existing plugin pack and plugin configs first, then writes the built-in full package.",
+          "6": "Continues to include Quick Control, diagnostic panel, common commands, map rotation tie-boundary fix and other existing capabilities."
+        }
+      },
+      "0_4_0": {
+        "title": "0.4.0 Full Package & Quick Control",
+        "summary": "Aligned with LBTVCS2BotEnhancer 0.4.0 full package, added Quick Control, and inherited 0.3.13 local experience optimizations. No longer bundles or calls legacy external launcher tools, instead absorbing high-frequency player operation entries within the current Tauri assistant.",
+        "items": {
+          "0": "Built-in resource pack replaced with LBTVCS2BotEnhancer 0.4.0 full package, includes BotHider, RayTrace, BotHiderImpl, RayTraceImpl and RoundDamageRecap after installation.",
+          "1": "Added Quick Control page, centrally provides Bot/Online mode switching, difficulty switching, open CS2, Aim presets, Nades presets, knife templates and Teams entry.",
+          "2": "Aim, Nades, Knife and Teams are made into one-click copy entries based on 0.4.0 Commands.txt, paste into CS2 console after copying.",
+          "3": "Command center added Teams category, integrates 40 professional teams' CT/T side presets.",
+          "4": "Install check, diagnostics and uninstall manifest have been updated with 0.4.0 new directories and plugins, no longer judging based on 0.3.x resource structure.",
+          "5": "Continues to retain existing install check, BotTaunt/NadeSystem editing, Demo lookup, diagnostic logs and release notes capabilities.",
+          "6": "Retains recent directories, recent commands, recent Demos and local prompt states, reducing repeated selection and copying.",
+          "7": "Get Started page adds quick action bar for re-checking, opening CS2, entering config, copying -insecure or opening Demo directory.",
+          "8": "Command center supports pinning common commands; bot_kick, bot_nades more, -insecure and lbtv_map_next are pinned by default.",
+          "9": "Game config page shows recently saved or toggled settings for easy follow-up adjustments.",
+          "10": "Help center added diagnostic panel: version, directories, environment status, running status, log path, recent errors and restore points, with one-click diagnostic info copy.",
+          "11": "Local restore points are recorded before installation, mode switching and config saving to help determine what was affected when issues occur.",
+          "12": "Reorganized page hierarchy of Get Started, Game Config, Command Center and Help Center; important buttons and status are easier to spot.",
+          "13": "Unified copy buttons, save buttons, danger confirmations and dialog bottom action areas; clearer success or failure feedback after operations.",
+          "14": "Optimized empty states, blocking states and long path display; scenarios like no directory selected, CS2 running, not installed give clearer next steps.",
+          "15": "Cards, status badges, tooltips and narrow window layouts polished under both dark and light themes.",
+          "16": "Continues to include 0.3.13's critical map rotation fix; users who already enabled map rotation will also receive the tie-boundary fix when upgrading to 0.4.0."
+        }
+      },
+      "0_3_13": {
+        "title": "CS2 Bot Assistant v0.3.13 Map Rotation Tie Boundary Fix",
+        "summary": "CS2 Bot Assistant v0.3.13 Map Rotation Tie Boundary Fix",
+        "items": {
+          "0": "Fixed issue where tie overtime boundaries like 12:12, 15:15, 18:18 could be misjudged as match end when map rotation is enabled.",
+          "1": "Tie boundaries now only log to file, no thank-you message is sent, and no auto map change occurs.",
+          "2": "Only when someone actually reaches the target score, e.g. 16:14, does the post-match rotation trigger.",
+          "3": "Map rotation still defaults to off, requires manual input of lbtv_map_rotation 1 to enable."
+        }
+      },
+      "0_3_12": {
+        "title": "Map Rotation Plugin Update",
+        "summary": "Added standalone MapRotation plugin, disabled by default, does not affect existing server operation, manual map switching or Bot behavior. When needed, auto map rotation after match end can be enabled via console.",
+        "items": {
+          "0": "Added lbtv_map_rotation 1/0 to enable or disable auto map rotation after match end.",
+          "1": "Added lbtv_map_next to immediately switch to the next map in the rotation list for testing.",
+          "2": "Map rotation disabled by default, installing the new version will not change existing server behavior.",
+          "3": "Two lines of LBTV thank-you message are sent at match end, thanking the upstream project ed0ard/CS2-Bot-Improver and friends who provided help, testing and feedback. This message does not depend on the map rotation toggle and is sent even when map rotation is off.",
+          "4": "Built-in plugin pack now includes MapRotation.dll, and continues to protect existing plugin configs."
+        }
+      },
+      "0_3_11": {
+        "title": "Launch, Notification and Common Operations Experience Optimization",
+        "summary": "Focused on optimizing launch wait, update reminders, opening CS2, common command copying and settings page structure. After installing the new version, common operations are more centralized, prompts are lighter, and continued software use is unaffected.",
+        "items": {
+          "0": "Displays the new app icon on startup, completes update check in the background, reducing abruptness when first opening the software.",
+          "1": "Update prompts shown in three tiers: normal, recommended, mandatory; recommended updates can be dismissed without affecting continued use.",
+          "2": "'Open CS2' adjusted to a single top-level entry, clicking opens a dedicated launch game dialog that correctly launches CS2 via Steam.",
+          "3": "Operation prompts in Install, Settings and Help unified into a top-right global toast, no longer crowding page content.",
+          "4": "Common commands page supports clicking the entire command line to copy directly, copy status shown on the right; first-time entry also shows usage tips.",
+          "5": "Common commands list changed to a more compact two-column layout; narrow screens and full Commands.txt viewing automatically revert to single column.",
+          "6": "Install check, game settings, common commands, help and changelog pages restructured to summary, collapsible panel and dialog structure; core buttons remain always visible, details expand on demand.",
+          "7": "AI API, BotTaunt taunt text, NadeSystem recovery time and Demo details changed to dialog editing or viewing for a cleaner page.",
+          "8": "Continues to retain Demo lookup and sharing optimizations, and uses the new app icon."
+        }
+      },
+      "0_3_10": {
+        "title": "AI Chat & Bot Taunt Output Official Update",
+        "summary": "This is the official 0.3.10 release, mainly enhancing BotTaunt's AI dialogue and taunt output experience. Not updating does not affect normal gameplay; users who want a more natural AI response and native Bot message effect can install.",
+        "items": {
+          "0": "AI dialogue now references recent chat context, no longer only looking at the player's current single sentence; replies are more likely to follow the conversation.",
+          "1": "Supports third-party OpenAI-compatible APIs, such as DeepSeek; default LBTV AI API retains original logic.",
+          "2": "AI replies, round-start taunts, kill taunts, multi-kill, clutch, save, BOT infighting and MVP taunts use Bot native say/say_team output.",
+          "3": "If native speech fails, automatically falls back to the original plugin print method, preventing taunt content from being completely lost.",
+          "4": "Added AI chat diagnostic command for testing whether config, speech and reply chains are working.",
+          "5": "This is an official version, not a mandatory update; users whose current version works fine can upgrade on demand."
+        }
+      },
+      "0_3_9": {
+        "title": "AI Reply Prompt Beta",
+        "summary": "This is an incomplete 0.3.9 beta, not a necessary update. Currently used to test BotTaunt's AI reply style; more content may be added to the 0.3.9 beta in the future.",
+        "items": {
+          "0": "BotTaunt AI replies changed to preset prompt-driven, reducing unnecessary prefixes, explanations and line breaks.",
+          "1": "Enhanced meme-style analogies, 'get it' style hot memes and related reply performance.",
+          "2": "Added narrower pre-display cleanup, reducing probability of duplicate BOT name prefixes appearing in chat.",
+          "3": "This is a beta update; users currently stable on 0.3.8 can wait to install."
+        }
+      },
+      "0_3_8": {
+        "title": "Window Experience & UI Detail Optimization",
+        "summary": "Optimized program window appearance, navigation feedback, install check page and Demo description. In-game settings do not need reconfiguration; takes effect immediately after installing the new version.",
+        "items": {
+          "0": "Program window changed to borderless style, added top title bar for window dragging.",
+          "1": "Added custom minimize, maximize/restore and close buttons.",
+          "2": "Added independent top title bar, fixed borderless window dragging issue.",
+          "3": "Fixed minimize, maximize/restore and close button click not working.",
+          "4": "Optimized left navigation bar selection, highlight and hover effects; visual feedback smoother when switching pages.",
+          "5": "Streamlined install check page, removed infrequently used copy diagnostic info and copy full log buttons.",
+          "6": "Adjusted recording bot Demo description, noting Demo files are generated near the game/csgo/replays folder.",
+          "7": "No new settings items added; takes effect directly after installing the new version."
+        }
+      },
+      "0_3_7": {
+        "title": "Nade Trajectory Optimization",
+        "summary": "Optimized NadeSystem's grenade generation performance, making smoke, HE and molotov trajectories more stable while retaining existing Bot throwing mechanics.",
+        "items": {
+          "0": "Optimized smoke, HE and molotov generation parameters, throw trajectories more stable.",
+          "1": "Retained existing mechanics like brief ceasefire after Bot throw, nade budget, nade cap and damage attribution.",
+          "2": "Flash, decoy and decoy-loop generated flash continue to use original behavior.",
+          "3": "Built-in plugin pack updated to 2026-06-01 new fresh full package."
+        }
+      },
+      "0_3_6": {
+        "title": "Knife Generation & Taunt Text Editing Enhancement",
+        "summary": "Optimized the key-binding knife generation experience and made more BotTaunt lines editable directly in the program, making it easier to swap in your own memes.",
+        "items": {
+          "0": "Pressing backslash by default now generates five popular knives: Karambit, Butterfly, Talon, M9 Bayonet and Bayonet.",
+          "1": "Common commands page added knife mode commands for easy copy to console.",
+          "2": "Enter lbtv_knife_hot to switch back to hot five-knife mode, suitable for daily quick knife testing.",
+          "3": "Enter lbtv_knife_rdm to switch to rotating five-knife combo, generates different knife types each time.",
+          "4": "Enter lbtv_knife_all to switch back to legacy logic, generates all knives at once.",
+          "5": "Added lbtv_bot_rivalry 1/0 to enable or disable low-frequency mutual taunts when BOTs kill enemy BOTs.",
+          "6": "BOT mutual taunts disabled by default, does not affect player kill taunts, player interactions and AI chat replies.",
+          "7": "Game settings taunt text editor upgraded, now can edit BOT mutual taunt phrase pool.",
+          "8": "5-kill in single round, 3-kill in 5 seconds, clutch and save lines can also be directly edited in the program.",
+          "9": "Config reading compatible with BOM-bearing JSON files, reducing parse failures after manual config editing.",
+          "10": "Built-in plugin pack updated, includes new BotTaunt, knife generation modes and documentation."
+        }
+      },
+      "0_3_5": {
+        "title": "Taunt Text & Post-Throw Recovery Optimization",
+        "summary": "BotTaunt taunt text can now be edited within the program, and Bot firing recovery after grenade throws is optimized, reducing immediate firing right after throwing.",
+        "items": {
+          "0": "Built-in plugin pack updated to latest version, includes BotTaunt, NadeSystem and related documentation.",
+          "1": "Game settings added BotTaunt taunt text editor, can edit normal kill, headshot, knife kill and round-start taunts.",
+          "2": "Taunt text now saved in Taunts.json; changing lines later doesn't require recompiling the plugin.",
+          "3": "Installation and upgrades continue to protect existing plugin configs, avoiding overwriting your modified BotTaunt and NadeSystem settings.",
+          "4": "Game settings added NadeSystem recovery time editor, can adjust flash, smoke, HE, molotov, incendiary and decoy recovery seconds.",
+          "5": "Optimized Bot firing recovery after using plugin grenades, reducing the abrupt immediate firing right after throwing.",
+          "6": "Enhanced recovery period suppression logic, allowing Bot to more stably stop aiming and shooting during recovery.",
+          "7": "Added NadeSystem diagnostic commands for troubleshooting recovery status: lbtv_nade_recovery_debug, lbtv_nade_recovery_status, lbtv_nade_recovery_test.",
+          "8": "BotTaunt AI chat rules synchronized: overly long messages are ignored, reply cooldown fixed at 10 seconds, round-start and MVP taunts trigger more stably."
+        }
+      },
+      "0_3_4": {
+        "title": "Bot Post-Throw Recovery",
+        "summary": "Added brief firing recovery after Bot uses grenades, reducing immediate firing right after throwing while not affecting movement, bomb plant and other non-shooting actions.",
+        "items": {
+          "0": "Bot enters brief firing recovery after generating a grenade.",
+          "1": "Flash and decoy default recovery time: 0.55 seconds.",
+          "2": "Smoke default recovery time: 0.85 seconds.",
+          "3": "HE default recovery time: 0.65 seconds.",
+          "4": "Molotov and incendiary default recovery time: 0.80 seconds.",
+          "5": "Built-in resource pack updated to CS2BotImprover_fresh_lbtv.zip."
+        }
+      },
+      "0_3_3": {
+        "title": "Changelog, Demo Help & Install Protection",
+        "summary": "Added in-app changelog, Demo recording help, plugin config protection during installation, and protected plugin pack uninstall operation.",
+        "items": {
+          "0": "Added changelog page, sharing the same data source with the first-open dialog.",
+          "1": "Added tv_enable 1; tv_autorecord 1 Demo recording instructions.",
+          "2": "Added button to open game/csgo/replays.",
+          "3": "Installation protects existing files under addons/counterstrikesharp/configs/plugins/.",
+          "4": "Added protected uninstall for known CS2-Bot-Improver plugin directories."
+        }
+      },
+      "0_3_2": {
+        "title": "Upstream v1.3.0 Notes",
+        "summary": "First-open dialog aligned with upstream v1.3.0 updates and app-side auxiliary features.",
+        "sourceLabel": "GitHub v1.3.0",
+        "items": {
+          "0": "Synced upstream Bot nade positions, aim behavior, economy logic, music kits and team data.",
+          "1": "Added community group entry, My Commands, Commands.txt viewer and AI API editor app auxiliary features."
+        }
+      },
+      "0_3_1": {
+        "title": "Fresh Resource Pack Update",
+        "summary": "Main built-in pack replaced with CS2BotImprover_fresh_lbtv.zip, restored LBTV bot enhancement features.",
+        "items": {
+          "0": "Built-in resource pack replaced with CS2BotImprover_fresh_lbtv.zip.",
+          "1": "Restored BotTaunt, AI chat replies, lbtv_bot_taunt, lbtv_bot_chat and lbtv_difficulty.",
+          "2": "Restored round damage recap, optimized nade source identification."
+        }
+      },
+      "0_3_0": {
+        "title": "Mainline Pack Official Release",
+        "summary": "Official packaged version of the current fresh resource line.",
+        "items": {
+          "0": "Aligned application version and built NSIS installer.",
+          "1": "Delivery installer saved in release directory."
+        }
+      },
+      "0_2_13": {
+        "title": "AI Chat API Settings",
+        "summary": "Added ability to read and save BotTaunt AI API settings within the app.",
+        "items": {
+          "0": "Added AI Chat API settings card, editable URL and API Key.",
+          "1": "Added Tauri commands for reading and patch-writing BotTaunt.json, preserving unknown fields."
+        }
+      },
+      "0_2_11": {
+        "title": "LBTV Resource Pack Update",
+        "summary": "Replaced upstream LBTV resource pack and completed official packaging.",
+        "items": {
+          "0": "Replaced main built-in resource pack.",
+          "1": "Completed workspace configuration and final installer output verification before release."
+        }
+      }
+    }
   },
   "config": {
     "title": "Config Console",
@@ -271,7 +926,29 @@
     "demoDirLabel": "Directory",
     "demoFullPathLabel": "Full Path",
     "copyDemoPath": "Copy Demo Path",
-    "secondaryReload": "Reload"
+    "secondaryReload": "Reload",
+    "applyDifficulty": "Apply Difficulty",
+    "switchMode": "Switch Mode",
+    "saveNadeRecovery": "Save Nade Recovery",
+    "copyLaunchOpt": "Copy Launch Option",
+    "copyDemoCmd": "Copy Demo Command",
+    "findRecentDemo": "Find Recent Demo",
+    "openDemoDir": "Open Demo Dir",
+    "openDemoFolder": "Open Demo Folder",
+    "enterConfig": "Enter Config",
+    "toast": {
+      "recheckAndExit": "{msg} Please recheck the directory and confirm CS2 has exited.",
+      "exitAndRecheck": "{msg} Please exit CS2, then return to Install page and recheck.",
+      "reloadOrDiagnose": "{msg} You can reload, or copy diagnostics from the Guide page.",
+      "confirmExitAndReload": "{msg} Please confirm CS2 has exited, then reload the config.",
+      "reloadAndRetry": "{msg} You can reload the config and try again.",
+      "launchOptCopied": "Launch option copied: -disable_workshop_command_filtering",
+      "consoleCmdCopied": "Console command copied: tv_enable 1; tv_autorecord 1",
+      "demoDirMissing": "{msg} Please confirm the demo directory exists, or copy the record command and play a match first.",
+      "demoPathCopied": "Demo path copied: {path}",
+      "returnAndRecheck": "{msg} Please return to the Install page and recheck the directory.",
+      "openDemoDirAndSearch": "{msg} You can open the demo directory and search manually."
+    }
   },
   "inventory": {
     "title": "Inventory",
@@ -312,7 +989,43 @@
     "launchAtStartup": "Launch at Startup",
     "autoInstall": "Auto-install on first run",
     "storage": "Storage Info",
-    "storageHint": "Settings are stored in localStorage. Directory list, theme preferences, and pinned commands will persist after uninstall."
+    "storageHint": "Settings are stored in localStorage. Directory list, theme preferences, and pinned commands will persist after uninstall.",
+    "appearanceTitle": "Theme & Colors",
+    "customAccent": "Custom Accent Color",
+    "languageLabel": "Language",
+    "startupTitle": "Program Behavior",
+    "autostart": "Launch at Startup",
+    "autostartHint": "Disabled by default. When enabled, the assistant will start automatically on Windows login.",
+    "autoInstallTitle": "First-run Plugin Pack Install",
+    "autoInstallHint": "Enabled by default. Attempts at most once per app version; skips if CS2 is running or no directory is set.",
+    "storagePrivacy": "Storage & Privacy",
+    "storagePrivacyTitle": "Storage & Privacy Info",
+    "storageLocalStorage": "Browser Cache / localStorage",
+    "storageLocalStorageDesc": "Used to remember your preferences and selected directories, including theme, update log read status, update reminder dismissals, pinned commands, recent commands, recent CS2 directories, hint dismissals, and the first-run auto-install toggle.",
+    "storageCs2Dir": "Selected CS2 Directory",
+    "storageCs2DirDesc": "The plugin pack is installed to the game directory, e.g. game\\csgo\\addons\\counterstrikesharp\\... and game\\csgo\\addons\\metamod\\...",
+    "storagePluginConfig": "Plugin Config Directory",
+    "storagePluginConfigDesc": "BotTaunt, NadeSystem and other configs are saved in the CS2 plugin config directory. Each install cleans old packages and configs, then writes the built-in package.",
+    "storageLogs": "Logs / Diagnostics",
+    "storageLogsDesc": "The diagnostics feature provides the log path and can open the log directory. This page only explains the location, it does not modify the log directory.",
+    "storageNotice": "These local preferences are not uploaded. Plugin configs remain in your selected CS2 directory. Related paths cannot be modified within the program.",
+    "versionHistory": "Version History",
+    "currentVersion": "Current v{version}",
+    "viewReleaseNotes": "View Release Notes",
+    "releaseNotesHint": "Release notes prioritize the current built-in version, and merge online history and download links when the network is available.",
+    "openSourceAttribution": "Built on the public CS2-Bot-Improver and CS2-Bot-Improver-Plus projects. This assistant is released under AGPL-3.0-or-later.",
+    "reload": "Reload",
+    "autostartChecking": "Checking...",
+    "autostartInstalled": "Auto-installed",
+    "autostartSkipped": "Skipped",
+    "autostartFailed": "Failed",
+    "autostartUnchecked": "Not Checked",
+    "autostartWebOnly": "Web preview environment. Autostart only works in the desktop version.",
+    "autostartOn": "Autostart status read: enabled.",
+    "autostartOff": "Autostart status read: disabled.",
+    "autostartEnabled": "Autostart enabled.",
+    "autostartDisabled": "Autostart disabled.",
+    "operationFailed": "Operation failed. Please try again."
   },
   "launchModal": {
     "title": "Launch Counter-Strike 2",
@@ -366,6 +1079,26 @@
     "copy": "Copy",
     "copied": "Copied",
     "failed": "Copy Failed"
+  },
+  "softwareUpdate": {
+    "critical": "Mandatory Update",
+    "recommended": "Recommended Update",
+    "normal": "New Version Available",
+    "criticalSummary": "The current version must be updated to continue using the software.",
+    "recommendedSummary": "This version includes recommended upgrades. You may continue without updating.",
+    "normalSummary": "This version is ready for download.",
+    "title": "{name} v{version} Released",
+    "defaultTitle": "New Version Available",
+    "downloadLabel": "Open Download",
+    "dismiss": "Later",
+    "extractCode": "Extract code: {code}",
+    "openFailed": "Failed to open download link. Try again from the release notes page."
+  },
+  "toast": {
+    "ready": "Completed",
+    "warn": "Action Needed",
+    "danger": "Operation Failed",
+    "info": "Notice"
   },
   "status": {
     "cs2Running": "CS2 is running",

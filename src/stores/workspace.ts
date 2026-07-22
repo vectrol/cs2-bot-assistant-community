@@ -5,7 +5,7 @@ import registry from '@/config/workspace/projects.json'
 import type { NavItem, ProjectProfile, WorkQueueItem, WorkspaceRegistry } from '@/types/app'
 
 const navItems: NavItem[] = [
-  { label: '仪表盘', to: '/dashboard', description: '工作区运行时和隔离状态概览' },
+  { label: '仪表盘', to: '/', description: '工作区运行时和隔离状态概览' },
   { label: '项目', to: '/projects', description: '项目注册表和路径隔离关系' },
   { label: '任务', to: '/tasks', description: '活跃项目的执行队列' },
   { label: '日志', to: '/logs', description: '项目诊断和命令输出' },

@@ -40,7 +40,7 @@ let copiedTimer: ReturnType<typeof setTimeout> | null = null
 const tabs = computed(() => [
   ...commandCenterTabs.map((tab) => ({
     key: tab.key,
-    label: tab.label,
+    label: t(`commands.tabs.${tab.key}` as `commands.tabs.${typeof tab.key}`),
     count: tab.commands.length,
   })),
   {
@@ -51,6 +51,8 @@ const tabs = computed(() => [
 ])
 
 const currentCommandTab = computed(() => commandCenterTabs.find((tab) => tab.key === activeTab.value) ?? commandCenterTabs[0])
+const currentTabLabel = computed(() => activeTab.value && !isCustomTab.value && !isTeamsTab.value ? t(`commands.tabs.${activeTab.value}` as const) : '')
+const currentTabDesc = computed(() => activeTab.value && !isCustomTab.value && !isTeamsTab.value ? t(`commands.tabs.${activeTab.value}.desc` as const) : '')
 const isCustomTab = computed(() => activeTab.value === 'custom')
 const isTeamsTab = computed(() => activeTab.value === 'teams')
 const isEditing = computed(() => editingId.value.length > 0)
@@ -63,11 +65,13 @@ const visibleCommands = computed(() => {
   if (!keyword) {
     return commands
   }
-  return commands.filter((item) => (
-    item.command.toLowerCase().includes(keyword)
-    || item.summary.toLowerCase().includes(keyword)
-    || tab?.label.toLowerCase().includes(keyword)
-  ))
+  return commands.filter((item) => {
+    if (item.command.toLowerCase().includes(keyword)) return true
+    if (item.summary.toLowerCase().includes(keyword)) return true
+    if (item.summaryKey && t(item.summaryKey).toLowerCase().includes(keyword)) return true
+    if (tab?.label.toLowerCase().includes(keyword)) return true
+    return false
+  })
 })
 
 const visibleCustomCommands = computed(() => {
@@ -352,8 +356,8 @@ onBeforeUnmount(() => {
     <article v-else-if="!isCustomTab" class="card command-center-panel glass">
       <div class="section-head">
         <div>
-          <p class="eyebrow">{{ currentCommandTab?.label }}</p>
-          <h3>{{ currentCommandTab?.description }}</h3>
+          <p class="eyebrow">{{ currentTabLabel }}</p>
+          <h3>{{ currentTabDesc }}</h3>
         </div>
       </div>
 
@@ -365,7 +369,7 @@ onBeforeUnmount(() => {
           @click="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)"
         >
           <code>{{ item.command }}</code>
-          <span>{{ item.summary }}</span>
+          <span>{{ item.summaryKey ? t(item.summaryKey) : item.summary }}</span>
           <button class="command-card__copy" type="button" @click.stop="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">
             {{ copiedKey === `${activeTab}:${item.command}` ? t('commands.copied') : t('commands.copy') }}
           </button>

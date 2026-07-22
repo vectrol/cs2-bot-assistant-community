@@ -1,69 +1,43 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import { useCs2Store } from '@/stores/cs2'
 
+const { t } = useI18n()
 const store = useCs2Store()
 const visible = ref(false)
 const message = ref('')
 let toastTimer: ReturnType<typeof setTimeout> | null = null
 
+const dangerPatterns = ['fail', 'error', 'failed', 'denied', 'exception', 'unable']
+const warnPatterns = ['please', 'need', 'running', 'not found', 'not select', 'no ', 'pending', 'warn', 'missing', 'exit', 'quit']
+const readyPatterns = ['saved', 'copied', 'selected', 'installed', 'deleted', 'restored', 'success', 'refreshed', 'complete']
+
 const toastState = computed<'ready' | 'warn' | 'danger' | 'info'>(() => {
-  const text = message.value
-  if (/(失败|错误|无法|异常|未能)/.test(text)) {
-    return 'danger'
-  }
-  if (/(请先|需要|运行中|没有|未选择|未找到|待)/.test(text)) {
-    return 'warn'
-  }
-  if (/(已保存|已复制|已选择|已安装|已删除|已恢复|已读取|成功)/.test(text)) {
-    return 'ready'
-  }
+  const text = message.value.toLowerCase()
+  if (dangerPatterns.some(p => text.includes(p))) return 'danger'
+  if (warnPatterns.some(p => text.includes(p))) return 'warn'
+  if (readyPatterns.some(p => text.includes(p))) return 'ready'
   return 'info'
 })
 
-const toastTitle = computed(() => {
-  if (toastState.value === 'ready') {
-    return '已完成'
-  }
-  if (toastState.value === 'warn') {
-    return '需要处理'
-  }
-  if (toastState.value === 'danger') {
-    return '操作失败'
-  }
-  return '提示'
-})
+const toastTitle = computed(() => t(`toast.${toastState.value}`))
 
 function showToast(nextMessage: string) {
-  if (!nextMessage.trim()) {
-    return
-  }
-
+  if (!nextMessage.trim()) return
   message.value = nextMessage
   visible.value = true
-  if (toastTimer) {
-    clearTimeout(toastTimer)
-  }
-  toastTimer = setTimeout(() => {
-    visible.value = false
-    toastTimer = null
-  }, 4000)
+  if (toastTimer) clearTimeout(toastTimer)
+  toastTimer = setTimeout(() => { visible.value = false; toastTimer = null }, 4000)
 }
 
-watch(
-  () => store.message,
-  (nextMessage) => {
-    if (nextMessage) {
-      showToast(nextMessage)
-    }
-  },
-)
+watch(() => store.message, (nextMessage) => {
+  if (nextMessage) showToast(nextMessage)
+})
 
 onBeforeUnmount(() => {
-  if (toastTimer) {
-    clearTimeout(toastTimer)
-  }
+  if (toastTimer) clearTimeout(toastTimer)
 })
 </script>
 

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, inject, onMounted, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 
 import ConsolePanel from '@/components/layout/ConsolePanel.vue'
 import CopyButton from '@/components/CopyButton.vue'
@@ -12,6 +13,7 @@ import { useCs2Store } from '@/stores/cs2'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
 
+const { t } = useI18n()
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
 
@@ -19,38 +21,38 @@ const openLaunchGameModal = inject<() => void>('openLaunchGameModal', () => {})
 
 const teamQuery = ref('')
 const localMessage = ref('')
-const currentResourcePackageLabel = computed(() => `当前 ${appConfig.appVersion} 资源包`)
+const currentResourcePackageLabel = computed(() => `${t('quickControl.currentPackage')} ${appConfig.appVersion}`)
 const currentCommandsTxtLabel = computed(() => `${appConfig.appVersion} Commands.txt`)
 
 const modeOptions: Array<{ label: string; value: GameModePreset; detail: string }> = [
-  { label: 'Bot 模式', value: 'withBots', detail: '加载本地插件练习，Steam 启动项需要 -insecure。' },
-  { label: '在线模式', value: 'online', detail: '恢复正常联机，切换后删除 -insecure。' },
+  { label: t('quickControl.modeBot'), value: 'withBots', detail: t('quickControl.modeBotDetail') },
+  { label: t('quickControl.modeOnline'), value: 'online', detail: t('quickControl.modeOnlineDetail') },
 ]
 
 const difficultyOptions: Array<{ label: string; value: DifficultyPreset; detail: string }> = [
-  { label: '低', value: 'low', detail: '适合热身和新手。' },
-  { label: '中', value: 'medium', detail: '接近默认训练强度。' },
-  { label: '高', value: 'high', detail: '更适合高强度练枪。' },
+  { label: t('quickControl.diffLow'), value: 'low', detail: t('quickControl.diffLowDetail') },
+  { label: t('quickControl.diffMedium'), value: 'medium', detail: t('quickControl.diffMediumDetail') },
+  { label: t('quickControl.diffHigh'), value: 'high', detail: t('quickControl.diffHighDetail') },
 ]
 
 const aimPresets = [
-  { label: '混合', value: 'mixed' as const, command: 'bot_aim mixed', detail: '根据局势选择瞄准位置。' },
-  { label: '头部', value: 'head' as const, command: 'bot_aim head', detail: '优先瞄准头部。' },
-  { label: '身体', value: 'body' as const, command: 'bot_aim body', detail: '优先瞄准身体。' },
+  { label: t('quickControl.aimMixed'), value: 'mixed' as const, command: 'bot_aim mixed', detail: t('quickControl.aimMixedDetail') },
+  { label: t('quickControl.aimHead'), value: 'head' as const, command: 'bot_aim head', detail: t('quickControl.aimHeadDetail') },
+  { label: t('quickControl.aimBody'), value: 'body' as const, command: 'bot_aim body', detail: t('quickControl.aimBodyDetail') },
 ]
 
 const nadePresets = [
-  { label: '正常', value: 'normal' as const, command: 'bot_nades normal', detail: '接近真人限制。' },
-  { label: '更多', value: 'more' as const, command: 'bot_nades more', detail: '推荐训练档。' },
-  { label: '最大', value: 'max' as const, command: 'bot_nades max', detail: '更频繁投掷。' },
-  { label: '关闭', value: 'off' as const, command: 'bot_nades off', detail: '完全禁用 Bot 投掷物。' },
+  { label: t('quickControl.nadesNormal'), value: 'normal' as const, command: 'bot_nades normal', detail: t('quickControl.nadesNormalDetail') },
+  { label: t('quickControl.nadesMore'), value: 'more' as const, command: 'bot_nades more', detail: t('quickControl.nadesMoreDetail') },
+  { label: t('quickControl.nadesMax'), value: 'max' as const, command: 'bot_nades max', detail: t('quickControl.nadesMaxDetail') },
+  { label: t('quickControl.nadesOff'), value: 'off' as const, command: 'bot_nades off', detail: t('quickControl.nadesOffDetail') },
 ]
 
 const botItemNotes = computed(() => [
-  { label: 'Skins', detail: '武器皮肤、刀和手套由 CounterStrikeSharp 物品插件提供。' },
-  { label: 'Profiles', detail: 'Bot 头像与资料能力来自 addons/BotHider。' },
-  { label: 'Agents', detail: `探员模型由${currentResourcePackageLabel.value}随插件加载。` },
-  { label: 'Music', detail: '音乐盒随 Bot 物品系统加载。' },
+  { label: t('quickControl.botItemsSkin'), detail: t('quickControl.botItemsSkinDetail') },
+  { label: t('quickControl.botItemsProfile'), detail: t('quickControl.botItemsProfileDetail') },
+  { label: t('quickControl.botItemsAgent'), detail: t('quickControl.botItemsAgentDetail', { pkg: currentResourcePackageLabel.value }) },
+  { label: t('quickControl.botItemsMusic'), detail: t('quickControl.botItemsMusicDetail') },
 ])
 
 const visibleTeams = computed(() => {
@@ -67,34 +69,34 @@ const visibleTeams = computed(() => {
 
 const summaryItems = computed(() => [
   {
-    label: '目录',
-    value: store.selectedRoot ? '已选择' : '未选择',
+    label: t('quickControl.directory'),
+    value: store.selectedRoot ? store.selectedRoot : t('quickControl.notSelected'),
     state: store.selectedRoot ? 'ready' as const : 'warn' as const,
   },
   {
-    label: '安装状态',
-    value: store.readyForConfig ? '可配置' : '待检查',
+    label: t('quickControl.installation'),
+    value: store.readyForConfig ? t('quickControl.ready') : t('quickControl.checkPending'),
     state: store.readyForConfig ? 'ready' as const : 'warn' as const,
   },
   {
-    label: '游戏进程',
-    value: store.cs2Running ? '运行中' : '未运行',
+    label: t('quickControl.process'),
+    value: store.cs2Running ? t('quickControl.running') : t('quickControl.notRunning'),
     state: store.cs2Running ? 'warn' as const : 'ready' as const,
   },
   {
-    label: '队伍预设',
-    value: `${teamPresets.length} 支`,
+    label: t('quickControl.teamPresets'),
+    value: t('quickControl.teamCount', { n: teamPresets.length }),
     state: 'ready' as const,
   },
 ])
 
 function recordCopied(label: string, command: string) {
   preferences.recordCommand(command, label)
-  localMessage.value = `已复制：${label}`
+  localMessage.value = t('quickControl.copiedLabel', { label })
 }
 
 function handleCopyFailed() {
-  localMessage.value = '复制失败，请手动选中命令后复制。'
+  localMessage.value = t('copyButton.failed')
 }
 
 async function applyAim(value: 'head' | 'mixed' | 'body') {
@@ -121,7 +123,7 @@ async function refreshStatus() {
       store.refreshCs2Running(),
       store.refreshEnvironment(),
     ])
-    localMessage.value = '状态已刷新。'
+    localMessage.value = t('quickControl.statusRefreshed')
   } catch (error) {
     localMessage.value = store.normalizeError(error)
   }
@@ -131,18 +133,18 @@ async function runOneClickFlow() {
   try {
     await refreshStatus()
     if (!store.selectedRoot) {
-      localMessage.value = '请先选择 CS2 根目录，再执行一键流程。'
+      localMessage.value = t('quickControl.noRootGuide')
       return
     }
     if (!store.readyForConfig) {
-      localMessage.value = '环境还未就绪，请先到准备环境页完成安装。'
+      localMessage.value = t('quickControl.envNotReady')
       return
     }
     if (store.cs2Running) {
-      localMessage.value = 'CS2 正在运行。配置写入前请先退出游戏。'
+      localMessage.value = t('quickControl.cs2RunningMsg')
       return
     }
-    localMessage.value = '状态检查通过，可以切换模式、难度或复制命令。'
+    localMessage.value = t('quickControl.checkPassed')
   } catch (error) {
     localMessage.value = store.normalizeError(error)
   }
@@ -185,15 +187,15 @@ onMounted(() => {
   <section class="page-grid quick-control-page">
     <section class="ops-overview">
       <ConsolePanel
-        eyebrow="Live Operations"
-        title="作战总览"
-        :description="`模式、难度和启动走桌面端原生能力；Aim、Nades、Knife 和 Teams 按 ${currentCommandsTxtLabel} 一键复制。`"
+        :eyebrow="t('quickControl.title')"
+        :title="t('quickControl.title')"
+        :description="t('quickControl.description', { txt: currentCommandsTxtLabel })"
         tone="strong"
       >
         <template #actions>
-          <button class="primary-button" type="button" @click="openLaunchModal">打开 CS2</button>
-          <button class="ghost-button" type="button" :disabled="store.busy" @click="runOneClickFlow">一键检查</button>
-          <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshStatus">刷新</button>
+          <button class="primary-button" type="button" @click="openLaunchModal">{{ t('quickControl.launchCs2') }}</button>
+          <button class="ghost-button" type="button" :disabled="store.busy" @click="runOneClickFlow">{{ t('quickControl.oneClickCheck') }}</button>
+          <button class="ghost-button" type="button" :disabled="store.busy" @click="refreshStatus">{{ t('quickControl.refresh') }}</button>
         </template>
         <div class="metric-grid">
           <MetricTile
@@ -205,12 +207,11 @@ onMounted(() => {
           />
         </div>
       </ConsolePanel>
-
     </section>
 
     <InlineNotice
       v-if="!store.selectedRoot"
-      message="请先在开始使用页选择 CS2 根目录。Quick Control 会复用同一个目录和安装状态。"
+      :message="t('quickControl.noRootMsg')"
       state="warn"
     />
 
@@ -218,11 +219,11 @@ onMounted(() => {
       <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Game Mode</p>
-            <h3>Bot / Online 模式</h3>
+            <p class="eyebrow">{{ t('quickControl.gameMode') }}</p>
+            <h3>{{ t('quickControl.modeSection') }}</h3>
           </div>
           <RouterLink class="ghost-button" to="/guide">
-            使用帮助
+            {{ t('quickControl.help') }}
           </RouterLink>
         </div>
         <div class="quick-option-list">
@@ -243,8 +244,8 @@ onMounted(() => {
       <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Difficulty</p>
-            <h3>Bot 难度</h3>
+            <p class="eyebrow">{{ t('quickControl.difficulty') }}</p>
+            <h3>{{ t('quickControl.diffSection') }}</h3>
           </div>
         </div>
         <div class="quick-option-list">
@@ -265,12 +266,12 @@ onMounted(() => {
       <article class="card quick-card command-panel">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Presets</p>
-            <h3>Aim / Nades</h3>
+            <p class="eyebrow">{{ t('quickControl.aimPreset') }}</p>
+            <h3>{{ t('quickControl.aimPresets') }}</h3>
           </div>
         </div>
         <div class="preset-section">
-          <p class="muted">Aim</p>
+          <p class="muted">{{ t('quickControl.aimPreset') }}</p>
           <div class="quick-chip-grid">
             <button
               v-for="preset in aimPresets"
@@ -285,7 +286,7 @@ onMounted(() => {
           </div>
         </div>
         <div class="preset-section">
-          <p class="muted">Nades</p>
+          <p class="muted">{{ t('quickControl.nadesPreset') }}</p>
           <div class="quick-chip-grid">
             <button
               v-for="preset in nadePresets"
@@ -304,11 +305,11 @@ onMounted(() => {
       <article class="card quick-card">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Bot Items</p>
-            <h3>物品能力状态</h3>
+            <p class="eyebrow">{{ t('quickControl.botItems') }}</p>
+            <h3>{{ t('quickControl.botItemsTitle') }}</h3>
           </div>
           <RouterLink class="ghost-button" to="/guide">
-            手动说明
+            {{ t('quickControl.manual') }}
           </RouterLink>
         </div>
         <div class="bot-item-grid">
@@ -318,24 +319,24 @@ onMounted(() => {
           </div>
         </div>
         <p class="tip-box">
-          {{ currentResourcePackageLabel }}已包含 BotHider、RayTrace、BotHiderImpl、RayTraceImpl 和 RoundDamageRecap。当前助手负责整包安装和状态检查；单项开关仍按上游 core.json / 目录重命名模型保守处理。
+          {{ t('quickControl.botItemsTip') }}
         </p>
       </article>
 
       <article class="card quick-card quick-card--wide">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Teams</p>
-            <h3>职业队伍预设</h3>
+            <p class="eyebrow">{{ t('quickControl.teamPresets') }}</p>
+            <h3>{{ t('quickControl.teamsSection') }}</h3>
           </div>
           <RouterLink class="ghost-button" to="/commands?tab=teams">
-            去指令中心
+            {{ t('quickControl.goToCommands') }}
           </RouterLink>
         </div>
 
         <label class="field search-field">
-          <span>搜索队伍或队员</span>
-          <input v-model="teamQuery" type="search" placeholder="例如 Vitality、donk、TYLOO" />
+          <span>{{ t('quickControl.teamsSearch') }}</span>
+          <input v-model="teamQuery" type="search" :placeholder="t('quickControl.teamsSearchPlaceholder')" />
         </label>
 
         <div class="team-preset-grid">
@@ -344,14 +345,14 @@ onMounted(() => {
             <div class="actions-row">
               <CopyButton
                 :text="team.ct"
-                label="复制 CT"
+                :label="t('quickControl.copyCt')"
                 :copy-without-semicolon="true"
                 @copied="recordCopied(`${team.name} CT`, team.ct)"
                 @failed="handleCopyFailed"
               />
               <CopyButton
                 :text="team.t"
-                label="复制 T"
+                :label="t('quickControl.copyT')"
                 :copy-without-semicolon="true"
                 @copied="recordCopied(`${team.name} T`, team.t)"
                 @failed="handleCopyFailed"
@@ -365,7 +366,7 @@ onMounted(() => {
     <InlineNotice
       v-if="localMessage"
       :message="localMessage"
-      :state="localMessage.includes('失败') || localMessage.includes('请先') ? 'warn' : 'info'"
+      :state="localMessage.includes(t('copyButton.failed').replace(t('copyButton.failed'), '')) || localMessage.includes(t('quickControl.noRootGuide')) ? 'warn' : 'info'"
     />
   </section>
 </template>

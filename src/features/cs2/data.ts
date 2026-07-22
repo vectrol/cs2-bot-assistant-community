@@ -1,6 +1,7 @@
 type CommandItem = {
   command: string
   summary: string
+  summaryKey?: string
   copyWithoutSemicolon?: boolean
 }
 
@@ -13,36 +14,36 @@ export type TeamPreset = {
 }
 
 export const weaponCommands = [
-  { command: 'elite', label: '双枪' },
-  { command: 'p250', label: 'P250' },
-  { command: 'fn57', label: 'FN57' },
-  { command: 'deagle', label: '沙鹰' },
-  { command: 'cz75a', label: 'CZ75' },
-  { command: 'r8', label: 'R8' },
-  { command: 'bizon', label: '野牛' },
-  { command: 'p90', label: 'P90' },
-  { command: 'mp5sd', label: 'MP5-SD' },
-  { command: 'mp9', label: 'MP9' },
-  { command: 'mp7', label: 'MP7' },
-  { command: 'mac10', label: '吹风机' },
-  { command: 'ump45', label: 'UMP45' },
-  { command: 'mag7', label: '警喷' },
-  { command: 'sawedoff', label: '匪喷' },
-  { command: 'nova', label: '新星' },
-  { command: 'xm1014', label: '连喷' },
-  { command: 'famas', label: '法玛斯' },
-  { command: 'galilar', label: '加利尔' },
-  { command: 'm4a1', label: 'M4A4' },
-  { command: 'm4a1s', label: 'M4A1 消音版' },
-  { command: 'ak47', label: 'AK47' },
-  { command: 'aug', label: 'AUG' },
-  { command: 'sg556', label: 'SG553' },
-  { command: 'ssg08', label: '鸟狙' },
-  { command: 'awp', label: '大狙' },
-  { command: 'scar20', label: '警连狙' },
-  { command: 'g3sg1', label: '匪连狙' },
-  { command: 'negev', label: '内格夫' },
-  { command: 'm249', label: 'M249' },
+  { command: 'elite', label: '双枪', labelKey: 'commands.weapons.elite' },
+  { command: 'p250', label: 'P250', labelKey: 'commands.weapons.p250' },
+  { command: 'fn57', label: 'FN57', labelKey: 'commands.weapons.fn57' },
+  { command: 'deagle', label: '沙鹰', labelKey: 'commands.weapons.deagle' },
+  { command: 'cz75a', label: 'CZ75', labelKey: 'commands.weapons.cz75a' },
+  { command: 'r8', label: 'R8', labelKey: 'commands.weapons.r8' },
+  { command: 'bizon', label: '野牛', labelKey: 'commands.weapons.bizon' },
+  { command: 'p90', label: 'P90', labelKey: 'commands.weapons.p90' },
+  { command: 'mp5sd', label: 'MP5-SD', labelKey: 'commands.weapons.mp5sd' },
+  { command: 'mp9', label: 'MP9', labelKey: 'commands.weapons.mp9' },
+  { command: 'mp7', label: 'MP7', labelKey: 'commands.weapons.mp7' },
+  { command: 'mac10', label: '吹风机', labelKey: 'commands.weapons.mac10' },
+  { command: 'ump45', label: 'UMP45', labelKey: 'commands.weapons.ump45' },
+  { command: 'mag7', label: '警喷', labelKey: 'commands.weapons.mag7' },
+  { command: 'sawedoff', label: '匪喷', labelKey: 'commands.weapons.sawedoff' },
+  { command: 'nova', label: '新星', labelKey: 'commands.weapons.nova' },
+  { command: 'xm1014', label: '连喷', labelKey: 'commands.weapons.xm1014' },
+  { command: 'famas', label: '法玛斯', labelKey: 'commands.weapons.famas' },
+  { command: 'galilar', label: '加利尔', labelKey: 'commands.weapons.galilar' },
+  { command: 'm4a1', label: 'M4A4', labelKey: 'commands.weapons.m4a1' },
+  { command: 'm4a1s', label: 'M4A1 消音版', labelKey: 'commands.weapons.m4a1s' },
+  { command: 'ak47', label: 'AK47', labelKey: 'commands.weapons.ak47' },
+  { command: 'aug', label: 'AUG', labelKey: 'commands.weapons.aug' },
+  { command: 'sg556', label: 'SG553', labelKey: 'commands.weapons.sg556' },
+  { command: 'ssg08', label: '鸟狙', labelKey: 'commands.weapons.ssg08' },
+  { command: 'awp', label: '大狙', labelKey: 'commands.weapons.awp' },
+  { command: 'scar20', label: '警连狙', labelKey: 'commands.weapons.scar20' },
+  { command: 'g3sg1', label: '匪连狙', labelKey: 'commands.weapons.g3sg1' },
+  { command: 'negev', label: '内格夫', labelKey: 'commands.weapons.negev' },
+  { command: 'm249', label: 'M249', labelKey: 'commands.weapons.m249' },
 ]
 
 export const commandGroups = [
@@ -50,47 +51,48 @@ export const commandGroups = [
     title: 'Bot 枪法',
     description: '控制 Bot 的瞄准倾向。',
     commands: [
-      { command: 'bot_aim mixed', summary: '默认模式，Bot 会根据局势灵活选择瞄准位置。' },
-      { command: 'bot_aim head', summary: '让 Bot 优先瞄准头部。' },
-      { command: 'bot_aim body', summary: '让 Bot 优先瞄准身体。' },
-      { command: 'bot_aim', summary: '查看当前 Bot 瞄准模式。' },
+      { command: 'bot_aim mixed', summary: '默认模式，Bot 会根据局势灵活选择瞄准位置。', summaryKey: 'commands.groups.aim.bot_aim_mixed' },
+      { command: 'bot_aim head', summary: '让 Bot 优先瞄准头部。', summaryKey: 'commands.groups.aim.bot_aim_head' },
+      { command: 'bot_aim body', summary: '让 Bot 优先瞄准身体。', summaryKey: 'commands.groups.aim.bot_aim_body' },
+      { command: 'bot_aim', summary: '查看当前 Bot 瞄准模式。', summaryKey: 'commands.groups.aim.bot_aim' },
     ] satisfies CommandItem[],
   },
   {
     title: 'Bot 投掷物',
     description: '控制 Bot 使用道具的强度和频率。',
     commands: [
-      { command: 'bot_nades off', summary: 'Bot 不会投掷任何道具。' },
-      { command: 'bot_nades normal', summary: '默认模式，Bot 遵循接近真人玩家的道具数量限制。' },
-      { command: 'bot_nades more', summary: '推荐模式，沿用 normal 的判断逻辑，但允许更多道具。' },
-      { command: 'bot_nades max', summary: '限制最少，Bot 会更频繁地使用道具。' },
-      { command: 'bot_nades', summary: '查看当前 Bot 投掷物模式。' },
+      { command: 'bot_nades off', summary: 'Bot 不会投掷任何道具。', summaryKey: 'commands.groups.nades.bot_nades_off' },
+      { command: 'bot_nades normal', summary: '默认模式，Bot 遵循接近真人玩家的道具数量限制。', summaryKey: 'commands.groups.nades.bot_nades_normal' },
+      { command: 'bot_nades more', summary: '推荐模式，沿用 normal 的判断逻辑，但允许更多道具。', summaryKey: 'commands.groups.nades.bot_nades_more' },
+      { command: 'bot_nades max', summary: '限制最少，Bot 会更频繁地使用道具。', summaryKey: 'commands.groups.nades.bot_nades_max' },
+      { command: 'bot_nades', summary: '查看当前 Bot 投掷物模式。', summaryKey: 'commands.groups.nades.bot_nades' },
     ] satisfies CommandItem[],
   },
   {
     title: '常用控制',
     description: '快速调整 Bot 数量和当前对局。',
     commands: [
-      { command: 'bot_kick', summary: '踢出当前全部 Bot。' },
-      { command: 'bot_kick t', summary: '踢出一名 T 阵营 Bot。' },
-      { command: 'bot_kick ct', summary: '踢出一名 CT 阵营 Bot。' },
-      { command: 'bot_add_t', summary: '添加一名 T 阵营 Bot。' },
-      { command: 'bot_add_ct', summary: '添加一名 CT 阵营 Bot。' },
-      { command: 'bot_randombuy 1', summary: '让 Bot 随机买枪，改成 0 可关闭。' },
-      { command: 'bot_quota 数字', summary: '把场上 Bot 数量补到指定数量。' },
-      { command: 'mp_restartgame 1', summary: '保留当前设置并重开对局。' },
+      { command: 'bot_kick', summary: '踢出当前全部 Bot。', summaryKey: 'commands.groups.controls.bot_kick' },
+      { command: 'bot_kick t', summary: '踢出一名 T 阵营 Bot。', summaryKey: 'commands.groups.controls.bot_kick_t' },
+      { command: 'bot_kick ct', summary: '踢出一名 CT 阵营 Bot。', summaryKey: 'commands.groups.controls.bot_kick_ct' },
+      { command: 'bot_add_t', summary: '添加一名 T 阵营 Bot。', summaryKey: 'commands.groups.controls.bot_add_t' },
+      { command: 'bot_add_ct', summary: '添加一名 CT 阵营 Bot。', summaryKey: 'commands.groups.controls.bot_add_ct' },
+      { command: 'bot_randombuy 1', summary: '让 Bot 随机买枪，改成 0 可关闭。', summaryKey: 'commands.groups.controls.bot_randombuy_1' },
+      { command: 'bot_quota 数字', summary: '把场上 Bot 数量补到指定数量。', summaryKey: 'commands.groups.controls.bot_quota' },
+      { command: 'mp_restartgame 1', summary: '保留当前设置并重开对局。', summaryKey: 'commands.groups.controls.mp_restartgame_1' },
     ] satisfies CommandItem[],
   },
   {
     title: '启动选项',
     description: 'Steam 启动项和常用附加命令。',
     commands: [
-      { command: 'bot_buy', summary: '恢复 Bot 默认买枪逻辑。' },
-      { command: '-insecure', summary: '把它加入 Steam 启动项，才能加载本地插件。', copyWithoutSemicolon: true },
+      { command: 'bot_buy', summary: '恢复 Bot 默认买枪逻辑。', summaryKey: 'commands.groups.startup.bot_buy' },
+      { command: '-insecure', summary: '把它加入 Steam 启动项，才能加载本地插件。', copyWithoutSemicolon: true, summaryKey: 'commands.groups.startup.insecure' },
       {
         command: '-disable_workshop_command_filtering',
         summary: '游玩创意工坊地图时，把它加入 Steam 启动项。',
         copyWithoutSemicolon: true,
+        summaryKey: 'commands.groups.startup.disable_workshop',
       },
     ] satisfies CommandItem[],
   },
@@ -107,13 +109,14 @@ export const commandCenterTabs: Array<{
     label: '常用',
     description: '最常复制的启动项和对局控制。',
     commands: [
-      { command: 'bot_kick', summary: '踢出当前全部 Bot。' },
-      { command: 'mp_restartgame 1', summary: '保留当前设置并重开对局。' },
-      { command: '-insecure', summary: '加入 Steam 启动项后才能加载本地插件。', copyWithoutSemicolon: true },
+      { command: 'bot_kick', summary: '踢出当前全部 Bot。', summaryKey: 'commands.groups.controls.bot_kick' },
+      { command: 'mp_restartgame 1', summary: '保留当前设置并重开对局。', summaryKey: 'commands.groups.controls.mp_restartgame_1' },
+      { command: '-insecure', summary: '加入 Steam 启动项后才能加载本地插件。', copyWithoutSemicolon: true, summaryKey: 'commands.groups.startup.insecure' },
       {
         command: '-disable_workshop_command_filtering',
         summary: '游玩创意工坊地图时，把它加入 Steam 启动项。',
         copyWithoutSemicolon: true,
+        summaryKey: 'commands.groups.startup.disable_workshop',
       },
     ],
   },
@@ -124,7 +127,7 @@ export const commandCenterTabs: Array<{
     commands: [
       ...(commandGroups.find((group) => group.title === '常用控制')?.commands ?? []),
       ...(commandGroups.find((group) => group.title === 'Bot 枪法')?.commands ?? []),
-      { command: 'bot_buy', summary: '恢复 Bot 默认买枪逻辑。' },
+      { command: 'bot_buy', summary: '恢复 Bot 默认买枪逻辑。', summaryKey: 'commands.groups.startup.bot_buy' },
     ],
   },
   {
@@ -146,6 +149,7 @@ export const commandCenterTabs: Array<{
     commands: weaponCommands.map((item) => ({
       command: item.command,
       summary: item.label,
+      summaryKey: item.labelKey,
     })),
   },
 ]
@@ -360,36 +364,5 @@ export const teamPresets: TeamPreset[] = [
     name: '9z Team',
     ct: 'bot_add_ct "max";bot_add_ct "HUASOPEEK";bot_add_ct "luchov";bot_add_ct "meyern";bot_add_ct "dgt";mp_teamlogo_1 9z;mp_teamname_1 9z Team',
     t: 'bot_add_t "max";bot_add_t "HUASOPEEK";bot_add_t "luchov";bot_add_t "meyern";bot_add_t "dgt";mp_teamlogo_2 9z;mp_teamname_2 9z Team',
-  },
-]
-
-export const guideSections = [
-  {
-    title: '怎么选对目录',
-    body: '选择 CS2 的游戏根目录，一般是 SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive。选中后页面会检查 game、csgo、MetaMod 和 CounterStrikeSharp 是否齐全。',
-  },
-  {
-    title: '怎么切 Bot / 在线模式',
-    body: '在“游戏配置”页使用模式切换。Bot 模式用于本地插件练习，在线模式用于正常比赛。切换前请先退出 CS2，避免正在运行的游戏占用文件。',
-  },
-  {
-    title: '怎么加 -insecure',
-    body: '在 Steam 库里右键 CS2，打开属性，在启动选项里加入 -insecure。想回到在线比赛前，先切回在线模式，再删除这个启动项。',
-  },
-  {
-    title: '怎么和朋友联机',
-    body: '进入对局后在控制台输入 status，找到 steamid: 后面的地址，在前面加上 connect 和空格，再发给朋友粘贴到控制台。',
-  },
-  {
-    title: '怎么找 Demo',
-    body: '在“游戏配置”的辅助操作里复制 tv_enable 1; tv_autorecord 1，打一局后点击查找最近 Demo。页面会显示最近文件、目录和完整路径。',
-  },
-  {
-    title: '怎么卸载',
-    body: '在本页底部的危险操作区确认卸载。卸载会彻底删除 addons、plugins、cfg/plugins 和 MetaMod 加载文件，包含所有第三方插件配置；不会删除 CS2 本体。',
-  },
-  {
-    title: '安装会清理什么',
-    body: '每次安装都会先彻底删除现有插件包和所有插件配置，再安装内置整包。cfg/autoexec.cfg、游戏模式配置、overrides、gameinfo.gi 和 CS2 本体不会被删除。',
   },
 ]

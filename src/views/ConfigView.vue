@@ -105,7 +105,7 @@ const demoStatus = computed(() => {
 })
 
 const recentConfigItems = computed(() => preferences.recentActions
-  .filter((item) => ['设置难度', '切换模式', '保存道具压制开火'].includes(item.label))
+  .filter((item) => ['Apply Difficulty', 'Switch Mode', 'Save Nade Recovery'].includes(item.label))
   .slice(0, 4))
 
 const configSections = computed(() => [
@@ -127,13 +127,13 @@ async function applyDifficulty(preset: DifficultyPreset) {
     return
   }
   try {
-    preferences.createRestorePoint('设置 Bot 难度', store.selectedRoot, `应用难度预设：${preset}`, false)
+    preferences.createRestorePoint('Apply Bot Difficulty', store.selectedRoot, `Applying difficulty: ${preset}`, false)
     await store.applyDifficulty(preset)
-    preferences.recordAction('设置难度', preset)
+    preferences.recordAction('Apply Difficulty', preset)
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '设置 Bot 难度')
-    store.setMessage(`${message} 请先重新检查目录，并确认 CS2 已退出。`)
+    preferences.recordError(message, 'Apply Bot Difficulty')
+    store.setMessage(t('config.toast.recheckAndExit', { msg: message }))
   }
 }
 
@@ -142,13 +142,13 @@ async function switchMode(preset: GameModePreset) {
     return
   }
   try {
-    preferences.createRestorePoint('切换游戏模式', store.selectedRoot, `模式切换：${preset}`, false)
+    preferences.createRestorePoint('Switch Game Mode', store.selectedRoot, `Mode switch: ${preset}`, false)
     await store.switchGameMode(preset)
-    preferences.recordAction('切换模式', preset === 'online' ? '在线模式' : 'Bot 模式')
+    preferences.recordAction('Switch Mode', preset === 'online' ? 'Online Mode' : 'Bot Mode')
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '切换游戏模式')
-    store.setMessage(`${message} 请先退出 CS2，再返回安装页重新检查。`)
+    preferences.recordError(message, 'Switch Game Mode')
+    store.setMessage(t('config.toast.exitAndRecheck', { msg: message }))
   }
 }
 
@@ -168,8 +168,8 @@ async function refreshNadeRecoveryConfig() {
     }
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '读取道具压制开火配置')
-    store.setMessage(`${message} 可以重新读取，或到帮助页复制诊断信息。`)
+    preferences.recordError(message, 'Read Nade Recovery Config')
+    store.setMessage(t('config.toast.reloadOrDiagnose', { msg: message }))
   }
 }
 
@@ -178,14 +178,14 @@ async function saveNadeRecovery() {
     return false
   }
   try {
-    preferences.createRestorePoint('保存道具压制开火时间', store.selectedRoot, '写入 NadeSystem.json 道具后开火压制时间', false)
+    preferences.createRestorePoint('Save Nade Recovery Time', store.selectedRoot, 'Write nade suppression times to NadeSystem.json', false)
     await store.saveNadeRecovery(nadeRecovery.value)
-    preferences.recordAction('保存道具压制开火', nadeRecoveryLoadedPath.value || store.selectedRoot)
+    preferences.recordAction('Save Nade Recovery', nadeRecoveryLoadedPath.value || store.selectedRoot)
     return true
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '保存道具压制开火时间')
-    store.setMessage(`${message} 请确认 CS2 已退出，并重新读取配置。`)
+    preferences.recordError(message, 'Save Nade Recovery Time')
+    store.setMessage(t('config.toast.confirmExitAndReload', { msg: message }))
     return false
   }
 }
@@ -215,19 +215,19 @@ async function resetNadeRecovery() {
     }
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '恢复道具压制开火默认配置')
-    store.setMessage(`${message} 可以重新读取配置后再试。`)
+    preferences.recordError(message, 'Reset Nade Recovery Config')
+    store.setMessage(t('config.toast.reloadAndRetry', { msg: message }))
   }
 }
 
 function handleWorkshopCopied() {
-  preferences.recordAction('复制启动项', '-disable_workshop_command_filtering')
-  store.setMessage('启动项已复制：-disable_workshop_command_filtering')
+  preferences.recordAction('Copy Launch Option', '-disable_workshop_command_filtering')
+  store.setMessage(t('config.toast.launchOptCopied'))
 }
 
 function handleDemoCommandCopied() {
-  preferences.recordAction('复制 Demo 命令', 'tv_enable 1; tv_autorecord 1')
-  store.setMessage('控制台命令已复制：tv_enable 1; tv_autorecord 1')
+  preferences.recordAction('Copy Demo Command', 'tv_enable 1; tv_autorecord 1')
+  store.setMessage(t('config.toast.consoleCmdCopied'))
 }
 
 async function refreshRecentDemo() {
@@ -236,11 +236,11 @@ async function refreshRecentDemo() {
     if (store.demoDiscovery?.recentDemo) {
       preferences.setLastDemoPath(store.demoDiscovery.recentDemo.path)
     }
-    preferences.recordAction('查找最近 Demo', store.demoDiscovery?.recentDemo?.fileName ?? '没有找到 Demo')
+    preferences.recordAction('Find Recent Demo', store.demoDiscovery?.recentDemo?.fileName ?? 'No demo found')
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '查找最近 Demo')
-    store.setMessage(`${message} 请确认 Demo 目录存在，或先复制录制命令打一局。`)
+    preferences.recordError(message, 'Find Recent Demo')
+    store.setMessage(t('config.toast.demoDirMissing', { msg: message }))
   }
 }
 
@@ -251,18 +251,18 @@ async function refreshRecentDemoAndShow() {
 
 function handleDemoPathCopied(text: string) {
   preferences.setLastDemoPath(text)
-  preferences.recordAction('复制 Demo 路径', text)
-  store.setMessage(`Demo 路径已复制：${text}`)
+  preferences.recordAction('Copy Demo Path', text)
+  store.setMessage(t('config.toast.demoPathCopied', { path: text }))
 }
 
 async function openRecentDemoDirectory() {
   try {
     await store.openReplays()
-    preferences.recordAction('打开 Demo 目录', store.selectedRoot || '未选择目录')
+    preferences.recordAction('Open Demo Dir', store.selectedRoot || 'No directory selected')
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '打开 Demo 目录')
-    store.setMessage(`${message} 请先返回安装页重新检查目录。`)
+    preferences.recordError(message, 'Open Demo Dir')
+    store.setMessage(t('config.toast.returnAndRecheck', { msg: message }))
   }
 }
 
@@ -276,8 +276,8 @@ async function openRecentDemoFolder() {
     await store.openDemoFolder(recentDemo.value.directoryPath)
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '打开 Demo 所在文件夹')
-    store.setMessage(`${message} 可以先打开 Demo 目录再手动查找。`)
+    preferences.recordError(message, 'Open Demo Folder')
+    store.setMessage(t('config.toast.openDemoDirAndSearch', { msg: message }))
   }
 }
 
@@ -291,7 +291,7 @@ onMounted(async () => {
     }
   } catch (error) {
     const message = store.normalizeError(error)
-    preferences.recordError(message, '进入游戏配置页')
+    preferences.recordError(message, 'Enter Config Page')
     store.setMessage(message)
   }
 })

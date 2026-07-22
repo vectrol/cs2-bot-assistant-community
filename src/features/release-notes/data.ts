@@ -22,6 +22,19 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '2.1.0',
+    date: '2026-07-23',
+    title: '2.1.0 Full i18n Completion',
+    summary: 'All views fully localized (EN/CN), route matching fixed, release notes translated, command library localized, config messages internationalized.',
+    items: [
+      { text: 'Full i18n: QuickControl, Guide, Install, Settings, SoftwareUpdateModal, GlobalToast, DiagnosticsPanel fully localized.' },
+      { text: 'Route fix: AppShell.vue startsWith replaced with exact path matching.' },
+      { text: 'Command library: weapon names, bot commands, pro teams tab labels and descriptions all translatable.' },
+      { text: 'Release notes: all 24 historical entries translated to English, with cloud-entry fallback.' },
+      { text: 'Config console: all toast messages, action labels, and diagnostic strings localized.' },
+    ],
+  },
+  {
     version: '1.4.0',
     date: '2026-07-22',
     title: '1.4.0 仪表盘+库存模拟器大改',

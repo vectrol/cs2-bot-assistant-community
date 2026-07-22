@@ -63,7 +63,161 @@
     "lastError": "最近错误",
     "openLogs": "打开日志",
     "copyDiagnostics": "复制诊断",
-    "copied": "已复制"
+    "copied": "已复制",
+    "faqItems": [
+      { "title": "怎么选对目录", "body": "选择 CS2 的游戏根目录，一般是 SteamLibrary\\steamapps\\common\\Counter-Strike Global Offensive。选中后页面会检查 game、csgo、MetaMod 和 CounterStrikeSharp 是否齐全。" },
+      { "title": "怎么切 Bot / 在线模式", "body": "在\"游戏配置\"页使用模式切换。Bot 模式用于本地插件练习，在线模式用于正常比赛。切换前请先退出 CS2，避免正在运行的游戏占用文件。" },
+      { "title": "怎么加 -insecure", "body": "在 Steam 库里右键 CS2，打开属性，在启动选项里加入 -insecure。想回到在线比赛前，先切回在线模式，再删除这个启动项。" },
+      { "title": "怎么和朋友联机", "body": "进入对局后在控制台输入 status，找到 steamid: 后面的地址，在前面加上 connect 和空格，再发给朋友粘贴到控制台。" },
+      { "title": "怎么找 Demo", "body": "在\"游戏配置\"的辅助操作里复制 tv_enable 1; tv_autorecord 1，打一局后点击查找最近 Demo。页面会显示最近文件、目录和完整路径。" },
+      { "title": "怎么卸载", "body": "在本页底部的危险操作区确认卸载。卸载会彻底删除 addons、plugins、cfg/plugins 和 MetaMod 加载文件，包含所有第三方插件配置；不会删除 CS2 本体。" },
+      { "title": "安装会清理什么", "body": "每次安装都会先彻底删除现有插件包和所有插件配置，再安装内置整包。cfg/autoexec.cfg、游戏模式配置、overrides、gameinfo.gi 和 CS2 本体不会被删除。" }
+    ],
+    "installedReinstall": "已安装 (可重装)",
+    "notInstalled": "未安装",
+    "cs2RunningMsg": "CS2 正在运行，请先退出游戏再写入。",
+    "selectDirFirst": "请先选择 CS2 目录。",
+    "dirSelected": "CS2 目录已选择",
+    "scanDirectories": "扫描目录",
+    "foundDirectories": "发现的 CS2 目录",
+    "cs2RunningWarn": "CS2 正在运行，安装、卸载、切换模式前请先退出游戏。",
+    "envCheckTitle": "插件安装状态",
+    "refreshAction": "刷新环境",
+    "notSelected": "未选择",
+    "dangerZone": "危险操作",
+    "uninstallTitle": "卸载插件包",
+    "uninstallDesc": "卸载会彻底删除 addons/plugins/cfg/plugins 和 MetaMod 加载文件，不会删除 CS2 本体。",
+    "uninstallPackage": "卸载插件包",
+    "installConfirmTitle": "确认安装插件包",
+    "installConfirmSub": "安装前会清理旧插件和残留文件，需要退出 CS2。",
+    "installConfirm": "确认安装",
+    "confirmExited": "我已退出 CS2",
+    "confirmRoot": "已确认目录正确",
+    "uninstallConfirmTitle": "确认卸载插件包",
+    "uninstallConfirmSub": "这个操作不可恢复，会彻底删除现有插件包和所有插件配置。",
+    "uninstallConfirm": "确认卸载",
+    "uninstallDetail": "将删除 addons、plugins、cfg\\plugins 及 MetaMod 加载文件。不会删除游戏本体。"
+  },
+  "install": {
+    "title": "准备环境",
+    "pageTitle": "准备环境",
+    "selectRoot": "选择 CS2 根目录",
+    "reselectRoot": "重新选择目录",
+    "scanNow": "扫描目录",
+    "recheck": "重新检查",
+    "installPack": "安装人机插件包",
+    "installing": "安装中...",
+    "checklistTitle": "安装安全检查",
+    "checklistDesc": "安装前必须确认目录、进程和启动项。",
+    "noRootMsg": "请先选择 CS2 根目录",
+    "cs2RunningMsg": "检测到 CS2 正在运行，请先退出游戏。",
+    "dirReady": "目录已确认，可以安装人机插件包。",
+    "envReady": "基础插件环境已安装，仍可覆盖更新。",
+    "envNotReady": "目录已确认，可以安装人机插件包。",
+    "installSafeDesc": "环境缺失时可执行安装，会先进入安全确认流程。",
+    "overwriteHint": "当前检查通过不代表已是最新版，可重新安装/覆盖更新。",
+    "installBtn": "安装人机插件包",
+    "summaryRoot": "CS2 根目录",
+    "summaryEnv": "基础插件环境",
+    "summaryProcess": "游戏运行状态",
+    "summaryAction": "当前动作",
+    "ready": "就绪",
+    "notSelected": "未选择",
+    "complete": "完整",
+    "pending": "待安装",
+    "running": "正在运行",
+    "notRunning": "未运行",
+    "installAction": "安装人机插件包",
+    "stepperTitle1": "选择 CS2 根目录",
+    "stepperDesc1": "选择 Counter-Strike Global Offensive 文件夹，不是 game 或 csgo 子目录。",
+    "stepperTitle2": "安装人机插件包",
+    "stepperDesc2": "确认目录后执行安装。",
+    "stepperDesc2Ready": "基础插件环境已安装，但旧包仍建议覆盖更新。",
+    "stepperTitle3": "添加 Steam 启动项",
+    "stepperDesc3": "复制 -insecure，手动加入 CS2 的 Steam 启动项。",
+    "currentDir": "当前选择",
+    "currentDirValue": "当前目录：{path}",
+    "noDirAuto": "没有自动找到 CS2，请手动选择 Counter-Strike Global Offensive 目录。",
+    "manualSelect": "手动选择目录",
+    "autoScan": "自动扫描",
+    "envSummary": "安装前摘要",
+    "cs2RunningNotice": "检测到 CS2 正在运行。请先退出游戏，再执行安装或配置写入。",
+    "envRecommend": "基础插件环境已安装，只代表必要目录和文件存在；如果之前装过旧包，仍建议重新安装当前内置人机插件包。",
+    "envFirstScreen": "第一屏只显示关键状态；完整文件检查可以在下方展开查看。",
+    "nextStep": "下一步",
+    "nextStepDesc": "安装完成后，把启动项和配置补齐。",
+    "nextStepHint": "Bot 模式需要在 Steam 的 CS2 启动项中添加 -insecure。之后可以进入游戏配置页调整体验。",
+    "copyInsecure": "复制 -insecure",
+    "copiedInsecure": "已复制 -insecure",
+    "viewLaunchHelp": "查看启动项说明",
+    "goToConfig": "前往游戏配置",
+    "candidateTitle": "候选目录列表",
+    "candidateSubtitle": "{n} 个候选目录",
+    "candidateEmpty": "没有自动找到目录",
+    "candidateSwitch": "可切换",
+    "repairTitle": "修复和恢复",
+    "repairSubtitle": "目录不对、环境缺失或安装失败时从这里处理",
+    "repairBadge": "自检",
+    "repairAction1": "重新检查目录",
+    "repairAction1Desc": "重新读取当前目录的文件状态。",
+    "repairAction1NoDir": "先选择 CS2 根目录，再做完整检查。",
+    "repairAction2": "重新扫描环境",
+    "repairAction2Desc": "重新扫描 Steam 常见安装位置和历史选择。",
+    "repairAction3": "修复缺失项",
+    "repairAction3Desc": "先彻底清理现有插件包和插件配置，再重新安装内置整包。",
+    "recentRestore": "最近恢复点",
+    "fullCheckTitle": "完整检查结果",
+    "fullCheckSubtitle": "展开查看每个文件和目录是否存在",
+    "fullCheckBadgeChecked": "已检查",
+    "fullCheckBadgePending": "待检查",
+    "found": "已找到",
+    "notFound": "未找到",
+    "showMore": "继续展开",
+    "collapse": "收起",
+    "shownCount": "已显示 {visible} / {total} 项",
+    "noCheckResults": "选好目录后，这里会显示检查结果。",
+    "logsAndDiagnostics": "查看日志和诊断",
+    "installConfirmTitle": "安装前确认",
+    "installConfirmSub": "安装会写入当前 CS2 目录，Steam 启动项仍需要手动处理。",
+    "installConfirmBtn": "确认安装",
+    "confirmExited": "我确认已经退出 CS2。",
+    "confirmRoot": "我确认选择的是 CS2 根目录，不是 game 或 csgo 子目录。",
+    "confirmLaunchOption": "我知道 Bot 模式需要在 Steam 启动项添加 -insecure。",
+    "installNotice1": "安装会写入当前 CS2 目录。",
+    "installNotice2": "每次安装都会先彻底删除现有插件包和所有插件配置，再安装内置整包。",
+    "installNotice3": "安装后需要手动处理 Steam 启动项。",
+    "targetPath": "目标位置：{path}",
+    "diagnosticsTitle": "日志位置和详细诊断",
+    "diagnosticsClose": "关闭",
+    "logPath": "日志位置：{path}",
+    "noLogPath": "当前没有读取到日志路径。",
+    "selectDir": "选择 CS2 游戏目录",
+    "dirSelected": "已确认",
+    "envFull": "完整",
+    "envPending": "待安装",
+    "cs2Status": "CS2 状态",
+    "currentAction": "当前动作",
+    "currentPackage": "当前内置"
+  },
+  "softwareUpdate": {
+    "critical": "强制更新",
+    "recommended": "推荐更新",
+    "normal": "发现新版本",
+    "criticalSummary": "当前版本需要更新后才能继续使用软件。",
+    "recommendedSummary": "这个版本包含推荐升级内容。不更新也可以继续使用。",
+    "normalSummary": "这个版本已经可以下载。",
+    "title": "{name} v{version} 已发布",
+    "defaultTitle": "发现新版本",
+    "downloadLabel": "打开夸克网盘",
+    "dismiss": "稍后再说",
+    "extractCode": "夸克提取码：{code}",
+    "openFailed": "打开夸克网盘链接失败，请稍后到更新日志页手动打开。"
+  },
+  "toast": {
+    "ready": "已完成",
+    "warn": "需要处理",
+    "danger": "操作失败",
+    "info": "提示"
   },
   "diagnostics": {
     "title": "环境诊断",
@@ -87,7 +241,13 @@
       "backupOnline": "备份-Online",
       "backupWithBots": "备份-WithBots"
     },
-    "pluginVersions": "插件版本"
+    "pluginVersions": "插件版本",
+    "dirLabel": "目录",
+    "notSelected": "未选择",
+    "gameModeLabel": "游戏模式",
+    "unknown": "未知",
+    "yes": "是",
+    "no": "否"
   },
   "quickControl": {
     "title": "作战总览",
@@ -113,7 +273,72 @@
     "copySuccess": "已复制到剪贴板",
     "oneClickFlow": "一件安装并启动",
     "oneClick": "一件启动",
-    "oneClickHint": "安装资源包 → 设置 Bot 模式 → 启动 CS2"
+    "oneClickHint": "安装资源包 → 设置 Bot 模式 → 启动 CS2",
+    "description": "模式、难度和启动走桌面端原生能力；Aim、Nades、Knife 和 Teams 按 Commands.txt 一键复制。",
+    "launchCs2": "打开 CS2",
+    "oneClickCheck": "一键检查",
+    "refresh": "刷新",
+    "directory": "目录",
+    "installation": "安装状态",
+    "process": "游戏进程",
+    "notSelected": "未选择",
+    "ready": "可配置",
+    "checkPending": "待检查",
+    "running": "运行中",
+    "notRunning": "未运行",
+    "teamCount": "{n} 支",
+    "noRootMsg": "请先在开始使用页选择 CS2 根目录。Quick Control 会复用同一个目录和安装状态。",
+    "modeSection": "Bot / Online 模式",
+    "modeBot": "Bot 模式",
+    "modeBotDetail": "加载本地插件练习，Steam 启动项需要 -insecure。",
+    "modeOnline": "在线模式",
+    "modeOnlineDetail": "恢复正常联机，切换后删除 -insecure。",
+    "diffSection": "Bot 难度",
+    "diffLow": "低",
+    "diffLowDetail": "适合热身和新手。",
+    "diffMedium": "中",
+    "diffMediumDetail": "接近默认训练强度。",
+    "diffHigh": "高",
+    "diffHighDetail": "更适合高强度练枪。",
+    "aimPresets": "Aim / Nades",
+    "aimMixed": "混合",
+    "aimMixedDetail": "根据局势选择瞄准位置。",
+    "aimHead": "头部",
+    "aimHeadDetail": "优先瞄准头部。",
+    "aimBody": "身体",
+    "aimBodyDetail": "优先瞄准身体。",
+    "nadesNormal": "正常",
+    "nadesNormalDetail": "接近真人限制。",
+    "nadesMore": "更多",
+    "nadesMoreDetail": "推荐训练档。",
+    "nadesMax": "最大",
+    "nadesMaxDetail": "更频繁投掷。",
+    "nadesOff": "关闭",
+    "nadesOffDetail": "完全禁用 Bot 投掷物。",
+    "botItems": "Bot Items",
+    "botItemsTitle": "物品能力状态",
+    "botItemsSkin": "Skins",
+    "botItemsSkinDetail": "武器皮肤、刀和手套由 CounterStrikeSharp 物品插件提供。",
+    "botItemsProfile": "Profiles",
+    "botItemsProfileDetail": "Bot 头像与资料能力来自 addons/BotHider。",
+    "botItemsAgent": "Agents",
+    "botItemsAgentDetail": "探员模型随插件加载。",
+    "botItemsMusic": "Music",
+    "botItemsMusicDetail": "音乐盒随 Bot 物品系统加载。",
+    "botItemsTip": "当前资源包已包含 BotHider、RayTrace、BotHiderImpl、RayTraceImpl 和 RoundDamageRecap。助手负责整包安装和状态检查；单项开关仍按上游 core.json / 目录重命名模型保守处理。",
+    "teamsSection": "职业队伍预设",
+    "teamsSearch": "搜索队伍或队员",
+    "teamsSearchPlaceholder": "例如 Vitality、donk、TYLOO",
+    "goToCommands": "去指令中心",
+    "help": "使用帮助",
+    "manual": "手动说明",
+    "currentPackage": "当前内置",
+    "copiedLabel": "已复制：{label}",
+    "statusRefreshed": "状态已刷新。",
+    "noRootGuide": "请先选择 CS2 根目录，再执行一键流程。",
+    "envNotReady": "环境还未就绪，请先到准备环境页完成安装。",
+    "cs2RunningMsg": "CS2 正在运行。配置写入前请先退出游戏。",
+    "checkPassed": "状态检查通过，可以切换模式、难度或复制命令。"
   },
   "commands": {
     "title": "指令库",
@@ -166,7 +391,81 @@
     "resultCount": "{n} 条",
     "teamsCount": "{n} 支",
     "categoryCount": "分类",
-    "categoryCountValue": "{n} 个"
+    "categoryCountValue": "{n} 个",
+    "tabs": {
+      "common": "常用",
+      "commonDesc": "最常复制的启动项和对局控制。",
+      "bot": "Bot 控制",
+      "botDesc": "Bot 数量、枪法、买枪和重开对局。",
+      "nades": "投掷物",
+      "nadesDesc": "控制 Bot 使用道具的频率。",
+      "teams": "队伍",
+      "teamsDesc": "40 支职业队伍，一键复制到 CT 或 T 阵营。",
+      "weapons": "武器",
+      "weaponsDesc": "复制武器名称后，下一回合 Bot 会优先使用。"
+    },
+    "weapons": {
+      "elite": "双枪",
+      "p250": "P250",
+      "fn57": "FN57",
+      "deagle": "沙鹰",
+      "cz75a": "CZ75",
+      "r8": "R8",
+      "bizon": "野牛",
+      "p90": "P90",
+      "mp5sd": "MP5-SD",
+      "mp9": "MP9",
+      "mp7": "MP7",
+      "mac10": "吹风机",
+      "ump45": "UMP45",
+      "mag7": "警喷",
+      "sawedoff": "匪喷",
+      "nova": "新星",
+      "xm1014": "连喷",
+      "famas": "法玛斯",
+      "galilar": "加利尔",
+      "m4a1": "M4A4",
+      "m4a1s": "M4A1 消音版",
+      "ak47": "AK47",
+      "aug": "AUG",
+      "sg556": "SG553",
+      "ssg08": "鸟狙",
+      "awp": "大狙",
+      "scar20": "警连狙",
+      "g3sg1": "匪连狙",
+      "negev": "内格夫",
+      "m249": "M249"
+    },
+    "groups": {
+      "aim": {
+        "bot_aim_mixed": "默认模式，Bot 会根据局势灵活选择瞄准位置。",
+        "bot_aim_head": "让 Bot 优先瞄准头部。",
+        "bot_aim_body": "让 Bot 优先瞄准身体。",
+        "bot_aim": "查看当前 Bot 瞄准模式。"
+      },
+      "nades": {
+        "bot_nades_off": "Bot 不会投掷任何道具。",
+        "bot_nades_normal": "默认模式，Bot 遵循接近真人玩家的道具数量限制。",
+        "bot_nades_more": "推荐模式，沿用 normal 的判断逻辑，但允许更多道具。",
+        "bot_nades_max": "限制最少，Bot 会更频繁地使用道具。",
+        "bot_nades": "查看当前 Bot 投掷物模式。"
+      },
+      "controls": {
+        "bot_kick": "踢出当前全部 Bot。",
+        "bot_kick_t": "踢出一名 T 阵营 Bot。",
+        "bot_kick_ct": "踢出一名 CT 阵营 Bot。",
+        "bot_add_t": "添加一名 T 阵营 Bot。",
+        "bot_add_ct": "添加一名 CT 阵营 Bot。",
+        "bot_randombuy_1": "让 Bot 随机买枪，改成 0 可关闭。",
+        "bot_quota": "把场上 Bot 数量补到指定数量。",
+        "mp_restartgame_1": "保留当前设置并重开对局。"
+      },
+      "startup": {
+        "bot_buy": "恢复 Bot 默认买枪逻辑。",
+        "insecure": "把它加入 Steam 启动项，才能加载本地插件。",
+        "disable_workshop": "游玩创意工坊地图时，把它加入 Steam 启动项。"
+      }
+    }
   },
   "releaseNotes": {
     "title": "更新日志",
@@ -181,7 +480,383 @@
     "sourceBuiltin": "线上无记录",
     "sourceFailed": "内置日志",
     "sourceNotConfigured": "线上源未配置",
-    "sourceLoading": "读取中"
+    "sourceLoading": "读取中",
+    "cloudUpdate": "v{version} 更新",
+    "cloudDownload": "打开夸克网盘",
+    "openFailed": "打开外部链接失败，请稍后手动访问。",
+    "cloudDefaultItem": "这个版本已经可以下载。",
+    "entries": {
+      "2_1_0": {
+        "title": "2.1.0 全面国际化完成",
+        "summary": "所有视图已完成中英双语本地化，路由匹配修复，更新日志翻译，指令库本地化，配置消息国际化。",
+        "items": {
+          "0": "全面 i18n：QuickControl、Guide、Install、Settings、SoftwareUpdateModal、GlobalToast、DiagnosticsPanel 完全本地化。",
+          "1": "路由修复：AppShell.vue 的 startsWith 替换为精确路径匹配。",
+          "2": "指令库：武器名称、Bot 命令、职业队伍标签和说明全部可翻译。",
+          "3": "更新日志：全部 24 条历史记录翻译为英文，支持云端条目回退。",
+          "4": "配置控制台：所有 Toast 消息、操作标签和诊断字符串已本地化。"
+        }
+      },
+      "1_4_0": {
+        "title": "1.4.0 仪表盘+库存模拟器大改",
+        "summary": "全新仪表盘主页，精简单栏导航，库存模拟器完整页面重做，所有 UI 布局现代化。",
+        "items": {
+          "0": "全新仪表盘主页：卡片式导航，快速访问各功能模块，实时显示状态摘要。",
+          "1": "侧栏精简：图标+文字导航，支持折叠/展开，移除冗余描述。",
+          "2": "标题栏优化：非仪表盘页面显示返回按钮，操作按钮移至标题栏。",
+          "3": "库存模拟器大改：功能卡片网格展示六大特性，底部显示配置项。",
+          "4": "全局 UI 现代化：统一间距、圆角、色彩系统，更简洁干净。"
+        }
+      },
+      "1_3_1": {
+        "title": "1.3.1 紧急修复：导航精简、i18n补充",
+        "summary": "删除废弃的「我的指令」导航；ReleaseNotesView 改用 i18n；补全英文翻译。",
+        "items": {
+          "0": "删除「我的指令」导航项、路由和视图（CustomCommandsView 仅为 /commands 重定向）。",
+          "1": "ReleaseNotesView 中文化字符串替换为 i18n 调用，支持中英文显示。",
+          "2": "补全英文翻译，包括 releaseNotes 等缺失的 key。",
+          "3": "修复 JSON 编码问题导致类型检查失败。"
+        }
+      },
+      "1_3_0": {
+        "title": "1.3.0 多语言、启动参数、插件版本诊断",
+        "summary": "引入中英文双语界面，支持自定义 CS2 启动参数，显示插件版本号，应用内更新提示，上游资源包同步提醒。",
+        "items": {
+          "0": "多语言支持：集成 vue-i18n，中英文界面切换（设置页）。",
+          "1": "自定义启动参数：启动弹窗增加额外参数输入框，自动保存。",
+          "2": "插件版本诊断：诊断面板显示 CounterStrikeSharp 及各插件版本号（读取 deps.json）。",
+          "3": "应用内更新提示：启动时检查 GitHub Release，有新版本弹窗引导下载。",
+          "4": "上游资源包同步：检测 ed0ard/CS2-Bot-Improver 新版本，侧栏显示更新提示。",
+          "5": "Git 清理：NSIS 安装包加入 .gitignore，不再追踪 62MB 二进制文件。"
+        }
+      },
+      "1_2_1": {
+        "title": "1.2.1 模式切换修复、比赛记录",
+        "summary": "修复 Bot/Online 模式切换后状态不刷新问题。新增比赛记录功能，管理 Demo 录像和战绩。",
+        "items": {
+          "0": "修复模式切换后面板状态不更新：switchMode 和 applyDifficulty 操作后自动刷新环境状态。",
+          "1": "新增比赛记录模块：列出最近比赛 Demo，显示地图、时间、路径，支持打开目录和复制路径。",
+          "2": "修复「准备环境」死链接：QuickControl 中「目录与安装」按钮指向使用帮助页。"
+        }
+      },
+      "1_2_0": {
+        "title": "1.2.0 自定义主题、面板整合",
+        "summary": "删除11套战队配色，改为深色/亮色双模式+HSL色相滑块自定义。准备环境合并入使用帮助。",
+        "items": {
+          "0": "主题系统重做：深色/亮色双模切换，HSL滑块0-360度自由配色，即时预览保存。",
+          "1": "面板整合：准备环境（InstallView）合并入使用帮助（GuideView），导航4组→3组。",
+          "2": "库存模拟器：inventory.cstrike.app WebView内嵌，单击打开外部窗口。",
+          "3": "环境诊断升级：18项检查（含InventorySimulator和游戏模式），复制诊断含完整状态。",
+          "4": "指令库精简：删除24条lbtv_*无效命令、聊天/嘲讽和地图轮换标签页、固定/最近面板。",
+          "5": "配置控制台精简：删除AI聊天和Bot嘲讽UI（LBTV插件不存在）。",
+          "6": "移除Panel v1.4.2.exe：根除与助手的gameinfo.gi双重管理冲突。",
+          "7": "移除官网嵌入、赞赏码、交流群入口。"
+        }
+      },
+      "1_1_0": {
+        "title": "1.1.0 代码重构：主题引擎独立化、指令库精简、ConfigView 瘦身",
+        "summary": "主题系统独立为数据文件，新增绿龙/G2配色。ConfigView瘦身40%。指令库清除所有LBTV无效命令。上游资源同步更新。",
+        "items": {
+          "0": "代码重构：主题系统独立为 src/features/theme/themes.ts，新增战队配色只需修改一个文件。",
+          "1": "主题精简为7套：深色、亮色、猎鹰、天禄、小蜜蜂、G2、绿龙。",
+          "2": "配置控制台精简：删除AI聊天和Bot嘲讽（插件不存在），仅保留难度/模式/道具/Demo。",
+          "3": "指令库清理：删除所有 lbtv_* 无效命令（24条），删除聊天/嘲讽和地图轮换标签页。",
+          "4": "作战总览清理：删除刀具模板面板，默认固定命令清理。",
+          "5": "上游资源同步：内置 Commands.txt 从 ed0ard/CS2-Bot-Improver v1.4.2 拉取。",
+          "6": "新增库存模拟器：内嵌 inventory.cstrike.app，集成 InventorySimulator CSS 插件。",
+          "7": "移除 Panel v1.4.2.exe 冲突：资源包不再包含上游启动器，避免 gameinfo.gi 双重管理。",
+          "8": "安装卸载优化：自动清理旧版 Panel.exe 残留，修复联机/人机模式混乱问题。",
+          "9": "Rust 后端死代码清理：移除 PlayerCosmetics/DropKnives/BotItems/PlusRuntime 相关函数。"
+        }
+      },
+      "1_0_0": {
+        "title": "1.0.0 社区版：致敬原作者的二次开发",
+        "summary": "本版本基于 YuGeYu/cs2-bot-improver-assistant 二次开发。感谢原作者 YuGeYu 的开创性工作，感谢上游项目 ed0ard/CS2-Bot-Improver 和 numakkiyu/CS2-Bot-Improver-Plus 的所有贡献者。没有他们的付出，就不会有这个社区版。",
+        "sourceLabel": "上游原项目",
+        "items": {
+          "0": "致谢：本项目基于 YuGeYu 的 CS2人机增强助手 (AGPL-3.0) 二次开发，完整保留上游 CS2-Bot-Improver 和 CS2-Bot-Improver-Plus 的所有功能。",
+          "1": "致谢：内置插件资源来源于 ed0ard/CS2-Bot-Improver v1.4.2，感谢 ed0ard 和所有插件贡献者为 CS2 Bot 增强社区做出的卓越贡献。",
+          "2": "新增双启动通道：Steam 协议 (steam://rungameid/730) 和直接启动 (cs2.exe + -insecure) 可在启动弹窗中随时切换。",
+          "3": "新增库存模拟器页面：内嵌 inventory.cstrike.app，支持皮肤浏览、开箱、贴纸、改名等全部功能。感谢 ianlucas/cs2-inventory-simulator。",
+          "4": "新增 CSS 库存同步插件：打包 InventorySimulator v3.0.1 进资源包，安装后自动加载，玩家可使用 !ws 指令同步库存到游戏内。感谢 ianlucas/cs2-css-inventory-simulator。",
+          "5": "新增战队主题配色：猎鹰(绿)、天禄(红)、小蜜蜂(黄)，加上原有的深色和亮色，共5套外观主题。",
+          "6": "项目更名：CS2人机助手社区版，独立于上游原项目维护。",
+          "7": "移除官网嵌入和内嵌浏览器功能，精简界面专注核心功能。",
+          "8": "移除赞赏入口，社区版完全免费无任何付费入口。",
+          "9": "库存模拟器页面替代原有玩家外观页面，提供更完整的皮肤预览和管理体验。",
+          "10": "上游插件资源更新至 ed0ard/CS2-Bot-Improver v1.4.2。"
+        }
+      },
+      "0_4_5": {
+        "title": "0.4.5 Plus 完整 GUI、资源安全与玩家饰品",
+        "summary": "以 CS2-Bot-Improver-Plus v1.4.2.1 整包为基底，完整迁移高频 GUI 操作到现有助手，并修复玩家饰品页在读取前发生的空白渲染。",
+        "items": {
+          "0": "新增 CS2 全量指令库入口，可搜索控制台命令、CVar、启动项和开发命令。",
+          "1": "指令保留英文原文，能确认的功能说明优先用中文展示，并保留源数据说明便于后续继续完善。",
+          "2": "同步 Plus v1.4.2.1 整包基底，并保留选边、外观稳定性与现有 AI、BotTaunt、NadeSystem、Demo、指令库等能力。",
+          "3": "安装前彻底删除旧插件、第三方插件和插件配置；新资源安装后会应用 Bot 模式 gameinfo.gi，并保留 Online / Bot 模板切换校验。",
+          "4": "Bot / Online 模式、难度、Aim、Nades、队伍、目录状态和启动体验继续在现有作战总览中统一呈现；不会伪造 Steam 持久启动项同步。",
+          "5": "玩家饰品页改为结构化状态机，修复读取前空对象导致标题以下整页空白的问题；读取中、失败、未安装、CS2 运行中和正常配置都有固定页面状态。",
+          "6": "新增结构化刀具、手套、枪械、音乐盒、名称标签、StatTrak、纪念品与拾取时应用编辑；保存保留未知 JSON 字段，支持 BOM 清理、原子写入、数值校验和运行中拒写。",
+          "7": "掉落刀具支持按键录入、刀具多选与完整目录预览；只写入助手专属标记块，不会替换玩家已有 bind。",
+          "8": "BOT 皮肤、档案、探员和音乐盒开关与 Plus 一致，仅保存助手本地偏好，不会伪造为游戏或插件外观开关。",
+          "9": "导入完整刀具、武器、手套、皮肤和音乐盒数据目录，使用延迟加载与图片懒加载控制首次页面开销。",
+          "10": "应用内保留 CS2-Bot-Improver 与 CS2-Bot-Improver-Plus 的 AGPL-3.0-or-later 来源说明和上游链接。",
+          "11": "修复玩家饰品读取兼容性：现在可直接读取 Plus 原始 player_knife_presets.json，兼容旧配置字段；已有刀具、枪械、手套和音乐盒预设无需手动修改。"
+        }
+      },
+      "0_4_4": {
+        "title": "0.4.4 设置页、自启动与初次安装优化",
+        "summary": "本次新增设置页面，把主题切换、储存说明、自启动和首次自动安装集中到一起，让程序更专注于 CS2 人机增强安装和控制。",
+        "items": {
+          "0": "新增设置页面，集中管理外观主题和程序行为。",
+          "1": "外观主题切换移动到设置页，深色和亮色模式仍会记住上次选择。",
+          "2": "新增储存说明，用更直白的方式说明程序会把哪些设置保存在本机、浏览器缓存和 CS2 插件目录。",
+          "3": "新增开机自启动开关，默认关闭，需要用户主动开启。",
+          "4": "新增新版本插件包初次安装选项，默认开启；识别到安全可安装的 CS2 目录后，会帮助新用户减少手动安装步骤。",
+          "5": "移除 Major 预测入口和页面，导航栏更聚焦于准备环境、作战控制、配置和帮助。",
+          "6": "更新内置插件包为 2026-07-03 新整包。",
+          "7": "修复设定打身体时 BOT 爆头率仍然偏高的问题，命中表现会更符合设置。",
+          "8": "优化道具系统的声音信息处理，减少脚步与声音轨迹记录开销，提升多人场景下的人机性能稳定性。",
+          "9": "修复 NadeSystem 同一 tick 多名 BOT 重复排队投掷相近快烟的问题，VIP 快烟等场景的投掷判断更稳定。"
+        }
+      },
+      "0_4_3": {
+        "title": "0.4.3 旧版 BotHider 残留清理增强",
+        "summary": "本次更新增强卸载清理，会移除旧版 BotHider 0.1.9 残留，避免覆盖安装后 BOT 头像异常显示为问号。",
+        "items": {
+          "0": "卸载插件包时会额外清理旧版 BotHider 0.1.9 残留的 BotHider.vdf、0Harmony 和 BotHiderApi。",
+          "1": "卸载结果会区分已删除目录数、已删除文件数和未找到项数，方便确认清理范围。",
+          "2": "当前版本已改为整包清理：删除 addons、plugins、cfg/plugins 与 MetaMod 加载文件；不会删除或恢复 gameinfo.gi 与 pak01_*.vpk。"
+        }
+      },
+      "0_4_2": {
+        "title": "0.4.2 BotHider 与 NadeSystem 更新",
+        "summary": "本次更新同步新版 BotHiderImpl，并收紧 BOT 每回合投掷物数量，提升新版游戏环境兼容性，同时减少单个 BOT 在同一回合过量丢雷的情况。",
+        "items": {
+          "0": "同步 BotHider 到上游新版 BotHiderImpl 0.2.5，更新 BOT 隐藏相关签名和 offset，提升新版游戏环境兼容性。",
+          "1": "调整 BOT 托管逻辑，回合开始后自动复活托管 BOT，移除旧的比赛结束 kick/refill 流程。",
+          "2": "NadeSystem 增加每个 BOT 每回合投掷物硬限制：火/燃烧弹、HE、烟每回合最多 1 个，闪光每回合最多 2 个。",
+          "3": "限制覆盖普通投掷、反击雷、下包、拆包、灭火等特殊投掷路径，避免同一 BOT 单回合过量投掷。",
+          "4": "修正特殊烟/闪额度不足时仍被错误标记为已使用的问题。"
+        }
+      },
+      "0_4_1": {
+        "title": "0.4.1 地图轮换恢复与 AI 聊天设置优化",
+        "summary": "本次更新补回 0.4.0 缺失的自动换图能力，并让 AI 聊天设置更容易启用。默认设置不变，升级后不会主动改动你的服务器和聊天配置。",
+        "items": {
+          "0": "恢复地图轮换插件，之前 0.4.0 缺失的自动换图能力已经补回。",
+          "1": "地图轮换默认仍然关闭，不会影响你现在的服务器设置。",
+          "2": "想使用自动换图时，可以在指令中心复制 lbtv_map_rotation 1 开启；lbtv_map_next 可以立即切到下一张图，方便测试。",
+          "3": "AI 聊天设置新增免费 Key 一键启用入口。默认不会写入 Key，只有你在编辑弹窗里点击启用并保存后才会生效。",
+          "4": "仍然可以手动填写自己的 API 地址和 API Key；免费 Key 只是快捷填充，不会覆盖已经填写的自定义 Key。",
+          "5": "当前安装策略会先清理现有插件包和插件配置，再写入内置整包。",
+          "6": "继续包含 Quick Control、诊断面板、常用命令、地图轮换平局边界修复等现有能力。"
+        }
+      },
+      "0_4_0": {
+        "title": "0.4.0 整包与 Quick Control",
+        "summary": "本次更新对齐 LBTVCS2BotEnhancer 0.4.0 整包，新增 Quick Control，并继承 0.3.13 本地体验优化。不再附带或调用旧版外部启动工具，而是在当前 Tauri 助手内吸收高频玩家操作入口。",
+        "items": {
+          "0": "内置资源包已替换为 LBTVCS2BotEnhancer 0.4.0 整包，安装后包含 BotHider、RayTrace、BotHiderImpl、RayTraceImpl 和 RoundDamageRecap。",
+          "1": "新增 Quick Control 页面，集中提供 Bot / Online 模式切换、难度切换、打开 CS2、Aim 预设、Nades 预设、刀具模板和 Teams 入口。",
+          "2": "Aim、Nades、Knife 和 Teams 按 0.4.0 Commands.txt 做成一键复制入口，复制后粘贴到 CS2 控制台使用。",
+          "3": "指令中心新增 Teams 分类，接入 40 支职业队伍的 CT / T 阵营预设。",
+          "4": "安装检查、诊断和卸载清单已补充 0.4.0 新增目录与插件，避免继续按 0.3.x 资源结构判断。",
+          "5": "继续保留原有安装检查、BotTaunt / NadeSystem 编辑、Demo 查找、诊断日志和发布记录能力。",
+          "6": "保留最近目录、最近命令、最近 Demo 和本地提示状态，减少重复选择和复制。",
+          "7": "开始使用页新增快捷动作条，可以直接重新检查、打开 CS2、进入配置、复制 -insecure 或打开 Demo 目录。",
+          "8": "指令中心支持固定常用命令，bot_kick、bot_nades more、-insecure 和 lbtv_map_next 会默认出现在固定区。",
+          "9": "游戏配置页会显示最近保存或切换过的设置，方便回头继续调整。",
+          "10": "帮助中心新增诊断面板，可查看版本、目录、环境状态、运行状态、日志路径、最近错误和恢复点，并一键复制诊断信息。",
+          "11": "安装、模式切换和配置保存前会记录本地恢复点，帮助判断发生问题时影响了哪些范围。",
+          "12": "重新整理开始使用、游戏配置、指令中心和帮助中心的页面层级，重要按钮和状态更容易扫到。",
+          "13": "统一复制按钮、保存按钮、危险确认和弹窗底部操作区，操作后会有更明确的成功或失败反馈。",
+          "14": "优化空状态、阻塞状态和长路径显示，未选择目录、CS2 运行中、未安装等情况会给出更清楚的下一步。",
+          "15": "深色和浅色主题下的卡片、状态徽章、提示框和窄窗口布局做了统一打磨。",
+          "16": "继续包含 0.3.13 的地图轮换关键修复，已开启地图轮换的用户升级 0.4.0 时也会一并获得平局边界修正。"
+        }
+      },
+      "0_3_13": {
+        "title": "CS2人机增强助手 v0.3.13 地图轮换平局边界修复",
+        "summary": "CS2人机增强助手 v0.3.13 地图轮换平局边界修复",
+        "items": {
+          "0": "修复开启地图轮换后，12:12、15:15、18:18 等平局加时边界可能被误判为比赛结束的问题。",
+          "1": "平局边界现在只记录日志，不会发感谢消息，也不会自动换图。",
+          "2": "真正有人达到目标分，例如 16:14，才会触发比赛结束后的轮换。",
+          "3": "地图轮换仍默认关闭，需要手动输入 lbtv_map_rotation 1 开启。"
+        }
+      },
+      "0_3_12": {
+        "title": "地图轮换插件更新",
+        "summary": "本次更新加入独立 MapRotation 地图轮换插件，默认关闭，不影响原有开服、手动换图和 Bot 行为。需要时可通过控制台开启比赛结束后的自动换图。",
+        "items": {
+          "0": "新增 lbtv_map_rotation 1/0，可开启或关闭比赛结束后的自动地图轮换。",
+          "1": "新增 lbtv_map_next，可立即切到轮换列表中的下一张图，方便测试。",
+          "2": "地图轮换默认关闭，安装新版后不会改变现有服务器行为。",
+          "3": "比赛结束时会发送两行 LBTV 感谢消息，感谢上游项目 ed0ard/CS2-Bot-Improver 以及提供帮助、测试和反馈的朋友们。该消息不依赖地图轮换开关，地图轮换关闭时也会在比赛结束后发送。",
+          "4": "内置插件包已包含 MapRotation.dll，并继续保护已有插件配置。"
+        }
+      },
+      "0_3_11": {
+        "title": "启动、提示和常用操作体验优化",
+        "summary": "本次更新重点优化启动等待、更新提醒、打开 CS2、常用指令复制和设置页面结构。安装新版后，常用操作会更集中，提示更轻，不影响继续使用软件。",
+        "items": {
+          "0": "启动时会先展示新版应用图标，并在后台完成更新检查，减少刚打开软件时的突兀感。",
+          "1": "更新提示会按普通、推荐、强制三种强度展示；推荐更新可以稍后再说，不影响继续使用。",
+          "2": "「打开 CS2」调整为顶部唯一入口，点击后进入专门的启动游戏弹窗，通过 Steam 正确启动 CS2。",
+          "3": "安装、设置和帮助里的操作提示统一改为右上角全局浮层，不再挤占页面内容。",
+          "4": "常用指令页支持点击整条指令直接复制，右侧会显示复制状态，第一次进入也会提示使用方式。",
+          "5": "常用指令列表改为更紧凑的两列布局，窄屏和完整 Commands.txt 查看时会自动回到单列。",
+          "6": "安装检查、游戏设置、常用指令、帮助和更新日志页面改为摘要、折叠面板和弹窗结构，核心按钮保持常驻，细节按需展开。",
+          "7": "AI API、BotTaunt 嘲讽文本、NadeSystem 恢复时间和 Demo 详情改为弹窗编辑或查看，页面更清爽。",
+          "8": "继续保留 Demo 查找和分享优化，并换用新版应用图标。"
+        }
+      },
+      "0_3_10": {
+        "title": "AI 对话与 Bot 嘲讽输出正式更新",
+        "summary": "这是 0.3.10 正式版本，主要增强 BotTaunt 的 AI 对话和嘲讽输出体验。不更新也不影响正常游玩，想体验更自然 AI 回复和原生 Bot 发言效果的用户可以安装。",
+        "items": {
+          "0": "AI 对话现在会参考最近聊天上下文，不再只看玩家当前一句话，回复更容易接上话题。",
+          "1": "支持第三方 OpenAI-compatible API，例如 DeepSeek；默认 LBTV AI API 仍然保留原逻辑。",
+          "2": "AI 回复、开局嘲讽、击杀嘲讽、多杀、残局、保枪、BOT 内斗和 MVP 嘲讽会优先使用 Bot 原生 say / say_team 输出。",
+          "3": "如果原生发言失败，会自动回退到原来的插件打印方式，避免嘲讽内容完全丢失。",
+          "4": "新增 AI 聊天诊断命令，方便测试配置、发言和回复链路是否正常。",
+          "5": "这是正式版本，但不是强制更新；当前版本能正常游玩的用户可以按需升级。"
+        }
+      },
+      "0_3_9": {
+        "title": "AI 回复提示词测试版",
+        "summary": "这是一个不完全的 0.3.9 测试版本，不是必要更新。当前主要用于测试 BotTaunt 的 AI 回复风格，未来可能会继续把更多内容加入 0.3.9 测试版。",
+        "items": {
+          "0": "BotTaunt 的 AI 回复改为预设提示词驱动，减少多余前缀、解释和换行。",
+          "1": "增强梗式类比、懂你意思类热梗和张雪峰相关歌词接句的回复表现。",
+          "2": "加入更窄的显示前清理，降低聊天区出现重复 BOT 名前缀的概率。",
+          "3": "这是测试版更新，当前稳定使用 0.3.8 的用户可以不急着安装。"
+        }
+      },
+      "0_3_8": {
+        "title": "窗口体验与界面细节优化",
+        "summary": "本次更新优化程序窗口外观、导航反馈、安装检查页和 Demo 说明。游戏内设置不需要重新配置，安装新版后直接生效。",
+        "items": {
+          "0": "程序窗口改为无边框样式，新增顶部标题栏用于拖动窗口。",
+          "1": "新增自定义最小化、最大化/还原和关闭按钮。",
+          "2": "新增独立顶部标题栏，修复无边框窗口无法拖动的问题。",
+          "3": "修复最小化、最大化/还原和关闭按钮点击无效的问题。",
+          "4": "优化左侧导航栏的选中、高亮和悬停效果，切换页面时视觉反馈更顺滑。",
+          "5": "精简安装检查页，移除使用频率很低的复制诊断信息和复制完整日志按钮。",
+          "6": "调整录制人机 Demo 的说明，提示 Demo 文件会生成在 game/csgo/replays 文件夹附近。",
+          "7": "这次不新增设置项，安装新版后直接生效。"
+        }
+      },
+      "0_3_7": {
+        "title": "投掷物轨迹优化",
+        "summary": "本次更新优化 NadeSystem 的投掷物生成表现，让烟雾弹、高爆雷和燃烧瓶的轨迹更稳定，同时保留原有 Bot 投掷机制。",
+        "items": {
+          "0": "优化烟雾弹、高爆雷和燃烧瓶的生成参数，投掷轨迹更稳定。",
+          "1": "保留 Bot 投掷后的短暂停火、道具预算、道具上限和伤害归因等现有机制。",
+          "2": "闪光弹、诱饵弹以及诱饵循环生成的闪光弹继续沿用原本表现。",
+          "3": "内置插件包已更新为 2026-06-01 的新版 fresh 整包。"
+        }
+      },
+      "0_3_6": {
+        "title": "刀具生成与嘲讽文本编辑增强",
+        "summary": "本次更新优化了按键生成刀具的体验，并让更多 BotTaunt 台词可以直接在程序里修改，想换成自己的梗会更方便。",
+        "items": {
+          "0": "默认按 \\ 现在生成热门五刀：爪子刀、蝴蝶刀、锯齿爪刀、M9 刺刀和刺刀。",
+          "1": "常用指令页面新增刀具模式命令，方便直接复制到控制台。",
+          "2": "输入 lbtv_knife_hot 可切回热门五刀模式，适合日常快速试刀。",
+          "3": "输入 lbtv_knife_rdm 可切到轮换五刀组合，每次生成一组不同刀型。",
+          "4": "输入 lbtv_knife_all 可切回旧版逻辑，一次生成全部刀具。",
+          "5": "新增 lbtv_bot_rivalry 1/0，可开启或关闭 BOT 击杀敌方 BOT 时的低频互相嘲讽。",
+          "6": "BOT 互相嘲讽默认关闭，不影响玩家击杀嘲讽、玩家互动和 AI 聊天回复。",
+          "7": "游戏设置里的嘲讽文本编辑升级，现在可修改 BOT 互相嘲讽语句池。",
+          "8": "单回合 5 杀、5 秒 3 杀、残局和保枪台词也可以在程序里直接修改。",
+          "9": "配置读取兼容带 BOM 的 JSON 文件，减少手动编辑配置后出现解析失败的情况。",
+          "10": "内置插件包已更新，包含新版 BotTaunt、刀具生成模式和说明文档。"
+        }
+      },
+      "0_3_5": {
+        "title": "嘲讽文本与投掷后恢复优化",
+        "summary": "本次更新让 BotTaunt 嘲讽文本可以在程序内修改，并优化 Bot 投掷道具后的开火恢复，减少刚丢完道具立刻开枪的情况。",
+        "items": {
+          "0": "内置插件包已更新到最新版本，包含 BotTaunt、NadeSystem 和相关说明文档。",
+          "1": "游戏设置中新增 BotTaunt 嘲讽文本编辑，可分别修改普通击杀、爆头、刀杀和开局嘲讽。",
+          "2": "嘲讽文本现在保存在 Taunts.json，后续想换台词不需要重新编译插件。",
+          "3": "安装和升级时会继续保护已有插件配置，避免覆盖你已经改过的 BotTaunt 与 NadeSystem 设置。",
+          "4": "游戏设置中新增 NadeSystem 恢复时间编辑，可调整闪光、烟雾、高爆、燃烧瓶、燃烧弹和诱饵弹的恢复秒数。",
+          "5": "优化 Bot 使用插件道具后的开火恢复，减少刚投掷完道具就立刻开枪的突兀情况。",
+          "6": "增强恢复期压制逻辑，让 Bot 在恢复期内更稳定地停止瞄准与射击。",
+          "7": "新增 NadeSystem 诊断命令，便于排查恢复状态：lbtv_nade_recovery_debug、lbtv_nade_recovery_status、lbtv_nade_recovery_test。",
+          "8": "BotTaunt AI 聊天规则同步优化：过长消息会被忽略，回复冷却固定为 10 秒，开局与 MVP 嘲讽触发更稳定。"
+        }
+      },
+      "0_3_4": {
+        "title": "Bot 投掷后恢复",
+        "summary": "为 Bot 使用道具后加入短暂开火恢复，减少刚丢完道具立刻开枪的情况，同时不影响移动和下包等非射击动作。",
+        "items": {
+          "0": "Bot 生成投掷物后会进入短暂开火恢复。",
+          "1": "闪光和诱饵弹默认恢复时间为 0.55 秒。",
+          "2": "烟雾弹默认恢复时间为 0.85 秒。",
+          "3": "高爆雷默认恢复时间为 0.65 秒。",
+          "4": "燃烧瓶和燃烧弹默认恢复时间为 0.80 秒。",
+          "5": "内置资源包更新为 CS2BotImprover_fresh_lbtv.zip。"
+        }
+      },
+      "0_3_3": {
+        "title": "更新日志、Demo 辅助和安装保护",
+        "summary": "新增应用内更新日志、Demo 录制辅助、安装时保护用户插件配置，并加入受保护的插件包卸载操作。",
+        "items": {
+          "0": "新增更新日志页面，并与首次打开弹窗共用同一份数据。",
+          "1": "新增 tv_enable 1; tv_autorecord 1 的 Demo 录制提示。",
+          "2": "新增打开 game/csgo/replays 的按钮。",
+          "3": "安装时会保护 addons/counterstrikesharp/configs/plugins/ 下已有文件。",
+          "4": "新增已知 CS2-Bot-Improver 插件目录的受保护卸载。"
+        }
+      },
+      "0_3_2": {
+        "title": "上游 v1.3.0 说明",
+        "summary": "首次打开弹窗已对齐上游 v1.3.0 更新和应用侧辅助功能。",
+        "sourceLabel": "GitHub v1.3.0",
+        "items": {
+          "0": "同步上游的 Bot 道具点位、瞄准行为、经济逻辑、音乐盒和队伍数据。",
+          "1": "新增交流群入口、我的指令、Commands.txt 查看和 AI API 编辑等应用辅助功能。"
+        }
+      },
+      "0_3_1": {
+        "title": "Fresh 资源包更新",
+        "summary": "主内置包替换为 CS2BotImprover_fresh_lbtv.zip，并恢复 LBTV 人机增强功能。",
+        "items": {
+          "0": "内置资源包替换为 CS2BotImprover_fresh_lbtv.zip。",
+          "1": "恢复 BotTaunt、AI 聊天回复、lbtv_bot_taunt、lbtv_bot_chat 和 lbtv_difficulty。",
+          "2": "恢复回合伤害统计，并优化道具来源识别。"
+        }
+      },
+      "0_3_0": {
+        "title": "主线包正式发布",
+        "summary": "当前 fresh 资源线的正式打包版本。",
+        "items": {
+          "0": "对齐应用版本并构建 NSIS 安装包。",
+          "1": "交付安装包保存在 release 目录中。"
+        }
+      },
+      "0_2_13": {
+        "title": "AI 聊天 API 设置",
+        "summary": "新增应用内读取和保存 BotTaunt AI API 设置的能力。",
+        "items": {
+          "0": "新增 AI 聊天 API 设置卡片，可编辑 URL 和 API Key。",
+          "1": "新增 Tauri 命令，用于读取和补丁式写入 BotTaunt.json，并保留未知字段。"
+        }
+      },
+      "0_2_11": {
+        "title": "LBTV 资源包更新",
+        "summary": "替换上游 LBTV 资源包并完成正式打包。",
+        "items": {
+          "0": "替换主内置资源包。",
+          "1": "发布前完成工作区配置和最终安装包输出验证。"
+        }
+      }
+    }
   },
   "config": {
     "title": "配置控制台",
@@ -267,7 +942,29 @@
     "demoDirLabel": "目录",
     "demoFullPathLabel": "完整路径",
     "copyDemoPath": "复制 Demo 路径",
-    "secondaryReload": "重新读取"
+    "secondaryReload": "重新读取",
+    "applyDifficulty": "设置难度",
+    "switchMode": "切换模式",
+    "saveNadeRecovery": "保存道具压制开火",
+    "copyLaunchOpt": "复制启动项",
+    "copyDemoCmd": "复制 Demo 命令",
+    "findRecentDemo": "查找最近 Demo",
+    "openDemoDir": "打开 Demo 目录",
+    "openDemoFolder": "打开 Demo 所在文件夹",
+    "enterConfig": "进入游戏配置页",
+    "toast": {
+      "recheckAndExit": "{msg} 请先重新检查目录，并确认 CS2 已退出。",
+      "exitAndRecheck": "{msg} 请先退出 CS2，再返回安装页重新检查。",
+      "reloadOrDiagnose": "{msg} 可以重新读取，或到帮助页复制诊断信息。",
+      "confirmExitAndReload": "{msg} 请确认 CS2 已退出，并重新读取配置。",
+      "reloadAndRetry": "{msg} 可以重新读取配置后再试。",
+      "launchOptCopied": "启动项已复制：-disable_workshop_command_filtering",
+      "consoleCmdCopied": "控制台命令已复制：tv_enable 1; tv_autorecord 1",
+      "demoDirMissing": "{msg} 请确认 Demo 目录存在，或先复制录制命令打一局。",
+      "demoPathCopied": "Demo 路径已复制：{path}",
+      "returnAndRecheck": "{msg} 请先返回安装页重新检查目录。",
+      "openDemoDirAndSearch": "{msg} 可以先打开 Demo 目录再手动查找。"
+    }
   },
   "inventory": {
     "title": "库存模拟",
@@ -308,7 +1005,43 @@
     "launchAtStartup": "开机自启",
     "autoInstall": "首次运行自动安装",
     "storage": "存储说明",
-    "storageHint": "配置存储在 localStorage 中。目录列表、主题偏好和固定命令会在卸载后保留。"
+    "storageHint": "配置存储在 localStorage 中。目录列表、主题偏好和固定命令会在卸载后保留。",
+    "appearanceTitle": "主题与配色",
+    "customAccent": "自定义主色调",
+    "languageLabel": "语言",
+    "startupTitle": "程序行为",
+    "autostart": "开机自启动",
+    "autostartHint": "默认关闭。开启后，Windows 登录时会自动启动本助手。",
+    "autoInstallTitle": "新版本插件包初次安装",
+    "autoInstallHint": "默认开启。每个应用版本最多尝试一次；检测到 CS2 正在运行或没有目录时会跳过。",
+    "storagePrivacy": "储存与隐私",
+    "storagePrivacyTitle": "储存与隐私说明",
+    "storageLocalStorage": "浏览器缓存 / localStorage",
+    "storageLocalStorageDesc": "用于记住你的使用习惯和已选择目录，包括主题、更新日志已读状态、更新提醒忽略状态、固定命令、最近命令、最近选择的 CS2 目录、页面提示是否已关闭，以及本页的新版本初次安装开关。",
+    "storageCs2Dir": "你选择的 CS2 目录",
+    "storageCs2DirDesc": "插件包会安装到游戏目录下，例如 game\\csgo\\addons\\counterstrikesharp\\... 和 game\\csgo\\addons\\metamod\\...。",
+    "storagePluginConfig": "插件配置目录",
+    "storagePluginConfigDesc": "BotTaunt、NadeSystem 等配置保存在 CS2 插件配置目录里。每次安装都会清理旧插件包和插件配置，并写入内置整包。",
+    "storageLogs": "运行日志 / 诊断信息",
+    "storageLogsDesc": "诊断功能会提供日志位置，并可打开日志目录；设置页只说明位置用途，不修改日志目录。",
+    "storageNotice": "不会上传这些本地偏好；插件配置仍保存在你选择的 CS2 目录里，相关位置暂时不能在程序里修改。",
+    "versionHistory": "版本记录",
+    "currentVersion": "当前版本 v{version}",
+    "viewReleaseNotes": "查看更新日志",
+    "releaseNotesHint": "更新日志会优先展示当前内置版本，并在网络可用时合并线上历史记录和下载入口。",
+    "openSourceAttribution": "内置人机资源基于 CS2-Bot-Improver 及 CS2-Bot-Improver-Plus 的公开项目构建；本助手遵循 AGPL-3.0-or-later 发布。",
+    "reload": "重新读取",
+    "autostartChecking": "检查中",
+    "autostartInstalled": "已自动安装",
+    "autostartSkipped": "已跳过",
+    "autostartFailed": "失败",
+    "autostartUnchecked": "未检查",
+    "autostartWebOnly": "当前是网页预览环境，开机自启动只在桌面版里可用。",
+    "autostartOn": "已读取系统状态：开机自启动已开启。",
+    "autostartOff": "已读取系统状态：开机自启动未开启。",
+    "autostartEnabled": "开机自启动已开启。",
+    "autostartDisabled": "开机自启动已关闭。",
+    "operationFailed": "操作失败，请稍后重试。"
   },
   "launchModal": {
     "title": "启动 Counter-Strike 2",

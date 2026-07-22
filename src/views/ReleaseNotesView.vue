@@ -13,6 +13,22 @@ import { openExternalUrl } from '@/services/tauri/app'
 
 const { t } = useI18n()
 
+function rnKey(version: string, ...parts: string[]) {
+  return `releaseNotes.entries.${version.replace(/\./g, '_')}.${parts.join('.')}`
+}
+
+function rnValue(version: string, field: string, fallback: string): string {
+  const key = rnKey(version, field)
+  const translated = t(key)
+  return translated !== key ? translated : fallback
+}
+
+function rnItemValue(version: string, index: number, item: { text: string }): string {
+  const key = rnKey(version, 'items', String(index))
+  const translated = t(key)
+  return translated !== key ? translated : item.text
+}
+
 const openMessage = ref('')
 const cloudEntries = ref<ReleaseNoteEntry[] | null>(null)
 const cloudStatus = ref<'loading' | 'online' | 'builtin' | 'failed' | 'not-configured'>('loading')
@@ -103,16 +119,16 @@ function mapCloudRelease(release: SoftwareRelease): ReleaseNoteEntry {
   const entry: ReleaseNoteEntry = {
     version: release.version,
     date: release.publishedAt ? release.publishedAt.slice(0, 10) : '',
-    title: release.title || `v${release.version} 更新`,
+    title: release.title || t('releaseNotes.cloudUpdate', { version: release.version }),
     summary: release.summary || '',
     items: release.items.length
       ? release.items.map((text) => ({ text }))
-      : [{ text: release.summary || '这个版本已经可以下载。' }],
+      : [{ text: t('releaseNotes.cloudDefaultItem') }],
   }
 
   if (release.download?.url) {
     entry.source = {
-      label: release.download.label || '打开夸克网盘',
+      label: release.download.label || t('releaseNotes.cloudDownload'),
       url: release.download.url,
     }
   }
@@ -125,7 +141,7 @@ async function openLink(url: string) {
     await openExternalUrl(url)
     openMessage.value = ''
   } catch {
-    openMessage.value = '打开外部链接失败，请稍后手动访问。'
+    openMessage.value = t('releaseNotes.openFailed')
   }
 }
 </script>
@@ -153,7 +169,7 @@ async function openLink(url: string) {
       <div class="section-head">
         <div>
           <p class="eyebrow">{{ latestEntry.date }}</p>
-          <h3>v{{ latestEntry.version }} · {{ latestEntry.title }}</h3>
+          <h3>v{{ latestEntry.version }} · {{ rnValue(latestEntry.version, 'title', latestEntry.title) }}</h3>
         </div>
         <button
           v-if="latestEntry.source"
@@ -161,15 +177,15 @@ async function openLink(url: string) {
           type="button"
           @click="openLink(latestEntry.source.url)"
         >
-          {{ latestEntry.source.label }}
+          {{ rnValue(latestEntry.version, 'sourceLabel', latestEntry.source?.label || '') }}
         </button>
       </div>
 
-      <p class="muted">{{ latestEntry.summary }}</p>
+      <p class="muted">{{ rnValue(latestEntry.version, 'summary', latestEntry.summary) }}</p>
 
       <div class="release-list">
-        <p v-for="item in latestEntry.items" :key="item.text">
-          <span>{{ item.text }}</span>
+        <p v-for="(item, index) in latestEntry.items" :key="index">
+          <span>{{ rnItemValue(latestEntry.version, index, item) }}</span>
           <template v-if="item.links">
             <button
               v-for="link in item.links"
@@ -189,8 +205,8 @@ async function openLink(url: string) {
       <CollapsiblePanel
         v-for="entry in historyEntries"
         :key="entry.version"
-        :title="`v${entry.version} · ${entry.title}`"
-        :subtitle="entry.summary"
+        :title="`v${entry.version} · ${rnValue(entry.version, 'title', entry.title)}`"
+        :subtitle="rnValue(entry.version, 'summary', entry.summary)"
         :badge="entry.date"
       >
         <div class="section-head">
@@ -200,13 +216,13 @@ async function openLink(url: string) {
             type="button"
             @click="openLink(entry.source.url)"
           >
-            {{ entry.source.label }}
+            {{ rnValue(entry.version, 'sourceLabel', entry.source?.label || '') }}
           </button>
         </div>
 
         <div class="release-list">
-          <p v-for="item in entry.items" :key="item.text">
-            <span>{{ item.text }}</span>
+          <p v-for="(item, index) in entry.items" :key="index">
+            <span>{{ rnItemValue(entry.version, index, item) }}</span>
             <template v-if="item.links">
               <button
                 v-for="link in item.links"

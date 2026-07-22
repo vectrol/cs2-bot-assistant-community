@@ -61,15 +61,15 @@ const copyText = computed(() => {
     }
   }
   const lines = [
-    `CS2人机助手社区版 v${appConfig.appVersion}`,
-    `目录：${props.rootPath || '未选择'}`,
-    `游戏模式：${env?.activeGameMode === 'withBots' ? 'Bot模式' : env?.activeGameMode === 'online' ? '在线模式' : '未知'}`,
-    `CS2运行中：${props.cs2Running ? '是' : '否'}`,
-    `环境检查：${readyCount.value}/${checks.value.length}`,
+    `${t('app.name')} v${appConfig.appVersion}`,
+    `${t('diagnostics.dirLabel')}：${props.rootPath || t('diagnostics.notSelected')}`,
+    `${t('diagnostics.gameModeLabel')}：${env?.activeGameMode === 'withBots' ? t('quickControl.botMode') : env?.activeGameMode === 'online' ? t('quickControl.onlineMode') : t('diagnostics.unknown')}`,
+    `${t('app.cs2Running')}：${props.cs2Running ? t('diagnostics.yes') : t('diagnostics.no')}`,
+    `${t('guide.environmentTitle')}：${readyCount.value}/${checks.value.length}`,
     ...checks.value.map((c) => `  ${c.ok ? '[OK]' : '[--]'} ${c.label}`),
-    ...(pluginLines.length ? ['插件版本：', ...pluginLines] : []),
-    `日志路径：${props.diagnostics?.logPath || '-'}`,
-    props.lastError ? `最近错误：${props.lastError.message} (${props.lastError.context})` : '',
+    ...(pluginLines.length ? [`${t('diagnostics.pluginVersions')}：`, ...pluginLines] : []),
+    `${t('guide.logSummary')}：${props.diagnostics?.logPath || '-'}`,
+    props.lastError ? `${t('guide.lastError')}：${props.lastError.message} (${props.lastError.context})` : '',
   ]
   return lines.filter(Boolean).join('\n')
 })

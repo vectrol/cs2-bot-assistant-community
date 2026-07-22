@@ -110,7 +110,7 @@ watch(() => route.fullPath, (routePath) => {
             :key="item.to"
             :to="item.to"
             class="nav-link"
-            :class="{ active: route.path.startsWith(item.to) }"
+            :class="{ active: route.path === item.to }"
           >
             <span class="nav-link__icon" v-html="getIcon(item.icon)" />
             <span class="nav-link__label">{{ item.label }}</span>
@@ -124,7 +124,7 @@ watch(() => route.fullPath, (routePath) => {
 
       <main class="content">
         <header v-if="!isDashboard" class="page-header">
-          <h2>{{ navItems.find(i => route.path.startsWith(i.to))?.label || '' }}</h2>
+          <h2>{{ navItems.find(i => route.path === i.to)?.label || '' }}</h2>
         </header>
 
         <div class="page-transition-wrapper">
