@@ -4,7 +4,7 @@ use crate::errors::AppError;
 use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset, GameModePreset, NadeRecoveryConfig,
-    OperationResult,
+    OperationResult, PluginInfo,
 };
 use crate::services::cs2;
 
@@ -155,4 +155,14 @@ pub fn uninstall_bot_package(root_path: String) -> Result<OperationResult, Strin
 #[tauri::command]
 pub fn get_diagnostics_payload(root_path: Option<String>) -> Result<DiagnosticsPayload, String> {
     cs2::get_diagnostics_payload(root_path.as_deref()).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn list_plugins(root_path: String) -> Result<Vec<PluginInfo>, String> {
+    cs2::list_plugins(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn toggle_plugin(root_path: String, plugin_name: String) -> Result<PluginInfo, String> {
+    cs2::toggle_plugin(&root_path, &plugin_name).map_err(AppError::into_string)
 }

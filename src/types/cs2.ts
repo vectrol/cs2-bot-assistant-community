@@ -34,6 +34,13 @@ export interface OperationResult {
   message: string
 }
 
+export interface PluginInfo {
+  name: string
+  version: string
+  enabled: boolean
+  hasConfig: boolean
+}
+
 export interface DemoDirectoryCandidate {
   path: string
   source: string

@@ -40,6 +40,15 @@ pub struct Cs2EnvironmentStatus {
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct PluginInfo {
+    pub name: String,
+    pub version: String,
+    pub enabled: bool,
+    pub has_config: bool,
+}
+
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct OperationResult {
     pub success: bool,
     pub message: String,

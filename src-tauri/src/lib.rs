@@ -65,6 +65,8 @@ pub fn run() {
             commands::cs2::uninstall_bot_package,
             commands::cs2::check_cs2_process,
             commands::cs2::get_diagnostics_payload,
+            commands::cs2::list_plugins,
+            commands::cs2::toggle_plugin,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

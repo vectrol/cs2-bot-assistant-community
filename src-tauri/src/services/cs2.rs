@@ -14,7 +14,7 @@ use crate::models::cs2::{
     AiApiConfig, BotTauntsConfig, CommandsTxtPayload, Cs2EnvironmentStatus, Cs2RootCandidate,
     DemoDirectoryCandidate, DemoDiscoveryPayload, DiagnosticsPayload, DifficultyPreset,
     GameModePreset, InstallDiagnostics, NadeRecoveryConfig,
-    OperationResult, RecentDemoFile,
+    OperationResult, PluginInfo, RecentDemoFile,
 };
 
 const CS2_FOLDER_NAME: &str = "Counter-Strike Global Offensive";
@@ -303,6 +303,111 @@ pub fn inspect_cs2_root(root_path: &str) -> Result<Cs2EnvironmentStatus, AppErro
         ),
     );
     Ok(status)
+}
+
+pub fn list_plugins(root_path: &str) -> Result<Vec<PluginInfo>, AppError> {
+    let root = normalize_root(root_path)?;
+    let plugins_dir = root
+        .join("game")
+        .join("csgo")
+        .join("addons")
+        .join("counterstrikesharp")
+        .join("plugins");
+
+    if !plugins_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut plugins = Vec::new();
+    let mut entries: Vec<_> = match fs::read_dir(&plugins_dir) {
+        Ok(e) => e.filter_map(|e| e.ok()).collect(),
+        Err(_) => return Ok(Vec::new()),
+    };
+    entries.sort_by_key(|e| e.file_name());
+
+    for entry in entries {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if name.starts_with('.') {
+            continue;
+        }
+
+        let (plugin_name, enabled) = if let Some(stripped) = name.strip_suffix(".disabled") {
+            (stripped.to_string(), false)
+        } else if entry.file_type().map(|t| t.is_dir()).unwrap_or(false) {
+            (name.clone(), true)
+        } else {
+            continue;
+        };
+
+        let version = read_plugin_version(&plugins_dir, &plugin_name);
+        let config_path = plugins_dir.join(&plugin_name).join("config.json");
+        let has_config = config_path.exists()
+            || (!enabled && {
+                let disabled_path = plugins_dir.join(format!("{}.disabled", &plugin_name));
+                disabled_path.join("config.json").exists()
+            });
+
+        plugins.push(PluginInfo {
+            name: plugin_name,
+            version,
+            enabled,
+            has_config,
+        });
+    }
+
+    Ok(plugins)
+}
+
+pub fn toggle_plugin(root_path: &str, plugin_name: &str) -> Result<PluginInfo, AppError> {
+    ensure_cs2_not_running()?;
+    let root = normalize_root(root_path)?;
+    let plugins_dir = root
+        .join("game")
+        .join("csgo")
+        .join("addons")
+        .join("counterstrikesharp")
+        .join("plugins");
+
+    let active = plugins_dir.join(plugin_name);
+    let disabled = plugins_dir.join(format!("{}.disabled", plugin_name));
+
+    let (enabled, from, to) = if active.exists() {
+        (false, active, disabled)
+    } else if disabled.exists() {
+        (true, disabled, active)
+    } else {
+        return Err(AppError::runtime(format!(
+            "[PLUGIN_NOT_FOUND]\n插件未找到：{}",
+            plugin_name
+        )));
+    };
+
+    fs::rename(&from, &to).map_err(|e| {
+        AppError::runtime(format!(
+            "[PLUGIN_TOGGLE_FAILED]\n切换插件状态失败：{}\n{}",
+            plugin_name, e
+        ))
+    })?;
+
+    write_log(
+        "INFO",
+        &format!(
+            "插件 {} 状态切换为 {}",
+            plugin_name,
+            if enabled { "启用" } else { "禁用" }
+        ),
+    );
+
+    let version = read_plugin_version(&plugins_dir, plugin_name);
+    let config_path = to.join("config.json");
+    let has_config = config_path.exists();
+
+    Ok(PluginInfo {
+        name: plugin_name.to_string(),
+        version,
+        enabled,
+        has_config,
+    })
 }
 
 pub fn check_cs2_process() -> Result<bool, AppError> {

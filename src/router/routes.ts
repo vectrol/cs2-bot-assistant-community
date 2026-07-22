@@ -41,4 +41,9 @@ export const routes: RouteRecordRaw[] = [
     name: 'release-notes',
     component: () => import('@/views/ReleaseNotesView.vue'),
   },
+  {
+    path: '/plugins',
+    name: 'plugins',
+    component: () => import('@/views/PluginsView.vue'),
+  },
 ]

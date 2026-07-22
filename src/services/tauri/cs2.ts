@@ -12,6 +12,7 @@ import type {
   GameModePreset,
   NadeRecoveryConfig,
   OperationResult,
+  PluginInfo,
 } from '@/types/cs2'
 
 function isTauriRuntime() {
@@ -270,6 +271,20 @@ export function uninstallBotPackage(rootPath: string) {
     return webOnlyOperation(`Web 预览不能卸载插件包。目标目录：${rootPath}`)
   }
   return invoke<OperationResult>('uninstall_bot_package', { rootPath })
+}
+
+export function listPlugins(rootPath: string): Promise<PluginInfo[]> {
+  if (!isTauriRuntime()) {
+    return Promise.resolve<PluginInfo[]>([])
+  }
+  return invoke<PluginInfo[]>('list_plugins', { rootPath })
+}
+
+export function togglePlugin(rootPath: string, pluginName: string): Promise<PluginInfo | null> {
+  if (!isTauriRuntime()) {
+    return Promise.resolve(null)
+  }
+  return invoke<PluginInfo | null>('toggle_plugin', { rootPath, pluginName })
 }
 
 export function getDiagnosticsPayload(rootPath?: string) {
