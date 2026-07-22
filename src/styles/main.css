@@ -157,6 +157,10 @@
   --theme-toggle-bg: rgba(255, 255, 255, 0.76);
   --theme-toggle-border: rgba(23, 33, 43, 0.08);
   --theme-toggle-shadow: 0 10px 24px rgba(119, 134, 149, 0.14);
+  --glass-bg: rgba(255, 255, 255, 0.70);
+  --glass-border: rgba(15, 23, 42, 0.08);
+  --glass-blur: 18px;
+  --glass-shadow: 0 8px 32px rgba(98, 119, 141, 0.12);
 }
 
 * {

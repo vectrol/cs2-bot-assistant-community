@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -12,9 +15,9 @@ const props = withDefaults(
     copyWithoutSemicolon?: boolean
   }>(),
   {
-    label: '复制',
-    copiedLabel: '已复制',
-    failedLabel: '复制失败',
+    label: undefined,
+    copiedLabel: undefined,
+    failedLabel: undefined,
     variant: 'ghost',
     disabled: false,
     copyWithoutSemicolon: true,
@@ -97,6 +100,6 @@ onBeforeUnmount(() => {
     :disabled="disabled"
     @click="copy"
   >
-    {{ failed ? failedLabel : copied ? copiedLabel : label }}
+    {{ failed ? (failedLabel ?? t('copyButton.failed')) : copied ? (copiedLabel ?? t('copyButton.copied')) : (label ?? t('copyButton.copy')) }}
   </button>
 </template>

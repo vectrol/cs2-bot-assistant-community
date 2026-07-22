@@ -17,19 +17,19 @@ const icons: Record<string, string> = {
 }
 
 const features = [
-  { icon: 'skin', title: '皮肤浏览', desc: '浏览所有武器皮肤，支持筛选和预览。' },
-  { icon: 'case', title: '开箱模拟', desc: '模拟开箱，查看所有武器箱的掉落物。' },
-  { icon: 'sticker', title: '贴纸应用', desc: '在武器上预览和搭配贴纸位置。' },
-  { icon: 'rename', title: '物品改名', desc: '自定义武器名称和描述标签。' },
-  { icon: 'sync', title: 'Steam 同步', desc: '同步你的 Steam 库存进行搭配。' },
-  { icon: 'manage', title: '库存管理', desc: '管理创建的预设和搭配方案。' },
+  { icon: 'skin', titleKey: 'inventory.features.skin.title', descKey: 'inventory.features.skin.desc' },
+  { icon: 'case', titleKey: 'inventory.features.case.title', descKey: 'inventory.features.case.desc' },
+  { icon: 'sticker', titleKey: 'inventory.features.sticker.title', descKey: 'inventory.features.sticker.desc' },
+  { icon: 'rename', titleKey: 'inventory.features.rename.title', descKey: 'inventory.features.rename.desc' },
+  { icon: 'sync', titleKey: 'inventory.features.sync.title', descKey: 'inventory.features.sync.desc' },
+  { icon: 'manage', titleKey: 'inventory.features.manage.title', descKey: 'inventory.features.manage.desc' },
 ]
 
 const configItems = [
-  { key: 'invsim_url', desc: '库存模拟器服务地址' },
-  { key: 'invsim_apikey', desc: 'API 密钥' },
-  { key: 'invsim_ws_enabled', desc: '启用 WebSocket 实时同步' },
-  { key: 'invsim_ws_cooldown', desc: 'WebSocket 冷却时间 (秒)' },
+  { key: 'invsim_url', descKey: 'inventory.configItems.url' },
+  { key: 'invsim_apikey', descKey: 'inventory.configItems.apikey' },
+  { key: 'invsim_ws_enabled', descKey: 'inventory.configItems.wsEnabled' },
+  { key: 'invsim_ws_cooldown', descKey: 'inventory.configItems.wsCooldown' },
 ]
 
 function getIcon(name: string): string {
@@ -42,15 +42,15 @@ function getIcon(name: string): string {
     <article class="hero-banner inventory-hero glass stagger-enter" style="animation: fade-in-up 0.25s ease;">
       <div>
         <p class="eyebrow">{{ t('nav.inventory') }}</p>
-        <h2>CS2 库存模拟器</h2>
+        <h2>{{ t('inventory.simulatorTitle') }}</h2>
         <p class="muted">{{ t('inventory.hint') }}</p>
       </div>
       <div class="inventory-hero__actions">
         <button class="primary-button" type="button" @click="openInventoryWindow()">
-          打开库存模拟器
+          {{ t('inventory.openSimulator') }}
         </button>
         <button class="ghost-button" type="button" @click="openLaunchModal?.()">
-          启动 CS2
+          {{ t('inventory.openCs2') }}
         </button>
       </div>
     </article>
@@ -58,29 +58,31 @@ function getIcon(name: string): string {
     <div class="inventory-features stagger-enter">
       <article
         v-for="f in features"
-        :key="f.title"
+        :key="f.titleKey"
         class="feature-card glass"
       >
         <span class="feature-card__icon" v-html="getIcon(f.icon)" />
-        <h3>{{ f.title }}</h3>
-        <p class="muted">{{ f.desc }}</p>
+        <h3>{{ t(f.titleKey) }}</h3>
+        <p class="muted">{{ t(f.descKey) }}</p>
       </article>
     </div>
 
     <article class="card inventory-config glass">
       <div class="section-head">
         <div>
-          <p class="eyebrow">插件配置</p>
-          <h3>CounterStrikeSharp 配置项</h3>
+          <p class="eyebrow">{{ t('inventory.configSection') }}</p>
+          <h3>{{ t('inventory.configTitle') }}</h3>
         </div>
       </div>
       <div class="config-grid">
         <div v-for="item in configItems" :key="item.key" class="config-row glass">
           <code>{{ item.key }}</code>
-          <span class="muted">{{ item.desc }}</span>
+          <span class="muted">{{ t(item.descKey) }}</span>
         </div>
       </div>
-      <p class="muted config-note">以上配置项位于 <code>game/csgo/addons/counterstrikesharp/configs/plugins/InventorySimulator/</code></p>
+      <p class="muted config-note">
+        {{ t('inventory.configNote') }}
+      </p>
     </article>
   </section>
 </template>
@@ -120,7 +122,7 @@ function getIcon(name: string): string {
 
 .feature-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.25);
+  box-shadow: var(--glass-shadow);
   border-color: var(--accent);
 }
 

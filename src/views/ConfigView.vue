@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 
 import ActionModal from '@/components/ActionModal.vue'
 import ConfigActionGroup from '@/components/config/ConfigActionGroup.vue'
@@ -14,6 +15,7 @@ import type { DifficultyPreset, GameModePreset } from '@/types/cs2'
 
 const store = useCs2Store()
 const preferences = useUiPreferencesStore()
+const { t } = useI18n()
 const nadeRecoveryModalOpen = ref(false)
 const demoDetailModalOpen = ref(false)
 const activeConfigSection = ref<'base' | 'nades' | 'demo'>('base')
@@ -28,78 +30,78 @@ const nadeRecovery = ref({
 const nadeRecoveryLoadedPath = ref('')
 
 const difficultyCards: Array<{ title: string; preset: DifficultyPreset; description: string }> = [
-  { title: '简单', preset: 'low', description: '适合刚开始练习，Bot 更容易应对。' },
-  { title: '标准', preset: 'medium', description: '更接近日常对局，推荐大多数玩家使用。' },
-  { title: '高强度', preset: 'high', description: '适合练反应、对枪和残局处理。' },
+  { title: t('config.difficultyEasy'), preset: 'low', description: t('config.difficultyEasyDesc') },
+  { title: t('config.difficultyStandard'), preset: 'medium', description: t('config.difficultyStandardDesc') },
+  { title: t('config.difficultyHard'), preset: 'high', description: t('config.difficultyHardDesc') },
 ]
 
 const modeCards: Array<{ title: string; preset: GameModePreset; description: string }> = [
-  { title: '在线模式', preset: 'online', description: '准备正常进入线上比赛时使用。' },
-  { title: 'Bot 模式', preset: 'withBots', description: '继续打人机或练习地图时使用。' },
+  { title: t('config.modeOnline'), preset: 'online', description: t('config.modeOnlineDesc') },
+  { title: t('config.modeBots'), preset: 'withBots', description: t('config.modeBotsDesc') },
 ]
 
 const blockedReason = computed(() => {
   if (!store.selectedRoot) {
-    return '请先到"安装检查"页选择游戏目录。'
+    return t('config.blockedNoDir')
   }
   if (!store.readyForConfig) {
-    return '当前环境尚未就绪，请先完成安装。'
+    return t('config.blockedNotReady')
   }
   if (store.cs2Running) {
-    return '检测到 CS2 正在运行，请先退出游戏。'
+    return t('config.blockedCs2Running')
   }
   return ''
 })
 
 const nadeRecoveryFields = [
-  { key: 'flash', label: '闪光弹', hint: 'BOT 丢出闪光后的压制秒数' },
-  { key: 'smoke', label: '烟雾弹', hint: 'BOT 丢出烟雾后的压制秒数' },
-  { key: 'he', label: '高爆雷', hint: 'BOT 丢出高爆后的压制秒数' },
-  { key: 'molotov', label: '燃烧瓶', hint: 'T 方燃烧瓶后的压制秒数' },
-  { key: 'incgrenade', label: '燃烧弹', hint: 'CT 方燃烧弹后的压制秒数' },
+  { key: 'flash', label: t('config.nadeFlash'), hint: t('config.nadeFlashHint') },
+  { key: 'smoke', label: t('config.nadeSmoke'), hint: t('config.nadeSmokeHint') },
+  { key: 'he', label: t('config.nadeHe'), hint: t('config.nadeHeHint') },
+  { key: 'molotov', label: t('config.nadeMolotov'), hint: t('config.nadeMolotovHint') },
+  { key: 'incgrenade', label: t('config.nadeInc'), hint: t('config.nadeIncHint') },
 ] as const
 
 const nadeRecoveryStatus = computed(() => {
   if (!store.nadeRecoveryConfig) {
-    return '选择并安装 CS2 目录后，可以在这里编辑 BOT 使用道具后的开火压制时间。'
+    return t('config.nadeHint')
   }
   if (!store.nadeRecoveryConfig.exists) {
-    return '尚未找到 NadeSystem.json，保存后会自动创建。'
+    return t('config.nadeNotFound')
   }
-  return `当前配置文件：${store.nadeRecoveryConfig.configPath}`
+  return t('config.nadePath', { path: store.nadeRecoveryConfig.configPath })
 })
 
 const recentDemo = computed(() => store.demoDiscovery?.recentDemo ?? null)
 
 const statusItems = computed(() => [
   {
-    label: '目录',
-    value: store.selectedRoot ? '已选择' : '未选择',
+    label: t('config.selectDir'),
+    value: store.selectedRoot ? t('config.selected') : t('config.notSelected'),
     state: store.selectedRoot ? 'ready' as const : 'warn' as const,
   },
   {
-    label: '环境',
-    value: store.readyForConfig ? '可配置' : '未就绪',
+    label: t('config.environment'),
+    value: store.readyForConfig ? t('config.configurable') : t('config.notReady'),
     state: store.readyForConfig ? 'ready' as const : 'warn' as const,
   },
   {
     label: 'CS2',
-    value: store.cs2Running ? '正在运行' : '未运行',
+    value: store.cs2Running ? t('config.running') : t('config.notRunning'),
     state: store.cs2Running ? 'danger' as const : 'ready' as const,
   },
 ])
 
 const demoStatus = computed(() => {
   if (!store.selectedRoot) {
-    return '选择 CS2 目录后，可以查找最近录制的人机 Demo。'
+    return t('config.demoNoRoot')
   }
   if (!store.demoDiscovery) {
-    return '尚未查找 Demo。'
+    return t('config.demoNotChecked')
   }
   if (!store.demoDiscovery.recentDemo) {
-    return `没有找到 Demo 文件。默认目录：${store.demoDiscovery.defaultDirectory}`
+    return t('config.demoNotFound', { dir: store.demoDiscovery.defaultDirectory })
   }
-  return `最近 Demo：${store.demoDiscovery.recentDemo.fileName}`
+  return t('config.demoRecent', { name: store.demoDiscovery.recentDemo.fileName })
 })
 
 const recentConfigItems = computed(() => preferences.recentActions
@@ -107,9 +109,9 @@ const recentConfigItems = computed(() => preferences.recentActions
   .slice(0, 4))
 
 const configSections = computed(() => [
-  { key: 'base' as const, label: '基础配置', detail: blockedReason.value || '难度和模式可写入' },
-  { key: 'nades' as const, label: '道具压制开火', detail: store.nadeRecoveryConfig?.exists ? '已读取时间' : '可编辑时间' },
-  { key: 'demo' as const, label: 'Demo / 启动项', detail: recentDemo.value?.fileName ?? '辅助操作' },
+  { key: 'base' as const, label: t('config.sectionBasic'), detail: blockedReason.value || `${t('config.difficultyEasy')}/${t('config.difficultyStandard')}/${t('config.difficultyHard')}` },
+  { key: 'nades' as const, label: t('config.sectionNades'), detail: store.nadeRecoveryConfig?.exists ? t('config.nadeFound') : t('config.nadeEditable') },
+  { key: 'demo' as const, label: t('config.sectionDemo'), detail: recentDemo.value?.fileName ?? t('config.demoOps') },
 ])
 
 function canWriteConfig() {
@@ -299,14 +301,14 @@ onMounted(async () => {
 <template>
   <section class="page-grid config-console-page">
     <ConsolePanel
-      eyebrow="Configuration"
-      title="配置控制台"
-      :description="blockedReason || 'Bot 难度、游戏模式、投掷物恢复、Demo 录制。写入前请退出 CS2。'"
+      :eyebrow="t('config.title')"
+      :title="t('config.title')"
+      :description="blockedReason || t('config.description')"
       tone="strong"
       class="glass"
     >
       <template #actions>
-        <button class="ghost-button" @click="store.refreshCs2Running()">刷新游戏状态</button>
+        <button class="ghost-button" @click="store.refreshCs2Running()">{{ t('app.refresh') }}</button>
       </template>
       <div class="metric-grid">
         <MetricTile
@@ -319,7 +321,7 @@ onMounted(async () => {
       </div>
     </ConsolePanel>
 
-    <article class="card config-section-tabs glass" aria-label="配置分区">
+    <article class="card config-section-tabs glass" :aria-label="t('config.title')">
       <button
         v-for="section in configSections"
         :key="section.key"
@@ -336,8 +338,8 @@ onMounted(async () => {
     <article v-if="recentConfigItems.length > 0" class="card recent-config-card glass">
       <div class="section-head">
         <div>
-          <p class="eyebrow">最近改动</p>
-          <h3>回头继续时不用重新找。</h3>
+          <p class="eyebrow">{{ t('config.recentChanges') }}</p>
+          <h3>{{ t('config.recentChangesDesc') }}</h3>
         </div>
       </div>
       <div class="recent-action-grid">
@@ -353,8 +355,8 @@ onMounted(async () => {
       <article class="card config-quick-card glass">
         <div class="section-head">
           <div>
-            <p class="eyebrow">Bot 难度</p>
-            <h3>选择适合你的练习强度</h3>
+            <p class="eyebrow">{{ t('quickControl.difficulty') }}</p>
+            <h3>{{ t('config.difficultyChoose') }}</h3>
           </div>
         </div>
 
@@ -376,8 +378,8 @@ onMounted(async () => {
       <article class="card config-quick-card glass">
         <div class="section-head">
           <div>
-            <p class="eyebrow">模式切换</p>
-            <h3>在线比赛 / Bot 模式</h3>
+            <p class="eyebrow">{{ t('config.modeSwitch') }}</p>
+            <h3>{{ t('config.modeSwitchDesc') }}</h3>
           </div>
         </div>
 
@@ -399,14 +401,14 @@ onMounted(async () => {
 
     <ConfigSection
       v-show="activeConfigSection === 'nades'"
-      title="道具压制开火"
+      :title="t('config.sectionNades')"
       :description="nadeRecoveryStatus"
-      :badge="store.nadeRecoveryConfig?.exists ? '已读取' : '可编辑'"
+      :badge="store.nadeRecoveryConfig?.exists ? t('config.nadeFound') : t('config.nadeEditable')"
       :default-open="false"
     >
       <ConfigActionGroup
-        primary-label="编辑"
-        reset-label="恢复默认"
+        :primary-label="t('app.edit')"
+        :reset-label="t('config.resetDefault')"
         :primary-disabled="Boolean(blockedReason)"
         :secondary-disabled="!store.selectedRoot"
         :reset-disabled="Boolean(blockedReason)"
@@ -416,41 +418,41 @@ onMounted(async () => {
         @reset="resetNadeRecovery"
       />
       <p v-if="nadeRecoveryLoadedPath && store.nadeRecoveryConfig?.exists" class="inline-path">
-        配置文件：<code>{{ nadeRecoveryLoadedPath }}</code>
+        {{ t('config.nadePath', { path: nadeRecoveryLoadedPath }) }}
       </p>
     </ConfigSection>
 
-    <ConfigSection v-show="activeConfigSection === 'demo'" title="比赛记录" :description="demoStatus" badge="按需使用" :default-open="true">
+    <ConfigSection v-show="activeConfigSection === 'demo'" :title="t('config.sectionDemo')" :description="demoStatus" :badge="t('config.demoBadge')" :default-open="true">
       <div class="match-record-grid">
         <div class="manual-item">
-          <strong>录制开关</strong>
+          <strong>{{ t('config.demoRecordToggle') }}</strong>
           <div class="copy-row">
             <code>tv_enable 1; tv_autorecord 1</code>
-            <CopyButton text="tv_enable 1; tv_autorecord 1" label="复制" copied-label="已复制" @copied="handleDemoCommandCopied" />
+            <CopyButton text="tv_enable 1; tv_autorecord 1" :label="t('app.copy')" :copied-label="t('app.copied')" @copied="handleDemoCommandCopied" />
           </div>
-          <p class="muted">控制台粘贴后每次对局自动录像。Demo保存在 csgo/replays。</p>
+          <p class="muted">{{ t('config.demoRecordHint') }}</p>
         </div>
 
         <div class="manual-item">
-          <strong>创意工坊地图</strong>
+          <strong>{{ t('config.demoWorkshop') }}</strong>
           <div class="copy-row">
             <code>-disable_workshop_command_filtering</code>
             <CopyButton text="-disable_workshop_command_filtering" @copied="handleWorkshopCopied" />
           </div>
-          <p class="muted">加入 Steam 启动项才能正常加载创意工坊地图。</p>
+          <p class="muted">{{ t('config.demoWorkshopHint') }}</p>
         </div>
 
         <div class="manual-item">
-          <strong>在线/Bot 模式切换</strong>
-          <p class="muted">在线比赛删除 <code>-insecure</code>，继续打 Bot 时重新加回。</p>
+          <strong>{{ t('config.demoModeSwitch') }}</strong>
+          <p class="muted">{{ t('config.demoModeSwitchHint') }}</p>
         </div>
 
         <div class="manual-item">
           <div class="section-head">
-            <strong>最近录像</strong>
+            <strong>{{ t('config.recentDemo') }}</strong>
             <div class="demo-actions">
-              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshRecentDemoAndShow">刷新</button>
-              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="openRecentDemoDirectory">打开目录</button>
+              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="refreshRecentDemoAndShow">{{ t('app.refresh') }}</button>
+              <button class="ghost-button" :disabled="!store.selectedRoot || store.busy" @click="openRecentDemoDirectory">{{ t('config.openDirectory') }}</button>
             </div>
           </div>
           <div v-if="recentDemo" class="recent-demo-card">
@@ -460,19 +462,19 @@ onMounted(async () => {
             </div>
             <div class="demo-actions">
               <CopyButton :text="recentDemo.path" @copied="handleDemoPathCopied(recentDemo.path)" />
-              <button class="ghost-button" @click="openRecentDemoFolder">打开位置</button>
+              <button class="ghost-button" @click="openRecentDemoFolder">{{ t('config.openFolder') }}</button>
             </div>
           </div>
-          <p v-else class="muted">暂无录像。复制上方命令后打一局即可自动录制。</p>
+          <p v-else class="muted">{{ t('config.demoNoRecent') }}</p>
         </div>
       </div>
     </ConfigSection>
 
     <ConfigEditorModal
       :open="nadeRecoveryModalOpen"
-      title="设置道具压制开火时间"
-      description="BOT 使用道具后，会在指定秒数内压制开火和瞄准。范围 0 到 5 秒，0 表示不压制。诱饵弹暂不开放配置。"
-      save-label="保存压制时间"
+      :title="t('config.nadeModalTitle')"
+      :description="t('config.nadeModalDesc')"
+      :save-label="t('config.saveNade')"
       :save-disabled="Boolean(blockedReason) || store.busy"
       :loading="store.busy"
       @close="nadeRecoveryModalOpen = false"
@@ -482,7 +484,7 @@ onMounted(async () => {
         <div v-for="field in nadeRecoveryFields" :key="field.key" class="field range-field">
           <div class="range-field__head">
             <span>{{ field.label }}</span>
-            <strong>{{ nadeRecovery[field.key].toFixed(2) }} 秒</strong>
+            <strong>{{ nadeRecovery[field.key].toFixed(2) }}s</strong>
           </div>
           <input
             v-model.number="nadeRecovery[field.key]"
@@ -505,16 +507,16 @@ onMounted(async () => {
       </div>
       <template #actions>
         <button class="ghost-button" :disabled="Boolean(blockedReason) || store.busy" @click="resetNadeRecovery">
-          恢复默认
+          {{ t('config.resetDefault') }}
         </button>
       </template>
     </ConfigEditorModal>
 
     <ActionModal
       :open="demoDetailModalOpen"
-      title="最近 Demo 详情"
+      :title="t('config.demoDetailTitle')"
       :subtitle="demoStatus"
-      cancel-label="关闭"
+      :cancel-label="t('app.close')"
       hide-confirm
       @close="demoDetailModalOpen = false"
       @confirm="demoDetailModalOpen = false"
@@ -523,26 +525,26 @@ onMounted(async () => {
         <template v-if="recentDemo">
           <dl>
             <div>
-              <dt>文件</dt>
+              <dt>{{ t('config.demoFileLabel') }}</dt>
               <dd>{{ recentDemo.fileName }}</dd>
             </div>
             <div>
-              <dt>时间</dt>
+              <dt>{{ t('config.demoTimeLabel') }}</dt>
               <dd>{{ recentDemo.modifiedAt }}</dd>
             </div>
             <div>
-              <dt>目录</dt>
+              <dt>{{ t('config.demoDirLabel') }}</dt>
               <dd><code>{{ recentDemo.directoryPath }}</code></dd>
             </div>
             <div>
-              <dt>完整路径</dt>
+              <dt>{{ t('config.demoFullPathLabel') }}</dt>
               <dd><code>{{ recentDemo.path }}</code></dd>
             </div>
           </dl>
           <div class="copy-row">
-            <CopyButton :text="recentDemo.path" label="复制 Demo 路径" copied-label="已复制路径" @copied="handleDemoPathCopied" />
+            <CopyButton :text="recentDemo.path" :label="t('config.copyDemoPath')" :copied-label="t('app.copied')" @copied="handleDemoPathCopied" />
             <button class="ghost-button" @click="openRecentDemoFolder">
-              打开所在文件夹
+              {{ t('config.openFolder') }}
             </button>
           </div>
         </template>

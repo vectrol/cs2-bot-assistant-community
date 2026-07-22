@@ -48,7 +48,7 @@ const navItems = computed(() => [
   { label: t('nav.configConsole'), to: '/config', icon: 'gear' },
   { label: t('nav.guideHelp'), to: '/guide', icon: 'help' },
   { label: t('nav.settings'), to: '/settings', icon: 'sliders' },
-  { label: '插件管理', to: '/plugins', icon: 'plugins' },
+  { label: t('nav.plugins'), to: '/plugins', icon: 'plugins' },
 ])
 
 const isDashboard = computed(() => route.path === '/')

@@ -11,6 +11,9 @@ import { commandCenterTabs, teamPresets, type CommandTabKey } from '@/features/c
 import { useCustomCommandsStore } from '@/stores/custom-commands'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import type { CustomCommandItem } from '@/types/custom-command'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const COMMANDS_HINT_STORAGE_KEY = 'cs2-bot-improver.commands-page-hint-seen'
 type CommandPageTabKey = CommandTabKey
@@ -42,7 +45,7 @@ const tabs = computed(() => [
   })),
   {
     key: 'custom' as const,
-    label: '自定义',
+    label: t('commands.customTab'),
     count: customStore.items.length,
   },
 ])
@@ -92,14 +95,18 @@ const visibleTeams = computed(() => {
 })
 
 const summaryItems = computed(() => [
-  { label: '分类', value: `${tabs.value.length} 个`, state: 'ready' as const },
+  { label: t('commands.categoryCount'), value: t('commands.categoryCountValue', { n: tabs.value.length }), state: 'ready' as const },
   {
-    label: '当前结果',
-    value: isCustomTab.value
-      ? `${visibleCustomCommands.value.length} 条`
+    label: isCustomTab.value
+      ? t('commands.resultCount', { n: visibleCustomCommands.value.length })
       : isTeamsTab.value
-        ? `${visibleTeams.value.length} 支`
-        : `${visibleCommands.value.length} 条`,
+        ? t('commands.teamsCount', { n: visibleTeams.value.length })
+        : t('commands.resultCount', { n: visibleCommands.value.length }),
+    value: isCustomTab.value
+      ? `${visibleCustomCommands.value.length}`
+      : isTeamsTab.value
+        ? `${visibleTeams.value.length}`
+        : `${visibleCommands.value.length}`,
     state: 'ready' as const,
   },
 ])
@@ -146,7 +153,7 @@ function markCopied(key: string) {
 }
 
 function handleCopyFailed() {
-  localMessage.value = '复制失败，请手动选中命令后复制。'
+  localMessage.value = t('copyButton.failed')
 }
 
 function recordCommandUse(command: string, summary: string) {
@@ -188,7 +195,7 @@ async function copy(text: string, key: string, copyWithoutSemicolon = false) {
   }
   markCommandsFeatureUsed()
   markCopied(key)
-  preferences.recordCommand(trimmed, '从指令中心复制')
+  preferences.recordCommand(trimmed, t('commands.title'))
 }
 
 async function submitCustomCommand() {
@@ -209,7 +216,7 @@ async function submitCustomCommand() {
     } else {
       await customStore.addCommand(draft)
     }
-    localMessage.value = customStore.storagePath ? `已保存到本地：${customStore.storagePath}` : '已保存到本地。'
+    localMessage.value = customStore.storagePath ? t('commands.savedToLocal', { path: customStore.storagePath }) : t('commands.savedLocal')
     resetForm()
   } catch (error) {
     localMessage.value = normalizeCustomError(error)
@@ -219,7 +226,7 @@ async function submitCustomCommand() {
 async function deleteCommand(id: string) {
   try {
     await customStore.deleteCommand(id)
-    localMessage.value = customStore.storagePath ? `已从本地文件删除：${customStore.storagePath}` : '已删除。'
+    localMessage.value = customStore.storagePath ? t('commands.deletedFromLocal', { path: customStore.storagePath }) : t('commands.deletedLocal')
   } catch (error) {
     localMessage.value = normalizeCustomError(error)
   }
@@ -232,7 +239,7 @@ function normalizeCustomError(error: unknown) {
   if (error instanceof Error) {
     return error.message
   }
-  return '保存本地指令失败，请稍后重试。'
+  return t('commands.saveFailed')
 }
 
 watch(
@@ -252,7 +259,7 @@ onMounted(async () => {
   preferences.load()
   await customStore.initialize().then(() => {
     if (customStore.storagePath) {
-      localMessage.value = `本地保存位置：${customStore.storagePath}`
+      localMessage.value = t('commands.storagePath', { path: customStore.storagePath })
     }
   })
 })
@@ -267,9 +274,9 @@ onBeforeUnmount(() => {
 <template>
   <section class="page-grid commands-console-page">
     <ConsolePanel
-      eyebrow="Command Library"
-      title="指令库"
-      description="按场景筛选命令，复制后粘贴到 CS2 控制台或 Steam 启动项。"
+      :eyebrow="t('commands.title')"
+      :title="t('commands.title')"
+      :description="t('commands.description')"
       tone="strong"
       class="glass"
     >
@@ -288,11 +295,11 @@ onBeforeUnmount(() => {
 
     <article class="card command-center-toolbar glass">
       <label class="field search-field">
-        <span>搜索命令或说明</span>
-        <input v-model="searchQuery" type="search" placeholder="例如 bot_kick、sv_cheats、cl_crosshair、启动项" />
+        <span>{{ t('commands.search') }}</span>
+        <input v-model="searchQuery" type="search" :placeholder="t('commands.searchPlaceholder')" />
       </label>
 
-      <div class="command-tabs" role="tablist" aria-label="指令分类">
+      <div class="command-tabs" role="tablist" :aria-label="t('commands.title')">
         <button
           v-for="tab in tabs"
           :key="tab.key"
@@ -307,13 +314,13 @@ onBeforeUnmount(() => {
       </div>
     </article>
 
-    <p v-if="hintVisible" class="tip-box">点击任意命令卡即可复制。</p>
+    <p v-if="hintVisible" class="tip-box">{{ t('commands.copyHint') }}</p>
 
     <article v-if="isTeamsTab" class="card command-center-panel glass">
       <div class="section-head">
         <div>
-          <p class="eyebrow">职业队伍</p>
-          <h3>复制到 CT 或 T 阵营。</h3>
+          <p class="eyebrow">{{ t('commands.teamPresetsTitle') }}</p>
+          <h3>{{ t('commands.teamPresetsDesc') }}</h3>
         </div>
       </div>
 
@@ -323,14 +330,14 @@ onBeforeUnmount(() => {
           <div class="actions-row">
             <CopyButton
               :text="team.ct"
-              label="复制 CT"
+              :label="t('quickControl.copyCt')"
               :copy-without-semicolon="true"
               @copied="recordCommandUse(team.ct, `${team.name} CT`)"
               @failed="handleCopyFailed"
             />
             <CopyButton
               :text="team.t"
-              label="复制 T"
+              :label="t('quickControl.copyT')"
               :copy-without-semicolon="true"
               @copied="recordCommandUse(team.t, `${team.name} T`)"
               @failed="handleCopyFailed"
@@ -339,7 +346,7 @@ onBeforeUnmount(() => {
         </article>
       </div>
 
-      <EmptyState v-else title="没有匹配的队伍" description="换一个队伍名或队员名继续搜索。" state="warn" />
+      <EmptyState v-else :title="t('commands.noTeams')" :description="t('commands.noTeamsDesc')" state="warn" />
     </article>
 
     <article v-else-if="!isCustomTab" class="card command-center-panel glass">
@@ -360,27 +367,27 @@ onBeforeUnmount(() => {
           <code>{{ item.command }}</code>
           <span>{{ item.summary }}</span>
           <button class="command-card__copy" type="button" @click.stop="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">
-            {{ copiedKey === `${activeTab}:${item.command}` ? '已复制' : '复制' }}
+            {{ copiedKey === `${activeTab}:${item.command}` ? t('commands.copied') : t('commands.copy') }}
           </button>
         </article>
       </div>
 
-      <EmptyState v-else title="没有匹配的命令" description="换一个关键词，或切换到其他分类看看。" state="warn" />
+      <EmptyState v-else :title="t('commands.noCommands')" :description="t('commands.noCommandsDesc')" state="warn" />
     </article>
 
     <article v-else class="custom-commands-layout command-center-custom">
       <section class="card custom-commands-list-card glass">
         <div class="section-head">
           <div>
-            <p class="eyebrow">自定义</p>
-            <h3>{{ hasCustomItems ? '你的常用列表' : '列表还是空的' }}</h3>
+            <p class="eyebrow">{{ t('commands.customTab') }}</p>
+            <h3>{{ hasCustomItems ? t('commands.customTabTitle') : t('commands.customTabEmpty') }}</h3>
           </div>
         </div>
 
         <EmptyState
           v-if="!hasCustomItems"
-          title="还没有保存的命令"
-          description="在右侧保存一条，之后就能在指令中心直接复制。"
+          :title="t('commands.customEmptyTitle')"
+          :description="t('commands.customEmptyDesc')"
           state="info"
         />
 
@@ -388,19 +395,19 @@ onBeforeUnmount(() => {
           <article v-for="item in visibleCustomCommands" :key="item.id" class="custom-command-card glass">
             <div class="custom-command-head">
               <div>
-                <strong>{{ item.title || '未命名命令' }}</strong>
+                <strong>{{ item.title || t('commands.noName') }}</strong>
                 <p v-if="item.description" class="muted">{{ item.description }}</p>
               </div>
               <div class="actions-row">
                 <CopyButton
                   :text="item.command"
                   :copy-without-semicolon="false"
-                  @copied="recordCommandUse(item.command, item.description || item.title || '自定义命令')"
+                  @copied="recordCommandUse(item.command, item.description || item.title || t('commands.customTab'))"
                   @failed="handleCopyFailed"
                 />
-                <button class="ghost-button" @click="editCommand(item)">编辑</button>
+                <button class="ghost-button" @click="editCommand(item)">{{ t('app.edit') }}</button>
                 <button class="ghost-button danger-button" :disabled="customStore.busy" @click="deleteCommand(item.id)">
-                  删除
+                  {{ t('app.delete') }}
                 </button>
               </div>
             </div>
@@ -409,48 +416,48 @@ onBeforeUnmount(() => {
           </article>
         </div>
 
-        <EmptyState v-else title="没有匹配的自定义指令" description="可以清空搜索词，或保存一条新的常用命令。" state="warn" />
+        <EmptyState v-else :title="t('commands.noCommands')" :description="t('commands.noCommandsDesc')" state="warn" />
       </section>
 
       <aside class="card custom-commands-editor-card glass">
         <div class="section-head">
           <div>
-            <p class="eyebrow">{{ isEditing ? '编辑命令' : '新建命令' }}</p>
-            <h3>{{ isEditing ? '修改这条命令' : '保存一条新的常用命令' }}</h3>
+            <p class="eyebrow">{{ isEditing ? t('commands.editCommand') : t('commands.newCommand') }}</p>
+            <h3>{{ isEditing ? t('commands.editCommandDesc') : t('commands.newCommandDesc') }}</h3>
           </div>
           <button
             v-if="isEditing || form.title || form.description || form.command"
             class="ghost-button"
             @click="resetForm"
           >
-            清空
+            {{ t('app.clear') }}
           </button>
         </div>
 
         <div class="form-grid compact-form-grid">
           <label class="field">
-            <span>名称</span>
-            <input v-model="form.title" type="text" placeholder="可留空，例如：热身 Bot" />
+            <span>{{ t('commands.commandName') }}</span>
+            <input v-model="form.title" type="text" :placeholder="t('commands.commandNamePlaceholder')" />
           </label>
 
           <label class="field">
-            <span>备注</span>
-            <textarea v-model="form.description" rows="2" placeholder="可留空，例如：训练前快速重开对局" />
+            <span>{{ t('commands.commandNote') }}</span>
+            <textarea v-model="form.description" rows="2" :placeholder="t('commands.commandNotePlaceholder')" />
           </label>
 
           <label class="field">
-            <span>命令内容</span>
-            <textarea v-model="form.command" rows="8" placeholder="必填，例如：bot_kick; bot_add_ct; mp_restartgame 1" />
+            <span>{{ t('commands.commandContent') }}</span>
+            <textarea v-model="form.command" rows="8" :placeholder="t('commands.commandContentPlaceholder')" />
           </label>
 
           <button class="primary-button wide" :disabled="!form.command.trim() || customStore.busy" @click="submitCustomCommand">
-            {{ isEditing ? '保存修改' : '保存命令' }}
+            {{ isEditing ? t('commands.saveEdit') : t('commands.saveCommand') }}
           </button>
         </div>
       </aside>
     </article>
 
-    <InlineNotice v-if="localMessage && isCustomTab" :message="localMessage" :state="localMessage.includes('失败') ? 'danger' : 'info'" />
+    <InlineNotice v-if="localMessage && isCustomTab" :message="localMessage" :state="localMessage.includes(t('copyButton.failed')) ? 'danger' : 'info'" />
 
   </section>
 </template>

@@ -45,15 +45,15 @@ onMounted(load)
   <section class="page-grid plugins-page">
     <article class="hero-banner plugins-hero glass stagger-enter" style="animation: fade-in-up 0.25s ease;">
       <div>
-        <p class="eyebrow">插件管理</p>
-        <h2>CounterStrikeSharp 插件</h2>
+        <p class="eyebrow">{{ t('plugins.title') }}</p>
+        <h2>{{ t('plugins.pageTitle') }}</h2>
         <p class="muted">
-          {{ installedCount }} / {{ totalCount }} 个插件已启用
+          {{ t('plugins.count', { enabled: installedCount, total: totalCount }) }}
         </p>
       </div>
       <div class="plugins-hero__actions">
         <button class="ghost-button" type="button" :disabled="loading" @click="load">
-          刷新列表
+           {{ t('plugins.refresh') }}
         </button>
       </div>
     </article>
@@ -66,7 +66,7 @@ onMounted(load)
     </div>
 
     <div v-else-if="plugins.length === 0" class="plugins-empty glass">
-      <p class="muted">未检测到插件。请先选择 CS2 目录并安装插件包。</p>
+      <p class="muted">{{ t('plugins.empty') }}</p>
     </div>
 
     <div v-else class="plugins-grid stagger-enter">
@@ -80,7 +80,7 @@ onMounted(load)
           <div class="plugin-card__info">
             <h3>{{ p.name }}</h3>
             <span v-if="p.version" class="plugin-card__version">{{ p.version }}</span>
-            <span v-else class="plugin-card__version muted">未知版本</span>
+            <span v-else class="plugin-card__version muted">{{ t('plugins.unknownVersion') }}</span>
           </div>
           <label class="plugin-toggle" :class="{ toggling: toggling === p.name }">
             <input
@@ -94,10 +94,10 @@ onMounted(load)
         </div>
         <div class="plugin-card__meta">
           <span class="status-pill" :data-state="p.enabled ? 'ready' : 'warn'">
-            {{ p.enabled ? '已启用' : '已禁用' }}
+            {{ p.enabled ? t('plugins.enabled') : t('plugins.disabled') }}
           </span>
           <span v-if="p.hasConfig" class="status-pill" data-state="info">
-            有配置文件
+            {{ t('plugins.hasConfig') }}
           </span>
         </div>
       </article>
@@ -140,7 +140,7 @@ onMounted(load)
 
 .plugin-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(0,0,0,0.25);
+  box-shadow: var(--glass-shadow);
 }
 
 .plugin-card--disabled {

@@ -117,7 +117,7 @@ function getIcon(name: string): string {
         </div>
         <div class="dashboard-card__actions">
           <RouterLink class="ghost-button" :to="card.to">
-            进入
+            {{ t('app.enter') }}
           </RouterLink>
           <button
             v-if="card.actions"
@@ -173,7 +173,7 @@ function getIcon(name: string): string {
 
 .dashboard-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 12px 40px rgba(0,0,0,0.3);
+  box-shadow: var(--glass-shadow);
   border-color: var(--card-color);
 }
 

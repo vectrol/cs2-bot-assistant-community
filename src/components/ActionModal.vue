@@ -1,5 +1,8 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
 
 const props = withDefaults(
   defineProps<{
@@ -17,8 +20,8 @@ const props = withDefaults(
   }>(),
   {
     subtitle: '',
-    confirmLabel: '确认',
-    cancelLabel: '取消',
+    confirmLabel: undefined,
+    cancelLabel: undefined,
     danger: false,
     hideConfirm: false,
     confirmDisabled: false,
@@ -78,11 +81,11 @@ onBeforeUnmount(() => {
       >
         <div class="section-head">
           <div>
-            <p class="eyebrow">{{ props.danger ? '确认操作' : '操作' }}</p>
+            <p class="eyebrow">{{ props.danger ? t('actionModal.dangerTitle') : t('actionModal.title') }}</p>
             <h3>{{ props.title }}</h3>
             <p v-if="props.subtitle" class="muted">{{ props.subtitle }}</p>
           </div>
-          <button class="ghost-button action-modal__close" type="button" :disabled="props.loading" @click="requestClose">关闭</button>
+          <button class="ghost-button action-modal__close" type="button" :disabled="props.loading" @click="requestClose">{{ t('actionModal.close') }}</button>
         </div>
 
         <div class="action-modal__body">
@@ -91,7 +94,7 @@ onBeforeUnmount(() => {
 
         <div class="actions-row release-actions">
           <slot name="actions" />
-          <button class="ghost-button" type="button" :disabled="props.loading" @click="requestClose">{{ props.cancelLabel }}</button>
+          <button class="ghost-button" type="button" :disabled="props.loading" @click="requestClose">{{ props.cancelLabel ?? t('actionModal.cancel') }}</button>
           <button
             v-if="!props.hideConfirm"
             class="primary-button"
@@ -100,7 +103,7 @@ onBeforeUnmount(() => {
             :disabled="props.confirmDisabled || props.loading"
             @click="emit('confirm')"
           >
-            {{ props.loading ? '处理中' : props.confirmLabel }}
+            {{ props.loading ? t('actionModal.processing') : (props.confirmLabel ?? t('actionModal.confirm')) }}
           </button>
         </div>
       </article>

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
+const { t } = useI18n()
+
 withDefaults(
   defineProps<{
     primaryLabel: string
@@ -10,7 +14,7 @@ withDefaults(
     busy?: boolean
   }>(),
   {
-    secondaryLabel: '重新读取',
+    secondaryLabel: undefined,
     resetLabel: '',
     primaryDisabled: false,
     secondaryDisabled: false,
@@ -32,7 +36,7 @@ const emit = defineEmits<{
       {{ primaryLabel }}
     </button>
     <button class="ghost-button" type="button" :disabled="secondaryDisabled || busy" @click="emit('secondary')">
-      {{ secondaryLabel }}
+      {{ secondaryLabel ?? t('config.secondaryReload') }}
     </button>
     <button
       v-if="resetLabel"
