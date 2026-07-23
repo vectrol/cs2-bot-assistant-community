@@ -5,25 +5,16 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
-import GlobalStatusBar from '@/components/layout/GlobalStatusBar.vue'
 import LaunchGameModal from '@/components/LaunchGameModal.vue'
 import WindowControls from '@/components/layout/WindowControls.vue'
 import { useThemePreference } from '@/composables/useThemePreference'
-import { useUpdateChecker } from '@/composables/useUpdateChecker'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 
 const route = useRoute()
 const preferences = useUiPreferencesStore()
 const { initializeTheme } = useThemePreference()
 const { t } = useI18n()
-const {
-  updateInfo,
-  checkForUpdates,
-  isDismissed,
-  dismissVersion,
-} = useUpdateChecker()
 const launchGameModalOpen = ref(false)
-const updateModalOpen = ref(false)
 const sidebarCollapsed = ref(false)
 const appWindow = '__TAURI_INTERNALS__' in window ? getCurrentWindow() : null
 
@@ -39,6 +30,7 @@ const icons: Record<string, string> = {
   help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke-linecap="round"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
   sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
   plugins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6h3M4 12h3M4 18h3"/><rect x="7" y="4" width="13" height="16" rx="2"/><path d="M12 10h5M12 14h5"/></svg>',
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-4 0v-9"/><path d="M10 7h6M10 11h6M10 15h4"/></svg>',
   history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
 }
 
@@ -50,6 +42,7 @@ const navItems = computed(() => [
   { label: t('nav.guideHelp'), to: '/guide', icon: 'help' },
   { label: t('nav.settings'), to: '/settings', icon: 'sliders' },
   { label: t('nav.plugins'), to: '/plugins', icon: 'plugins' },
+  { label: t('nav.news'), to: '/news', icon: 'news' },
   { label: t('nav.matchHistory'), to: '/match-history', icon: 'history' },
 ])
 
@@ -70,14 +63,9 @@ async function toggleWindowMaximize() {
   try { await appWindow.toggleMaximize() } catch { /* noop */ }
 }
 
-onMounted(async () => {
+onMounted(() => {
   preferences.load()
   initializeTheme()
-
-  const info = await checkForUpdates()
-  if (info && !isDismissed(info.latestVersion)) {
-    updateModalOpen.value = true
-  }
 })
 
 watch(() => route.fullPath, (routePath) => {
@@ -141,28 +129,7 @@ watch(() => route.fullPath, (routePath) => {
 
     <LaunchGameModal :open="launchGameModalOpen" @close="launchGameModalOpen = false" />
 
-    <Teleport to="body">
-      <div v-if="updateModalOpen && updateInfo" class="update-backdrop" role="dialog" aria-modal="true">
-        <article class="update-modal glass" style="backdrop-filter: blur(28px);">
-          <button class="update-modal__close" type="button" :aria-label="t('app.close')" @click="updateModalOpen = false">
-            <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
-          </button>
-          <div class="update-modal__content">
-            <p class="eyebrow">{{ t('update.newVersion') }}</p>
-            <h3>{{ updateInfo.title }}</h3>
-            <p class="muted">
-              v{{ updateInfo.currentVersion }} → <strong>v{{ updateInfo.latestVersion }}</strong>
-            </p>
-            <pre class="update-modal__body">{{ updateInfo.body }}</pre>
-            <div class="update-modal__actions">
-              <a v-if="updateInfo.downloadUrl" :href="updateInfo.downloadUrl" class="primary-button" target="_blank" rel="noopener noreferrer">{{ t('update.download') }}</a>
-              <a :href="updateInfo.htmlUrl" class="ghost-button" target="_blank" rel="noopener noreferrer">{{ t('update.viewOnGithub') }}</a>
-              <button class="ghost-button" type="button" @click="dismissVersion(updateInfo.latestVersion); updateModalOpen = false">{{ t('update.remindLater') }}</button>
-            </div>
-          </div>
-        </article>
-      </div>
-    </Teleport>
+
   </div>
 </template>
 
@@ -317,63 +284,5 @@ watch(() => route.fullPath, (routePath) => {
   font-size: var(--fs-lg);
 }
 
-.update-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
-  animation: fade-in 0.15s ease;
-}
 
-.update-modal {
-  position: relative;
-  width: 480px;
-  max-width: 90vw;
-  max-height: 80vh;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  animation: scale-in 0.2s ease;
-}
-
-.update-modal__close {
-  position: absolute;
-  top: 0.6rem;
-  right: 0.6rem;
-  width: 28px;
-  height: 28px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  color: var(--text-muted);
-  background: transparent;
-  z-index: 1;
-  transition: background 0.15s, color 0.15s;
-}
-
-.update-modal__close svg { width: 16px; height: 16px; }
-.update-modal__close:hover { background: var(--ghost-bg); color: var(--text-primary); }
-.update-modal__content { padding: 1.5rem; overflow-y: auto; }
-.update-modal__body {
-  margin: 0.75rem 0;
-  padding: 0.75rem;
-  border-radius: var(--radius-sm);
-  background: var(--field-bg);
-  font-size: var(--fs-xs);
-  font-family: var(--font-mono);
-  line-height: 1.5;
-  max-height: 240px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-.update-modal__actions { display: flex; gap: 0.5rem; margin-top: 1rem; flex-wrap: wrap; }
 </style>

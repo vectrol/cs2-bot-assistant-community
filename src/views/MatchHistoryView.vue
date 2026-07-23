@@ -70,7 +70,7 @@ onMounted(() => {
 
     <div v-else class="match-list">
       <article
-        v-for="(match, idx) in filtered"
+        v-for="(match) in filtered"
         :key="match.timestamp"
         class="match-card glass"
         role="button"

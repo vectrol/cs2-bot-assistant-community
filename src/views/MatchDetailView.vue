@@ -3,7 +3,6 @@ import { computed, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMatchHistoryStore } from '@/stores/match-history'
-import StatusPill from '@/components/ui/StatusPill.vue'
 
 const { t } = useI18n()
 const route = useRoute()

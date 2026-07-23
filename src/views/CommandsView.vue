@@ -115,16 +115,6 @@ const summaryItems = computed(() => [
   },
 ])
 
-const commandLookup = computed(() => {
-  const map = new Map<string, { command: string; summary: string; copyWithoutSemicolon?: boolean }>()
-  for (const tab of commandCenterTabs) {
-    for (const item of tab.commands) {
-      map.set(item.command, item)
-    }
-  }
-  return map
-})
-
 function resetForm() {
   editingId.value = ''
   form.title = ''

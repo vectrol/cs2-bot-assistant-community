@@ -47,6 +47,11 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/PluginsView.vue'),
   },
   {
+    path: '/news',
+    name: 'news',
+    component: () => import('@/views/NewsView.vue'),
+  },
+  {
     path: '/match-history',
     name: 'match-history',
     component: () => import('@/views/MatchHistoryView.vue'),

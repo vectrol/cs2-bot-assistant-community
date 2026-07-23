@@ -252,13 +252,6 @@ export function openDemoDirectory(rootPath: string, directoryPath: string) {
   return invoke<OperationResult>('open_demo_directory', { rootPath, directoryPath })
 }
 
-export function openReplaysDirectory(rootPath: string) {
-  if (!isTauriRuntime()) {
-    return webOnlyOperation(`Web preview cannot open replays directory. Target: ${rootPath}`)
-  }
-  return invoke<OperationResult>('open_replays_directory', { rootPath })
-}
-
 export function openDiagnosticsLogDirectory() {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web preview cannot open log location. Desktop app will open native log directory.`)

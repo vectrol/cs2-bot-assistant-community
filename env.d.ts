@@ -11,6 +11,7 @@ interface ImportMetaEnv {
   readonly VITE_ENABLE_UPDATER: string
   readonly VITE_WORKSPACE_NAME: string
   readonly VITE_DEFAULT_PROJECT_ID: string
+  readonly VITE_NEWS_FEED_URL?: string
 }
 
 interface ImportMeta {

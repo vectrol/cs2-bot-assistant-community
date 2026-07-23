@@ -20,6 +20,7 @@ const icons: Record<string, string> = {
   sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
   plugins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6h3M4 12h3M4 18h3"/><rect x="7" y="4" width="13" height="16" rx="2"/><path d="M12 10h5M12 14h5"/></svg>',
   history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V5"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/><line x1="10" y1="16" x2="14" y2="16"/></svg>',
 }
 
 const cards = computed(() => [
@@ -74,6 +75,13 @@ const cards = computed(() => [
     icon: 'plugins',
     to: '/plugins',
     color: '#8b5cf6',
+  },
+  {
+    title: t('nav.news'),
+    desc: t('news.title'),
+    icon: 'news',
+    to: '/news',
+    color: '#f97316',
   },
   {
     title: t('nav.matchHistory'),
@@ -135,16 +143,17 @@ function getIcon(name: string): string {
           <RouterLink class="ghost-button" :to="card.to">
             {{ t('app.enter') }}
           </RouterLink>
-          <button
-            v-if="card.actions"
-            v-for="action in card.actions"
-            :key="action.label"
-            :class="action.primary ? 'primary-button' : 'ghost-button'"
-            type="button"
-            @click="action.action"
-          >
-            {{ action.label }}
-          </button>
+          <template v-if="card.actions">
+            <button
+              v-for="action in card.actions"
+              :key="action.label"
+              :class="action.primary ? 'primary-button' : 'ghost-button'"
+              type="button"
+              @click="action.action"
+            >
+              {{ action.label }}
+            </button>
+          </template>
         </div>
       </article>
     </div>

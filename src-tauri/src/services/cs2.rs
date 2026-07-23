@@ -989,10 +989,6 @@ pub fn open_demo_directory(
     })
 }
 
-pub fn open_replays_directory(root_path: &str) -> Result<OperationResult, AppError> {
-    open_recent_demo_directory(root_path)
-}
-
 pub fn open_diagnostics_log_directory() -> Result<OperationResult, AppError> {
     let log_path = diagnostics_log_path();
     let log_dir = log_path.parent().ok_or_else(|| {

@@ -1,4 +1,4 @@
-import { computed, onMounted, ref } from 'vue'
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 import { listen } from '@tauri-apps/api/event'

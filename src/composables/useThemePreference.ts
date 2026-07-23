@@ -1,4 +1,4 @@
-import { type Ref, ref, watch } from 'vue'
+import { type Ref, ref } from 'vue'
 
 import { appConfig } from '@/config/app'
 import { type ThemeMode, loadAccent, saveAccent, applyAccentToDocument } from '@/features/theme/themes'

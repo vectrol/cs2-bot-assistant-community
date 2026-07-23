@@ -39,7 +39,8 @@
     "system": "系统",
     "settings": "设置",
     "plugins": "插件管理",
-    "matchHistory": "比赛记录"
+    "matchHistory": "比赛记录",
+    "news": "新闻资讯"
   },
   "guide": {
     "title": "使用帮助",
@@ -1225,5 +1226,22 @@
     "diagnosticsNoDir": "尚未选择 CS2 目录。",
     "diagnosticsRecentLogs": "最近日志预览：",
     "diagnosticsWebOnly": "Web 预览只能验证界面，安装、写入、打开目录等能力需要在 Tauri 桌面环境中使用。"
+  },
+  "news": {
+    "title": "资讯",
+    "headline": "CS2 资讯中心",
+    "description": "HLTV 新闻、赛程与电竞赛事动态",
+    "articlesCount": "新闻",
+    "matchesCount": "赛程",
+    "matchesTitle": "比赛赛程",
+    "matchesDesc": "近期及即将进行的比赛",
+    "articlesTitle": "新闻资讯",
+    "articlesDesc": "最新 CS2 电竞动态",
+    "loading": "正在加载资讯...",
+    "fetchFailed": "获取资讯失败，请稍后重试。",
+    "noData": "暂没有资讯内容。",
+    "upcoming": "即将开始",
+    "live": "进行中",
+    "finished": "已结束"
   }
 }

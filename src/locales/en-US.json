@@ -43,7 +43,8 @@
     "system": "System",
     "settings": "Settings",
     "plugins": "Plugins",
-    "matchHistory": "Match History"
+    "matchHistory": "Match History",
+    "news": "News"
   },
   "guide": {
     "title": "Guide and Help",
@@ -1229,5 +1230,22 @@
     "diagnosticsNoDir": "No CS2 directory selected.",
     "diagnosticsRecentLogs": "Recent log preview:",
     "diagnosticsWebOnly": "Web preview can only validate the UI. Install, write, and open directory features require the Tauri desktop environment."
+  },
+  "news": {
+    "title": "News",
+    "headline": "CS2 News Center",
+    "description": "HLTV news, match schedules and esports updates",
+    "articlesCount": "Articles",
+    "matchesCount": "Matches",
+    "matchesTitle": "Match Schedule",
+    "matchesDesc": "Recent and upcoming matches",
+    "articlesTitle": "News",
+    "articlesDesc": "Latest CS2 esports news",
+    "loading": "Loading news...",
+    "fetchFailed": "Failed to fetch news. Please try again later.",
+    "noData": "No news available.",
+    "upcoming": "Upcoming",
+    "live": "Live",
+    "finished": "Finished"
   }
 }

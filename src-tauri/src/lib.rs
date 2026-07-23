@@ -38,8 +38,6 @@ pub fn run() {
             commands::app::enable_autostart,
             commands::app::disable_autostart,
             commands::app::is_autostart_enabled,
-            commands::custom_commands::load_custom_commands,
-            commands::custom_commands::save_custom_commands,
             commands::cs2::discover_cs2_roots,
             commands::cs2::inspect_cs2_root,
             commands::cs2::install_bot_package,
@@ -60,7 +58,6 @@ pub fn run() {
             commands::cs2::discover_demos,
             commands::cs2::open_recent_demo_directory,
             commands::cs2::open_demo_directory,
-            commands::cs2::open_replays_directory,
             commands::cs2::open_diagnostics_log_directory,
             commands::cs2::uninstall_bot_package,
             commands::cs2::check_cs2_process,
@@ -69,10 +66,6 @@ pub fn run() {
             commands::cs2::toggle_plugin,
             commands::cs2::list_match_history,
             commands::cs2::read_match_history,
-            commands::resource::get_resource_pack_info,
-            commands::resource::create_backup,
-            commands::resource::list_backups,
-            commands::resource::restore_backup,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

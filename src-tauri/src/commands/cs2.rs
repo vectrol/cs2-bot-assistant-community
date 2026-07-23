@@ -138,11 +138,6 @@ pub fn open_demo_directory(
 }
 
 #[tauri::command]
-pub fn open_replays_directory(root_path: String) -> Result<OperationResult, String> {
-    cs2::open_replays_directory(&root_path).map_err(AppError::into_string)
-}
-
-#[tauri::command]
 pub fn open_diagnostics_log_directory() -> Result<OperationResult, String> {
     cs2::open_diagnostics_log_directory().map_err(AppError::into_string)
 }
