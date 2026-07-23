@@ -46,4 +46,14 @@ export const routes: RouteRecordRaw[] = [
     name: 'plugins',
     component: () => import('@/views/PluginsView.vue'),
   },
+  {
+    path: '/match-history',
+    name: 'match-history',
+    component: () => import('@/views/MatchHistoryView.vue'),
+  },
+  {
+    path: '/match-history/:index',
+    name: 'match-detail',
+    component: () => import('@/views/MatchDetailView.vue'),
+  },
 ]

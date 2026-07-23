@@ -166,3 +166,13 @@ pub fn list_plugins(root_path: String) -> Result<Vec<PluginInfo>, String> {
 pub fn toggle_plugin(root_path: String, plugin_name: String) -> Result<PluginInfo, String> {
     cs2::toggle_plugin(&root_path, &plugin_name).map_err(AppError::into_string)
 }
+
+#[tauri::command]
+pub fn list_match_history(root_path: String) -> Result<Vec<String>, String> {
+    cs2::list_match_history_files(&root_path).map_err(AppError::into_string)
+}
+
+#[tauri::command]
+pub fn read_match_history(root_path: String, filename: String) -> Result<String, String> {
+    cs2::read_match_history_file(&root_path, &filename).map_err(AppError::into_string)
+}

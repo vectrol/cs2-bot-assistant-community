@@ -2237,6 +2237,46 @@ fn yes_no(value: bool) -> &'static str {
     }
 }
 
+pub fn list_match_history_files(root_path: &str) -> Result<Vec<String>, AppError> {
+    let root = normalize_root(root_path)?;
+    let history_dir = root.join("game").join("csgo").join("cs2-match-history");
+    if !history_dir.exists() {
+        return Ok(Vec::new());
+    }
+
+    let mut files = Vec::new();
+    let entries = fs::read_dir(&history_dir)
+        .map_err(|e| AppError::runtime(format!("读取历史记录目录失败: {}", e)))?;
+
+    for entry in entries.flatten() {
+        let path = entry.path();
+        if path.extension().and_then(|e| e.to_str()) == Some("json") {
+            if let Some(name) = path.file_name().and_then(|n| n.to_str()) {
+                files.push(name.to_string());
+            }
+        }
+    }
+
+    files.sort_by(|a, b| b.cmp(a)); // newest first
+    Ok(files)
+}
+
+pub fn read_match_history_file(root_path: &str, filename: &str) -> Result<String, AppError> {
+    let root = normalize_root(root_path)?;
+    let file_path = root
+        .join("game")
+        .join("csgo")
+        .join("cs2-match-history")
+        .join(filename);
+
+    if !file_path.exists() {
+        return Err(AppError::runtime(format!("历史记录文件不存在: {}", filename)));
+    }
+
+    fs::read_to_string(&file_path)
+        .map_err(|e| AppError::runtime(format!("读取历史记录文件失败: {}", e)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

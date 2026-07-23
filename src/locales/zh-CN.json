@@ -38,7 +38,8 @@
     "guideHelp": "使用帮助",
     "system": "系统",
     "settings": "设置",
-    "plugins": "插件管理"
+    "plugins": "插件管理",
+    "matchHistory": "比赛记录"
   },
   "guide": {
     "title": "使用帮助",
@@ -487,6 +488,18 @@
     "openFailed": "打开外部链接失败，请稍后手动访问。",
     "cloudDefaultItem": "这个版本已经可以下载。",
     "entries": {
+      "3_1_0": {
+        "title": "3.1.0 比赛记录 + RoundDamageRecap 插件",
+        "summary": "新增内置 RoundDamageRecap CounterStrikeSharp 插件，支持比赛记录追踪、HLTV 评分和赛后总结。应用内新增比赛记录视图。",
+        "items": {
+          "0": "新增 RoundDamageRecap C# 插件。",
+          "1": "每场比赛统计：击杀/死亡/助攻、伤害、爆头率、ADR、多杀、残局。",
+          "2": "HLTV 2.0 评分和比赛记录持久化。",
+          "3": "MatchHistoryView + MatchDetailView 可排序表格和柱状图。",
+          "4": "首页卡片和侧栏入口。",
+          "5": "中英双语支持。"
+        }
+      },
       "3_0_1": {
         "title": "3.0.1 移除工作区面板",
         "summary": "移除多余的项目、任务和日志工作区面板、路由和侧栏入口。清理死代码。",
@@ -1128,6 +1141,22 @@
     "noMatch": "没有找到匹配的插件。",
     "toggleError": "切换插件失败。{message}",
     "loadError": "加载插件失败。{message}"
+  },
+  "matchHistory": {
+    "title": "比赛记录",
+    "subtitle": "赛后统计与表现追踪",
+    "dashboardDesc": "浏览比赛结果、评分和数据统计",
+    "back": "返回",
+    "search": "按地图或玩家搜索...",
+    "loading": "加载比赛记录中...",
+    "empty": "暂无记录。安装 RoundDamageRecap 插件并打几局人机对战！",
+    "notFound": "未找到该比赛。",
+    "avgRating": "平均评分",
+    "kills": "击杀",
+    "deaths": "死亡",
+    "topRating": "最高评分",
+    "totalDamage": "总伤害",
+    "player": "玩家"
   },
   "actionModal": {
     "title": "操作",

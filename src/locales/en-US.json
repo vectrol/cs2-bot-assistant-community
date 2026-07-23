@@ -42,7 +42,8 @@
     "guideHelp": "Guide and Help",
     "system": "System",
     "settings": "Settings",
-    "plugins": "Plugins"
+    "plugins": "Plugins",
+    "matchHistory": "Match History"
   },
   "guide": {
     "title": "Guide and Help",
@@ -471,6 +472,18 @@
     "openFailed": "Failed to open external link. Please try manually later.",
     "cloudDefaultItem": "This version is ready for download.",
     "entries": {
+      "3_1_0": {
+        "title": "3.1.0 Match history + RoundDamageRecap plugin",
+        "summary": "Added built-in RoundDamageRecap CounterStrikeSharp plugin with match history tracking, HLTV-style rating, and post-match summaries. New Match History view in the app.",
+        "items": {
+          "0": "Added RoundDamageRecap C# plugin.",
+          "1": "Per-match stat tracking: K/D/A, damage, HS%, ADR, multikills, clutches.",
+          "2": "HLTV 2.0 rating and match history persistence.",
+          "3": "MatchHistoryView + MatchDetailView with sortable table and bar charts.",
+          "4": "Dashboard card and nav entry for Match History.",
+          "5": "Full bilingual support (en-US/zh-CN)."
+        }
+      },
       "3_0_1": {
         "title": "3.0.1 Remove workspace panels",
         "summary": "Removed unnecessary projects, tasks, and logs workspace panels, routes, and sidebar entries. Cleaned up dead code.",
@@ -1112,6 +1125,22 @@
     "noMatch": "No plugins match your search.",
     "toggleError": "Failed to toggle plugin. {message}",
     "loadError": "Failed to load plugins. {message}"
+  },
+  "matchHistory": {
+    "title": "Match History",
+    "subtitle": "Post-match statistics and performance tracking",
+    "dashboardDesc": "Browse match results, ratings, and stats",
+    "back": "Back",
+    "search": "Search by map or player...",
+    "loading": "Loading match history...",
+    "empty": "No matches found. Play some bot matches with RoundDamageRecap plugin installed!",
+    "notFound": "Match not found.",
+    "avgRating": "Avg Rating",
+    "kills": "Kills",
+    "deaths": "Deaths",
+    "topRating": "Top Rating",
+    "totalDamage": "Total Damage",
+    "player": "Player"
   },
   "actionModal": {
     "title": "Action",

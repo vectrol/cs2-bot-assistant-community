@@ -22,6 +22,25 @@ export interface ReleaseNoteEntry {
 
 export const releaseNoteEntries: ReleaseNoteEntry[] = [
   {
+    version: '3.1.0',
+    date: '2026-07-23',
+    title: '3.1.0 Match history + RoundDamageRecap plugin',
+    summary: 'Added built-in RoundDamageRecap CounterStrikeSharp plugin with match history tracking, HLTV-style rating, and post-match summaries. New Match History view in the app.',
+    items: [
+      { text: 'Added RoundDamageRecap C# plugin (plugins/RoundDamageRecap/).' },
+      { text: 'Per-match stat tracking: kills, deaths, assists, damage, HS%, ADR, multikills, clutches.' },
+      { text: 'HLTV 2.0 rating calculation.' },
+      { text: 'Match history JSON persistence to game/csgo/cs2-match-history/.' },
+      { text: 'Round-end chat recap with damage dealt/taken per enemy.' },
+      { text: 'Map-start BOT difficulty announcement.' },
+      { text: 'MatchHistoryView: browse past matches, search by map/player.' },
+      { text: 'MatchDetailView: full stat table, sorted by rating, bar visualization.' },
+      { text: 'Dashboard card for match history with summary stats.' },
+      { text: 'New nav sidebar entry for Match History.' },
+      { text: 'Full bilingual support (en-US/zh-CN) for plugin and app views.' },
+    ],
+  },
+  {
     version: '3.0.1',
     date: '2026-07-23',
     title: '3.0.1 Remove workspace panels',
