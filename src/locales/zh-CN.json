@@ -99,7 +99,13 @@
     "uninstallConfirmTitle": "确认卸载插件包",
     "uninstallConfirmSub": "这个操作不可恢复，会彻底删除现有插件包和所有插件配置。",
     "uninstallConfirm": "确认卸载",
-    "uninstallDetail": "将删除 addons、plugins、cfg\\plugins 及 MetaMod 加载文件。不会删除游戏本体。"
+    "uninstallDetail": "将删除 addons、plugins、cfg\\plugins 及 MetaMod 加载文件。不会删除游戏本体。",
+    "pluginPack": "插件包版本",
+    "pluginPackDesc": "选择部署的插件包",
+    "variantOriginal": "原版",
+    "variantOriginalDesc": "默认配置，稳定性优先",
+    "variantImproved": "改进版",
+    "variantImprovedDesc": "AI 会使用投掷物，更激进的战术行为"
   },
   "install": {
     "title": "准备环境",

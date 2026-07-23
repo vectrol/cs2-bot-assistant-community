@@ -422,7 +422,7 @@ pub fn check_cs2_process() -> Result<bool, AppError> {
     Ok(false)
 }
 
-pub fn install_bot_package(app: &AppHandle, root_path: &str) -> Result<OperationResult, AppError> {
+pub fn install_bot_package(app: &AppHandle, root_path: &str, variant: Option<&str>) -> Result<OperationResult, AppError> {
     ensure_cs2_not_running()?;
 
     let root = normalize_root(root_path)?;
@@ -434,7 +434,8 @@ pub fn install_bot_package(app: &AppHandle, root_path: &str) -> Result<Operation
         )));
     }
 
-    let zip_path = resolve_zip_path(app)?;
+    let zip_name = variant.unwrap_or(DEFAULT_BUNDLED_ZIP_NAME);
+    let zip_path = resolve_zip_path_with_name(app, zip_name)?;
     ensure_install_destination_ready(&destination)?;
     let cleanup_summary = remove_entire_plugin_package(&destination)?;
     let temp_dir = std::env::temp_dir().join(format!(
@@ -1697,6 +1698,10 @@ fn is_probable_cs2_root(path: &Path) -> bool {
 }
 
 fn resolve_zip_path(app: &AppHandle) -> Result<PathBuf, AppError> {
+    resolve_zip_path_with_name(app, bundled_zip_name())
+}
+
+fn resolve_zip_path_with_name(app: &AppHandle, zip_name: &str) -> Result<PathBuf, AppError> {
     let resource_dir = app
         .path()
         .resource_dir()
@@ -1705,12 +1710,12 @@ fn resolve_zip_path(app: &AppHandle) -> Result<PathBuf, AppError> {
         .ok()
         .and_then(|path| path.parent().map(Path::to_path_buf));
     let mut candidates = vec![
-        resource_dir.join(bundled_zip_name()),
-        resource_dir.join("resources").join(bundled_zip_name()),
+        resource_dir.join(zip_name),
+        resource_dir.join("resources").join(zip_name),
     ];
     if let Some(exe_dir) = exe_dir {
-        candidates.push(exe_dir.join(bundled_zip_name()));
-        candidates.push(exe_dir.join("resources").join(bundled_zip_name()));
+        candidates.push(exe_dir.join(zip_name));
+        candidates.push(exe_dir.join("resources").join(zip_name));
     }
     for candidate in &candidates {
         if candidate.exists() {
@@ -1729,7 +1734,7 @@ fn resolve_zip_path(app: &AppHandle) -> Result<PathBuf, AppError> {
         .join("\n");
     Err(AppError::runtime(format!(
         "[INSTALL_ZIP_NOT_FOUND]\n未找到内置资源包 {}。\n已搜索：\n{}",
-        bundled_zip_name(),
+        zip_name,
         searched
     )))
 }

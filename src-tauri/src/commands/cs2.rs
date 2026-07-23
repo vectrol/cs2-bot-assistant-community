@@ -24,8 +24,8 @@ pub fn check_cs2_process() -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub fn install_bot_package(app: AppHandle, root_path: String) -> Result<OperationResult, String> {
-    cs2::install_bot_package(&app, &root_path).map_err(AppError::into_string)
+pub fn install_bot_package(app: AppHandle, root_path: String, variant: Option<String>) -> Result<OperationResult, String> {
+    cs2::install_bot_package(&app, &root_path, variant.as_deref()).map_err(AppError::into_string)
 }
 
 #[tauri::command]

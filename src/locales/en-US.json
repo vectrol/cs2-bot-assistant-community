@@ -103,7 +103,13 @@
     "uninstallConfirmTitle": "Confirm Uninstall Plugin Pack",
     "uninstallConfirmSub": "This action cannot be undone. The existing plugin pack and all plugin configs will be permanently deleted.",
     "uninstallConfirm": "Confirm Uninstall",
-    "uninstallDetail": "This will delete addons, plugins, cfg\\plugins and MetaMod loader files. The game itself will not be affected."
+    "uninstallDetail": "This will delete addons, plugins, cfg\\plugins and MetaMod loader files. The game itself will not be affected.",
+    "pluginPack": "Plugin Pack",
+    "pluginPackDesc": "Select plugin pack variant",
+    "variantOriginal": "Original",
+    "variantOriginalDesc": "Default configuration, stability first",
+    "variantImproved": "Improved",
+    "variantImprovedDesc": "AI uses grenades, more aggressive tactics"
   },
   "install": {
     "title": "Preparation",

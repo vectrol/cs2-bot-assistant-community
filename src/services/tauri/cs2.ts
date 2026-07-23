@@ -89,11 +89,11 @@ export function launchCs2Direct(rootPath: string, insecure: boolean, extraArgs: 
   return invoke<void>('launch_cs2_direct', { cs2Root: rootPath, insecure, extraArgs })
 }
 
-export function installBotPackage(rootPath: string) {
+export function installBotPackage(rootPath: string, variant?: string) {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web preview cannot install packages. Target: ${rootPath}`)
   }
-  return invoke<OperationResult>('install_bot_package', { rootPath })
+  return invoke<OperationResult>('install_bot_package', { rootPath, variant: variant ?? null })
 }
 
 export function applyDifficultyProfile(rootPath: string, preset: DifficultyPreset) {

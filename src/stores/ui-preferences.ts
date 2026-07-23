@@ -3,6 +3,7 @@ import { defineStore } from 'pinia'
 import { useI18n } from 'vue-i18n'
 
 const STORAGE_KEY = 'cs2-bot-improver.ui-preferences.v1'
+export type PluginPackVariant = 'original' | 'improved'
 const DEFAULT_PINNED_COMMANDS = ['bot_kick', 'bot_nades more', '-insecure']
 const MAX_RECENT_COMMANDS = 8
 const MAX_RECENT_ACTIONS = 8
@@ -53,6 +54,7 @@ interface UiPreferencesState {
   lastError: LastErrorInfo | null
   lastDemoPath: string
   dismissedHints: string[]
+  pluginPackVariant: PluginPackVariant
   autoInstallOnFirstRunEnabled: boolean
   autoInstallAttemptedVersions: string[]
   lastAutoInstall: AutoInstallState
@@ -69,6 +71,7 @@ function defaultState(): UiPreferencesState {
     lastError: null,
     lastDemoPath: '',
     dismissedHints: [],
+    pluginPackVariant: 'original',
     autoInstallOnFirstRunEnabled: true,
     autoInstallAttemptedVersions: [],
     lastAutoInstall: {
@@ -102,6 +105,9 @@ function readState(): UiPreferencesState {
       dismissedHints: Array.isArray(parsed.dismissedHints)
         ? parsed.dismissedHints.filter((item): item is string => typeof item === 'string')
         : [],
+      pluginPackVariant: parsed.pluginPackVariant === 'original' || parsed.pluginPackVariant === 'improved'
+        ? parsed.pluginPackVariant
+        : fallback.pluginPackVariant,
       autoInstallOnFirstRunEnabled:
         typeof parsed.autoInstallOnFirstRunEnabled === 'boolean'
           ? parsed.autoInstallOnFirstRunEnabled
@@ -191,6 +197,7 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
   const lastSelectedRoot = computed(() => state.value.lastSelectedRoot)
   const lastError = computed(() => state.value.lastError)
   const lastDemoPath = computed(() => state.value.lastDemoPath)
+  const pluginPackVariant = computed(() => state.value.pluginPackVariant)
   const autoInstallOnFirstRunEnabled = computed(() => state.value.autoInstallOnFirstRunEnabled)
   const autoInstallAttemptedVersions = computed(() => state.value.autoInstallAttemptedVersions)
   const lastAutoInstall = computed(() => state.value.lastAutoInstall)
@@ -293,6 +300,12 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     persist()
   }
 
+  function setPluginPackVariant(variant: PluginPackVariant) {
+    load()
+    state.value.pluginPackVariant = variant
+    persist()
+  }
+
   function isHintDismissed(key: string) {
     load()
     return state.value.dismissedHints.includes(key)
@@ -367,5 +380,7 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     hasAutoInstallAttempted,
     recordAutoInstallStatus,
     markAutoInstallAttempted,
+    pluginPackVariant,
+    setPluginPackVariant,
   }
 })

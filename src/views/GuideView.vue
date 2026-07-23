@@ -60,7 +60,7 @@ function canWrite() {
 async function installPackage() {
   if (!canWrite()) return
   try {
-    const result = await store.install()
+    const result = await store.install(preferences.pluginPackVariant === 'improved' ? 'CS2BotImprover_Improved.zip' : undefined)
     store.setMessage(result.message)
     installConfirmOpen.value = false
     await refreshAll()
@@ -122,6 +122,35 @@ onMounted(async () => {
           @click="installConfirmOpen = true"
         >
           {{ installStatus || t('guide.installPackage') }}
+        </button>
+      </div>
+    </article>
+
+    <article class="card variant-picker glass">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">{{ t('guide.pluginPack') }}</p>
+          <h3>{{ t('guide.pluginPackDesc') }}</h3>
+        </div>
+      </div>
+      <div class="variant-toggle">
+        <button
+          type="button"
+          class="variant-option"
+          :class="{ active: preferences.pluginPackVariant === 'original' }"
+          @click="preferences.setPluginPackVariant('original')"
+        >
+          <strong>{{ t('guide.variantOriginal') }}</strong>
+          <small class="muted">{{ t('guide.variantOriginalDesc') }}</small>
+        </button>
+        <button
+          type="button"
+          class="variant-option"
+          :class="{ active: preferences.pluginPackVariant === 'improved' }"
+          @click="preferences.setPluginPackVariant('improved')"
+        >
+          <strong>{{ t('guide.variantImproved') }}</strong>
+          <small class="muted">{{ t('guide.variantImprovedDesc') }}</small>
         </button>
       </div>
     </article>
@@ -224,3 +253,49 @@ onMounted(async () => {
     </ActionModal>
   </section>
 </template>
+
+<style scoped>
+.variant-picker {
+  padding: 1.25rem;
+  margin-top: 1.5rem;
+}
+
+.variant-toggle {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+
+.variant-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--text-primary);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.variant-option:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+}
+
+.variant-option.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+}
+
+.variant-option strong {
+  font-size: var(--fs-md);
+}
+
+.variant-option small {
+  font-size: var(--fs-xs);
+}
+</style>
