@@ -10,20 +10,12 @@ const { t } = useI18n()
 const articles = ref<NewsArticle[]>([])
 const matches = ref<MatchSchedule[]>([])
 const loading = ref(true)
-const error = ref('')
 
 onMounted(async () => {
-  try {
-    const feed = await fetchNewsFeed()
-    if (feed) {
-      articles.value = feed.articles
-      matches.value = feed.matches
-    }
-  } catch {
-    error.value = t('news.fetchFailed')
-  } finally {
-    loading.value = false
-  }
+  const feed = await fetchNewsFeed()
+  articles.value = feed.articles
+  matches.value = feed.matches
+  loading.value = false
 })
 
 function matchStatusLabel(status: MatchSchedule['status']) {
@@ -77,8 +69,6 @@ function openUrl(url: string) {
     <div v-if="loading" class="news-loading">
       <p>{{ t('news.loading') }}</p>
     </div>
-
-    <p v-else-if="error" class="tip-box warn-tip">{{ error }}</p>
 
     <template v-else>
       <section v-if="matches.length > 0" class="card news-section glass">
