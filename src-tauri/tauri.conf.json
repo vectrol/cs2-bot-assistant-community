@@ -37,6 +37,7 @@
     },
     "resources": [
       "resources/CS2BotImprover.zip",
+      "resources/CS2BotImprover_Improved.zip",
       "../LICENSE",
       "../NOTICE.md"
     ],
