@@ -5,6 +5,7 @@ import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
+import { getIcon } from '@/constants/icons'
 import LaunchGameModal from '@/components/LaunchGameModal.vue'
 import WindowControls from '@/components/layout/WindowControls.vue'
 import { useThemePreference } from '@/composables/useThemePreference'
@@ -22,35 +23,19 @@ provide('openLaunchGameModal', () => {
   launchGameModalOpen.value = true
 })
 
-const icons: Record<string, string> = {
-  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>',
-  terminal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-linecap="round"/></svg>',
-  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke-linecap="round"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
-  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
-  plugins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6h3M4 12h3M4 18h3"/><rect x="7" y="4" width="13" height="16" rx="2"/><path d="M12 10h5M12 14h5"/></svg>',
-  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 002-2V4a2 2 0 00-2-2H8a2 2 0 00-2 2v16a2 2 0 01-4 0v-9"/><path d="M10 7h6M10 11h6M10 15h4"/></svg>',
-  history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-}
-
 const navItems = computed(() => [
   { label: t('nav.quickControl'), to: '/quick-control', icon: 'play' },
   { label: t('nav.inventory'), to: '/inventory', icon: 'grid' },
   { label: t('nav.commands'), to: '/commands', icon: 'terminal' },
-  { label: t('nav.configConsole'), to: '/config', icon: 'gear' },
+
   { label: t('nav.guideHelp'), to: '/guide', icon: 'help' },
   { label: t('nav.settings'), to: '/settings', icon: 'sliders' },
   { label: t('nav.plugins'), to: '/plugins', icon: 'plugins' },
-  { label: t('nav.news'), to: '/news', icon: 'news' },
+
   { label: t('nav.matchHistory'), to: '/match-history', icon: 'history' },
 ])
 
 const isDashboard = computed(() => route.path === '/')
-
-function getIcon(name: string): string {
-  return icons[name] || ''
-}
 
 async function startWindowDrag(event: MouseEvent) {
   if (event.button !== 0 || event.detail > 1) return
@@ -107,7 +92,7 @@ watch(() => route.fullPath, (routePath) => {
           </RouterLink>
         </nav>
 
-        <button class="sidebar-toggle" type="button" @click="sidebarCollapsed = !sidebarCollapsed">
+        <button class="sidebar-toggle" type="button" :aria-label="t('nav.quickControl')" @click="sidebarCollapsed = !sidebarCollapsed">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
         </button>
       </aside>
@@ -138,13 +123,13 @@ watch(() => route.fullPath, (routePath) => {
   display: flex;
   align-items: center;
   text-decoration: none;
-  color: var(--text-muted);
+  color: var(--muted-color);
   padding: 0 0.25rem;
   line-height: 1;
   transition: color 0.15s;
 }
 .back-button:hover {
-  color: var(--text-primary);
+  color: var(--text-color);
 }
 .back-button svg {
   width: 18px;
@@ -158,7 +143,8 @@ watch(() => route.fullPath, (routePath) => {
 
 .page-enter-active,
 .page-leave-active {
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  transition: opacity calc(0.2s * var(--anim-speed, 1)) var(--ease-out),
+              transform calc(0.2s * var(--anim-speed, 1)) var(--ease-out);
 }
 .page-enter-from {
   opacity: 0;
@@ -205,19 +191,19 @@ watch(() => route.fullPath, (routePath) => {
   padding: 0.5rem 0.625rem;
   border-radius: var(--radius-sm);
   text-decoration: none;
-  color: var(--text-muted);
+  color: var(--muted-color);
   font-size: var(--fs-sm);
   transition: background 0.2s, color 0.2s;
 }
 
 .nav-link:hover {
   background: var(--ghost-bg);
-  color: var(--text-primary);
+  color: var(--text-color);
 }
 
 .nav-link.active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-  color: var(--accent);
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  color: var(--color-accent);
 }
 
 .nav-link__icon {
@@ -250,7 +236,7 @@ watch(() => route.fullPath, (routePath) => {
   justify-content: center;
   border: none;
   background: transparent;
-  color: var(--text-muted);
+  color: var(--muted-color);
   cursor: pointer;
   padding: 0.5rem;
   margin: 0.5rem;
@@ -261,7 +247,7 @@ watch(() => route.fullPath, (routePath) => {
 
 .sidebar-toggle:hover {
   background: var(--ghost-bg);
-  color: var(--text-primary);
+  color: var(--text-color);
 }
 
 .sidebar-toggle svg {

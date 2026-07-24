@@ -78,7 +78,8 @@ onMounted(load)
     </article>
 
     <div class="plugins-toolbar">
-      <div class="plugins-search">
+      <label class="plugins-search">
+        <span class="sr-only">{{ t('plugins.searchPlaceholder') }}</span>
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
         <input
           v-model="searchQuery"
@@ -86,7 +87,7 @@ onMounted(load)
           class="search-input"
           :placeholder="t('plugins.searchPlaceholder')"
         />
-      </div>
+      </label>
       <div class="plugins-filters">
         <button
           v-for="mode in filterModes"
@@ -192,14 +193,14 @@ onMounted(load)
   transform: translateY(-50%);
   width: 16px;
   height: 16px;
-  color: var(--text-muted);
+  color: var(--muted-color);
   pointer-events: none;
 }
 
 .search-input {
   width: 100%;
   padding: 0.5rem 0.75rem 0.5rem 2.25rem;
-  border: 1px solid var(--border);
+  border: 1px solid var(--panel-border);
   border-radius: var(--radius-md);
   background: var(--ghost-bg);
   color: var(--text);
@@ -209,7 +210,7 @@ onMounted(load)
 }
 
 .search-input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .plugins-filters {
@@ -219,24 +220,24 @@ onMounted(load)
 
 .filter-pill {
   padding: 0.35rem 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-pill);
   background: transparent;
-  color: var(--text-muted);
+  color: var(--muted-color);
   font-size: var(--fs-xs);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .filter-pill:hover {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
   color: var(--text);
 }
 
 .filter-pill.active {
-  background: var(--accent);
+  background: var(--color-accent);
   color: #fff;
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .plugins-grid {
@@ -249,7 +250,7 @@ onMounted(load)
 .plugin-card {
   padding: 1rem 1.25rem;
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--accent);
+  border-left: 3px solid var(--color-accent);
   transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -259,7 +260,7 @@ onMounted(load)
 }
 
 .plugin-card--disabled {
-  border-left-color: var(--text-muted);
+  border-left-color: var(--muted-color);
   opacity: 0.7;
 }
 
@@ -281,8 +282,8 @@ onMounted(load)
 
 .plugin-card__version {
   font-size: var(--fs-xs);
-  font-family: var(--font-mono);
-  color: var(--accent);
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  color: var(--color-accent);
 }
 
 .plugin-card__meta {
@@ -322,13 +323,13 @@ onMounted(load)
   height: 16px;
   left: 2px;
   bottom: 2px;
-  background: var(--text-muted);
+  background: var(--muted-color);
   border-radius: 50%;
   transition: transform 0.2s, background 0.2s;
 }
 
 .plugin-toggle input:checked + .plugin-toggle__slider {
-  background: var(--accent);
+  background: var(--color-accent);
 }
 
 .plugin-toggle input:checked + .plugin-toggle__slider::before {

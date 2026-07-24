@@ -1,19 +1,18 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
+import { ACCENT_PRESETS } from '@/features/theme/themes'
 import { useThemePreference } from '@/composables/useThemePreference'
 import { disableAutostart, enableAutostart, isAutostartEnabled } from '@/services/tauri/autostart'
 import { openExternalUrl } from '@/services/tauri/app'
 import { useUiPreferencesStore } from '@/stores/ui-preferences'
 import { saveLocale } from '@/app/i18n'
-
 const { t } = useI18n()
 const preferences = useUiPreferencesStore()
 const { locale } = useI18n()
-const { theme, accentHue, applyTheme, setAccent, initializeTheme } = useThemePreference()
+const { theme, accentHue, glassOpacity, animationSpeed, applyTheme, setAccent, setGlassOpacity, setAnimationSpeed, initializeTheme } = useThemePreference()
 const autostartEnabled = ref(false)
 const autostartLoading = ref(false)
 const autostartMessage = ref('')
@@ -119,6 +118,41 @@ onMounted(() => {
       </div>
 
       <div class="accent-picker">
+        <p class="eyebrow">{{ t('settings.accentPresets') }}</p>
+        <div class="accent-presets">
+          <button
+            v-for="p in ACCENT_PRESETS"
+            :key="p.hue"
+            type="button"
+            class="accent-preset-btn"
+            :class="{ active: accentHue === p.hue }"
+            :style="{ '--swatch': `hsl(${p.hue},85%,55%)` }"
+            :title="p.label"
+            @click="setAccent(p.hue)"
+          />
+        </div>
+      </div>
+
+      <div class="accent-picker">
+        <p class="eyebrow">{{ t('settings.glassOpacity') }}</p>
+        <div class="accent-row">
+          <input type="range" :value="glassOpacity" min="0" max="1" step="0.05" class="accent-slider" @input="setGlassOpacity(Number(($event.target as HTMLInputElement).value))" />
+          <span class="accent-swatch opacity-swatch" :style="{ opacity: 0.35 + 0.65 * glassOpacity }" />
+        </div>
+        <p class="muted">{{ t('settings.glassOpacityHint') }}</p>
+      </div>
+
+      <div class="accent-picker">
+        <p class="eyebrow">{{ t('settings.animationSpeed') }}</p>
+        <div class="segmented-control">
+          <button :data-active="animationSpeed === 'normal'" type="button" @click="setAnimationSpeed('normal')">{{ t('settings.animationNormal') }}</button>
+          <button :data-active="animationSpeed === 'reduced'" type="button" @click="setAnimationSpeed('reduced')">{{ t('settings.animationReduced') }}</button>
+          <button :data-active="animationSpeed === 'none'" type="button" @click="setAnimationSpeed('none')">{{ t('settings.animationNone') }}</button>
+        </div>
+        <p class="muted">{{ t('settings.animationSpeedHint') }}</p>
+      </div>
+
+      <div class="accent-picker">
         <p class="eyebrow">{{ t('settings.languageLabel') }} / Language</p>
         <div class="segmented-control" aria-label="Language">
           <button :data-active="locale === 'zh-CN'" type="button" @click="locale = 'zh-CN'; saveLocale('zh-CN')">中文</button>
@@ -196,9 +230,7 @@ onMounted(() => {
           <p class="eyebrow">{{ t('settings.versionHistory') }}</p>
           <h3>{{ t('settings.currentVersion', { version: appConfig.appVersion }) }}</h3>
         </div>
-        <RouterLink class="ghost-button" to="/release-notes">{{ t('settings.viewReleaseNotes') }}</RouterLink>
       </div>
-      <p class="muted">{{ t('settings.releaseNotesHint') }}</p>
       <div class="open-source-attribution">
         <p>{{ t('settings.openSourceAttribution') }}</p>
         <div>

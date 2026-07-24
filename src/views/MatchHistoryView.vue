@@ -3,8 +3,6 @@ import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useMatchHistoryStore } from '@/stores/match-history'
-import StatusPill from '@/components/ui/StatusPill.vue'
-
 const { t } = useI18n()
 const router = useRouter()
 const store = useMatchHistoryStore()
@@ -12,11 +10,15 @@ const searchQuery = ref('')
 
 const filtered = computed(() => {
   const q = searchQuery.value.toLowerCase()
-  return store.sortedMatches.filter(m =>
-    m.map.toLowerCase().includes(q) ||
-    m.players.some(p => p.name.toLowerCase().includes(q))
-  )
+  return store.sortedMatches
+    .filter(m => m.map.toLowerCase().includes(q) || m.players.some(p => p.name.toLowerCase().includes(q)))
+    .map(m => ({ match: m, bestPlayer: topPlayer(m.players) }))
 })
+
+function topPlayer(players: typeof store.sortedMatches[0]['players']) {
+  const sorted = [...players].sort((a, b) => b.rating - a.rating)
+  return sorted[0]!
+}
 
 function formatDuration(seconds: number): string {
   const m = Math.floor(seconds / 60)
@@ -27,10 +29,6 @@ function formatDuration(seconds: number): string {
 function formatDate(iso: string): string {
   const d = new Date(iso)
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-}
-
-function topPlayer(players: typeof store.sortedMatches[0]['players']) {
-  return [...players].sort((a, b) => b.rating - a.rating)[0]
 }
 
 function viewDetail(index: number) {
@@ -50,9 +48,10 @@ onMounted(() => {
         <h2>{{ t('matchHistory.subtitle') }}</h2>
         <p class="muted">{{ store.totalMatches }} matches · {{ t('matchHistory.avgRating') }}: {{ store.averageRating.toFixed(2) }} · {{ store.totalKills }} kills</p>
       </div>
-      <div class="search-wrap">
+      <label class="search-wrap">
+        <span class="sr-only">{{ t('matchHistory.search') }}</span>
         <input v-model="searchQuery" class="search-input" :placeholder="t('matchHistory.search')" />
-      </div>
+      </label>
     </article>
 
     <div v-if="store.loading" class="loading-state">
@@ -69,14 +68,12 @@ onMounted(() => {
     </div>
 
     <div v-else class="match-list">
-      <article
-        v-for="(match) in filtered"
+      <button
+        v-for="{ match, bestPlayer } in filtered"
         :key="match.timestamp"
         class="match-card glass"
-        role="button"
-        :tabindex="0"
+        type="button"
         @click="viewDetail(store.sortedMatches.indexOf(match))"
-        @keydown.enter="viewDetail(store.sortedMatches.indexOf(match))"
       >
         <div class="match-card__header">
           <div class="match-card__map">{{ match.map }}</div>
@@ -93,20 +90,16 @@ onMounted(() => {
         </div>
 
         <div class="match-card__top-player">
-          <template v-if="topPlayer(match.players)">
-            <span class="match-card__top-name">{{ topPlayer(match.players).name }}</span>
-            <span class="match-card__top-kd">{{ topPlayer(match.players).kills }}K / {{ topPlayer(match.players).deaths }}D</span>
-            <span class="match-card__top-rating">{{ topPlayer(match.players).rating.toFixed(2) }}</span>
-            <span class="match-card__top-adr">{{ topPlayer(match.players).adr.toFixed(1) }} ADR</span>
-          </template>
+          <span class="match-card__top-name">{{ bestPlayer.name }}</span>
+          <span class="match-card__top-kd">{{ bestPlayer.kills }}K / {{ bestPlayer.deaths }}D</span>
+          <span class="match-card__top-rating">{{ bestPlayer.rating.toFixed(2) }}</span>
+          <span class="match-card__top-adr">{{ bestPlayer.adr.toFixed(1) }} ADR</span>
         </div>
 
         <div class="match-card__players">
-          <StatusPill v-for="p in match.players.filter(p => !p.isBot).slice(0, 10)" :key="p.name">
-            {{ p.name }}
-          </StatusPill>
+          <span v-for="p in match.players.filter(p => !p.isBot).slice(0, 10)" :key="p.name" class="player-tag">{{ p.name }}</span>
         </div>
-      </article>
+      </button>
     </div>
   </section>
 </template>
@@ -134,7 +127,7 @@ onMounted(() => {
   border: 1px solid var(--panel-border);
   border-radius: var(--radius-sm);
   background: var(--field-bg);
-  color: var(--text-primary);
+  color: var(--text-color);
   font-size: var(--fs-sm);
   min-width: 220px;
 }
@@ -152,7 +145,7 @@ onMounted(() => {
   width: 20px;
   height: 20px;
   border: 2px solid var(--panel-border);
-  border-top-color: var(--accent);
+  border-top-color: var(--color-accent);
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
@@ -202,17 +195,17 @@ onMounted(() => {
 }
 
 .match-card__score .winner {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .match-card__score-divider {
-  color: var(--text-muted);
+  color: var(--muted-color);
   margin: 0 0.15rem;
 }
 
 .match-card__duration {
   font-size: var(--fs-xs);
-  color: var(--text-muted);
+  color: var(--muted-color);
   margin-left: auto;
 }
 
@@ -237,16 +230,16 @@ onMounted(() => {
 }
 
 .match-card__top-rating {
-  color: var(--accent);
+  color: var(--color-accent);
   font-weight: 600;
 }
 
 .match-card__top-adr {
-  color: var(--text-muted);
+  color: var(--muted-color);
 }
 
 .match-card__top-kd {
-  color: var(--text-secondary);
+  color: var(--muted-color);
 }
 
 .match-card__players {
@@ -254,5 +247,13 @@ onMounted(() => {
   flex-wrap: wrap;
   gap: 0.25rem;
   margin-top: 0.5rem;
+}
+
+.player-tag {
+  font-size: var(--fs-xs);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-sm);
+  background: var(--ghost-bg);
+  color: var(--muted-color);
 }
 </style>

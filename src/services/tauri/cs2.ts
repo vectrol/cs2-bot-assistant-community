@@ -3,7 +3,6 @@ import { invoke } from '@tauri-apps/api/core'
 import type {
   AiApiConfig,
   BotTauntsConfig,
-  CommandsTxtPayload,
   Cs2EnvironmentStatus,
   Cs2RootCandidate,
   DemoDiscoveryPayload,
@@ -89,11 +88,11 @@ export function launchCs2Direct(rootPath: string, insecure: boolean, extraArgs: 
   return invoke<void>('launch_cs2_direct', { cs2Root: rootPath, insecure, extraArgs })
 }
 
-export function installBotPackage(rootPath: string, variant?: string) {
+export function installBotPackage(rootPath: string) {
   if (!isTauriRuntime()) {
     return webOnlyOperation(`Web preview cannot install packages. Target: ${rootPath}`)
   }
-  return invoke<OperationResult>('install_bot_package', { rootPath, variant: variant ?? null })
+  return invoke<OperationResult>('install_bot_package', { rootPath })
 }
 
 export function applyDifficultyProfile(rootPath: string, preset: DifficultyPreset) {
@@ -215,16 +214,6 @@ export function resetNadeRecoveryConfig(rootPath: string) {
     return getNadeRecoveryConfig(rootPath)
   }
   return invoke<NadeRecoveryConfig>('reset_nade_recovery_config', { rootPath })
-}
-
-export function getCommandsTxt() {
-  if (!isTauriRuntime()) {
-    return Promise.resolve<CommandsTxtPayload>({
-      content: 'Web preview cannot read Commands.txt from the built-in resource pack.',
-      sourcePath: 'web-preview',
-    })
-  }
-  return invoke<CommandsTxtPayload>('get_commands_txt')
 }
 
 export function discoverDemos(rootPath: string) {

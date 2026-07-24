@@ -214,7 +214,7 @@ const copyText = computed(() => {
   border-radius: var(--radius-sm);
   background: var(--field-bg);
   font-size: var(--fs-xs);
-  font-family: var(--font-mono);
+  font-family: "Cascadia Code", ui-monospace, monospace;
   line-height: 1.5;
   max-height: 300px;
   overflow: auto;
@@ -224,7 +224,7 @@ const copyText = computed(() => {
 .diagnostics-divider {
   margin: 1rem 0;
   border: none;
-  border-top: 1px solid var(--border-muted);
+  border-top: 1px solid var(--panel-border);
 }
 
 .version-section {
@@ -251,11 +251,11 @@ const copyText = computed(() => {
 
 .version-row code {
   font-size: var(--fs-xs);
-  font-family: var(--font-mono);
-  color: var(--accent-text);
+  font-family: "Cascadia Code", ui-monospace, monospace;
+  color: var(--color-accent);
   background: var(--field-bg);
   padding: 0.1rem 0.35rem;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-sm);
 }
 
 .diagnostics-error {

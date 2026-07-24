@@ -1,14 +1,11 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { useI18n } from 'vue-i18n'
 
 const STORAGE_KEY = 'cs2-bot-improver.ui-preferences.v1'
-export type PluginPackVariant = 'original' | 'improved'
+
 const DEFAULT_PINNED_COMMANDS = ['bot_kick', 'bot_nades more', '-insecure']
 const MAX_RECENT_COMMANDS = 8
 const MAX_RECENT_ACTIONS = 8
-const MAX_RESTORE_POINTS = 10
-
 export interface RecentCommand {
   command: string
   summary: string
@@ -18,21 +15,6 @@ export interface RecentCommand {
 export interface RecentAction {
   label: string
   detail: string
-  at: string
-}
-
-export interface RestorePoint {
-  id: string
-  at: string
-  operation: string
-  rootPath: string
-  scope: string
-  rollbackAvailable: boolean
-}
-
-export interface LastErrorInfo {
-  message: string
-  context: string
   at: string
 }
 
@@ -50,11 +32,11 @@ interface UiPreferencesState {
   recentCommands: RecentCommand[]
   pinnedCommands: string[]
   recentActions: RecentAction[]
-  restorePoints: RestorePoint[]
-  lastError: LastErrorInfo | null
+  restorePoints: Array<{ id: string; at: string; operation: string; rootPath: string; scope: string; rollbackAvailable: boolean }>
+  lastError: { message: string; context: string; at: string } | null
   lastDemoPath: string
   dismissedHints: string[]
-  pluginPackVariant: PluginPackVariant
+
   autoInstallOnFirstRunEnabled: boolean
   autoInstallAttemptedVersions: string[]
   lastAutoInstall: AutoInstallState
@@ -71,7 +53,6 @@ function defaultState(): UiPreferencesState {
     lastError: null,
     lastDemoPath: '',
     dismissedHints: [],
-    pluginPackVariant: 'original',
     autoInstallOnFirstRunEnabled: true,
     autoInstallAttemptedVersions: [],
     lastAutoInstall: {
@@ -99,15 +80,16 @@ function readState(): UiPreferencesState {
         ? parsed.pinnedCommands.filter((item): item is string => typeof item === 'string')
         : fallback.pinnedCommands,
       recentActions: Array.isArray(parsed.recentActions) ? parsed.recentActions.filter(isRecentAction) : [],
-      restorePoints: Array.isArray(parsed.restorePoints) ? parsed.restorePoints.filter(isRestorePoint) : [],
-      lastError: isLastError(parsed.lastError) ? parsed.lastError : null,
+      restorePoints: Array.isArray(parsed.restorePoints)
+        ? parsed.restorePoints.filter((item): item is { id: string; at: string; operation: string; rootPath: string; scope: string; rollbackAvailable: boolean } =>
+          Boolean(item && typeof item === 'object' && typeof Reflect.get(item, 'id') === 'string'),
+        )
+        : [],
+      lastError: (parsed.lastError && typeof parsed.lastError === 'object' && typeof Reflect.get(parsed.lastError, 'message') === 'string') ? parsed.lastError as { message: string; context: string; at: string } : null,
       lastDemoPath: typeof parsed.lastDemoPath === 'string' ? parsed.lastDemoPath : '',
       dismissedHints: Array.isArray(parsed.dismissedHints)
         ? parsed.dismissedHints.filter((item): item is string => typeof item === 'string')
         : [],
-      pluginPackVariant: parsed.pluginPackVariant === 'original' || parsed.pluginPackVariant === 'improved'
-        ? parsed.pluginPackVariant
-        : fallback.pluginPackVariant,
       autoInstallOnFirstRunEnabled:
         typeof parsed.autoInstallOnFirstRunEnabled === 'boolean'
           ? parsed.autoInstallOnFirstRunEnabled
@@ -144,28 +126,6 @@ function isRecentAction(item: unknown): item is RecentAction {
   )
 }
 
-function isRestorePoint(item: unknown): item is RestorePoint {
-  return Boolean(
-    item
-      && typeof item === 'object'
-      && typeof Reflect.get(item, 'id') === 'string'
-      && typeof Reflect.get(item, 'operation') === 'string'
-      && typeof Reflect.get(item, 'rootPath') === 'string'
-      && typeof Reflect.get(item, 'scope') === 'string'
-      && typeof Reflect.get(item, 'at') === 'string',
-  )
-}
-
-function isLastError(item: unknown): item is LastErrorInfo {
-  return Boolean(
-    item
-      && typeof item === 'object'
-      && typeof Reflect.get(item, 'message') === 'string'
-      && typeof Reflect.get(item, 'context') === 'string'
-      && typeof Reflect.get(item, 'at') === 'string',
-  )
-}
-
 function isAutoInstallState(item: unknown): item is AutoInstallState {
   return Boolean(
     item
@@ -180,12 +140,7 @@ function nowIso() {
   return new Date().toISOString()
 }
 
-function makeRestoreId() {
-  return `restore-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-}
-
 export const useUiPreferencesStore = defineStore('uiPreferences', () => {
-  const { t } = useI18n()
   const state = ref<UiPreferencesState>(defaultState())
   const loaded = ref(false)
 
@@ -197,7 +152,6 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
   const lastSelectedRoot = computed(() => state.value.lastSelectedRoot)
   const lastError = computed(() => state.value.lastError)
   const lastDemoPath = computed(() => state.value.lastDemoPath)
-  const pluginPackVariant = computed(() => state.value.pluginPackVariant)
   const autoInstallOnFirstRunEnabled = computed(() => state.value.autoInstallOnFirstRunEnabled)
   const autoInstallAttemptedVersions = computed(() => state.value.autoInstallAttemptedVersions)
   const lastAutoInstall = computed(() => state.value.lastAutoInstall)
@@ -269,40 +223,9 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     persist()
   }
 
-  function createRestorePoint(operation: string, rootPath: string, scope: string, rollbackAvailable = false) {
-    load()
-    const point: RestorePoint = {
-      id: makeRestoreId(),
-      at: nowIso(),
-      operation,
-      rootPath: rootPath || t('store.dirNotSelected'),
-      scope,
-      rollbackAvailable,
-    }
-    state.value.restorePoints = [point, ...state.value.restorePoints].slice(0, MAX_RESTORE_POINTS)
-    persist()
-    return point
-  }
-
-  function recordError(message: string, context?: string) {
-    load()
-    state.value.lastError = {
-      message,
-      context: context || t('store.generalOperation'),
-      at: nowIso(),
-    }
-    persist()
-  }
-
   function setLastDemoPath(path: string) {
     load()
     state.value.lastDemoPath = path
-    persist()
-  }
-
-  function setPluginPackVariant(variant: PluginPackVariant) {
-    load()
-    state.value.pluginPackVariant = variant
     persist()
   }
 
@@ -371,8 +294,6 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     recordCommand,
     togglePinnedCommand,
     recordAction,
-    createRestorePoint,
-    recordError,
     setLastDemoPath,
     isHintDismissed,
     dismissHint,
@@ -380,7 +301,5 @@ export const useUiPreferencesStore = defineStore('uiPreferences', () => {
     hasAutoInstallAttempted,
     recordAutoInstallStatus,
     markAutoInstallAttempted,
-    pluginPackVariant,
-    setPluginPackVariant,
   }
 })

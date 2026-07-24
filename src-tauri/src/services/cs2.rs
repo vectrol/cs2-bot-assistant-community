@@ -422,7 +422,7 @@ pub fn check_cs2_process() -> Result<bool, AppError> {
     Ok(false)
 }
 
-pub fn install_bot_package(app: &AppHandle, root_path: &str, variant: Option<&str>) -> Result<OperationResult, AppError> {
+pub fn install_bot_package(app: &AppHandle, root_path: &str) -> Result<OperationResult, AppError> {
     ensure_cs2_not_running()?;
 
     let root = normalize_root(root_path)?;
@@ -434,8 +434,7 @@ pub fn install_bot_package(app: &AppHandle, root_path: &str, variant: Option<&st
         )));
     }
 
-    let zip_name = variant.unwrap_or(DEFAULT_BUNDLED_ZIP_NAME);
-    let zip_path = resolve_zip_path_with_name(app, zip_name)?;
+    let zip_path = resolve_zip_path(app)?;
     ensure_install_destination_ready(&destination)?;
     let cleanup_summary = remove_entire_plugin_package(&destination)?;
     let temp_dir = std::env::temp_dir().join(format!(

@@ -73,8 +73,8 @@ const launchLabel = computed(() => {
 
 <template>
   <Teleport to="body">
-    <div v-if="open" class="modal-backdrop launch-game-backdrop" style="animation: fade-in 0.15s ease;" role="dialog" aria-modal="true" :aria-label="t('launchGame.ariaLabel')">
-      <article class="launch-game-modal glass" style="backdrop-filter: blur(28px); animation: scale-in 0.2s ease;">
+    <div v-if="open" class="modal-backdrop launch-game-backdrop modal-enter" role="dialog" aria-modal="true" :aria-label="t('launchGame.ariaLabel')">
+      <article class="launch-game-modal glass modal-enter">
         <button class="launch-game-modal__close" type="button" :aria-label="t('launchGame.close')" @click="emit('close')">
           <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
             <path d="M18 6L6 18M6 6l12 12" />
@@ -168,26 +168,26 @@ const launchLabel = computed(() => {
   grid-template-rows: auto auto;
   gap: 0.125rem 0.5rem;
   padding: 0.625rem 0.75rem;
-  border: 1px solid var(--border-muted);
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
 }
 
 .launch-mode-option:hover {
-  border-color: var(--border-subtle);
+  border-color: var(--panel-border);
 }
 
 .launch-mode-option.active {
-  border-color: var(--accent);
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 8%, transparent);
 }
 
 .launch-mode-option__indicator {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  border: 1.5px solid var(--border-muted);
+  border: 1.5px solid var(--panel-border);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -195,9 +195,9 @@ const launchLabel = computed(() => {
 }
 
 .launch-mode-option.active .launch-mode-option__indicator {
-  border-color: var(--accent);
-  background: var(--accent);
-  box-shadow: inset 0 0 0 3px var(--bg-primary);
+  border-color: var(--color-accent);
+  background: var(--color-accent);
+  box-shadow: inset 0 0 0 3px var(--color-bg);
 }
 
 .launch-mode-option__label {
@@ -208,7 +208,7 @@ const launchLabel = computed(() => {
 .launch-mode-option__detail {
   grid-column: 2;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--muted-color);
   line-height: 1.4;
 }
 
@@ -219,7 +219,7 @@ const launchLabel = computed(() => {
   gap: 0.5rem;
   margin-bottom: 1rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-muted);
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
   cursor: pointer;
 }
@@ -241,7 +241,7 @@ const launchLabel = computed(() => {
   gap: 0.5rem;
   margin-bottom: 1rem;
   padding: 0.5rem 0.75rem;
-  border: 1px solid var(--border-muted);
+  border: 1px solid var(--panel-border);
   border-radius: 6px;
 }
 
@@ -254,30 +254,30 @@ const launchLabel = computed(() => {
 .custom-args-field__input {
   width: 100%;
   padding: 0.4rem 0.6rem;
-  border: 1px solid var(--border-muted);
+  border: 1px solid var(--panel-border);
   border-radius: 4px;
   background: var(--field-bg);
-  color: var(--text-primary);
+  color: var(--text-color);
   font-size: 0.8125rem;
-  font-family: var(--font-mono);
+  font-family: "Cascadia Code", ui-monospace, monospace;
   outline: none;
   transition: border-color 0.15s;
 }
 
 .custom-args-field__input:focus {
-  border-color: var(--accent);
+  border-color: var(--color-accent);
 }
 
 .custom-args-field__hint {
   width: 100%;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--muted-color);
 }
 
 .insecure-toggle__hint {
   width: 100%;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--muted-color);
 }
 
 .sr-only {
@@ -292,9 +292,26 @@ const launchLabel = computed(() => {
   margin-bottom: 0.75rem;
   padding: 0.5rem 0.75rem;
   font-size: 0.8125rem;
-  color: var(--text-warn, #d97706);
-  background: color-mix(in srgb, var(--text-warn, #d97706) 10%, transparent);
+  color: var(--color-warn);
+  background: color-mix(in srgb, var(--color-warn) 10%, transparent);
   border-radius: 5px;
-  border: 1px solid color-mix(in srgb, var(--text-warn, #d97706) 25%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-warn) 25%, transparent);
+}
+
+.modal-enter {
+  animation: fade-in 0.15s ease;
+}
+.modal-enter > .launch-game-modal {
+  animation: scale-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
 }
 </style>

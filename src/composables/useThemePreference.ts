@@ -1,7 +1,15 @@
 import { type Ref, ref } from 'vue'
 
 import { appConfig } from '@/config/app'
-import { type ThemeMode, loadAccent, saveAccent, applyAccentToDocument } from '@/features/theme/themes'
+import {
+  type ThemeMode,
+  type AnimationSpeed,
+  loadAccent,
+  saveAccent,
+  loadThemePreferences,
+  saveThemePreferences,
+  applyAccentToDocument,
+} from '@/features/theme/themes'
 
 type ThemePreference = ThemeMode
 
@@ -16,14 +24,30 @@ function persistTheme(value: ThemePreference) {
 export function useThemePreference() {
   const theme: Ref<ThemePreference> = ref(DEFAULT_THEME)
   const accentHue: Ref<number> = ref(200)
+  const glassOpacity: Ref<number> = ref(1)
+  const animationSpeed: Ref<AnimationSpeed> = ref('normal')
 
   const themeLabel = ref('深色')
+
+  function applyPrefs() {
+    applyAccentToDocument(accentHue.value, theme.value, {
+      glassOpacity: glassOpacity.value,
+      animationSpeed: animationSpeed.value,
+    })
+  }
+
+  function saveAllPrefs() {
+    saveThemePreferences({
+      glassOpacity: glassOpacity.value,
+      animationSpeed: animationSpeed.value,
+    })
+  }
 
   function applyTheme(value: ThemePreference) {
     theme.value = value
     themeLabel.value = value === 'dark' ? '深色' : '亮色'
     persistTheme(value)
-    applyAccentToDocument(accentHue.value, value)
+    applyPrefs()
   }
 
   function toggleTheme() {
@@ -33,7 +57,20 @@ export function useThemePreference() {
   function setAccent(hue: number) {
     accentHue.value = hue
     saveAccent({ hue })
-    applyAccentToDocument(hue, theme.value)
+    applyPrefs()
+  }
+
+  function setGlassOpacity(value: number) {
+    glassOpacity.value = value
+    applyPrefs()
+    saveAllPrefs()
+  }
+
+  function setAnimationSpeed(value: AnimationSpeed) {
+    animationSpeed.value = value
+    document.documentElement.dataset.animSpeed = value === 'normal' ? '' : value
+    applyPrefs()
+    saveAllPrefs()
   }
 
   function initializeTheme() {
@@ -47,16 +84,27 @@ export function useThemePreference() {
     }
     const accent = loadAccent()
     accentHue.value = accent.hue
-    applyAccentToDocument(accent.hue, theme.value)
+
+    const prefs = loadThemePreferences()
+    glassOpacity.value = prefs.glassOpacity
+    animationSpeed.value = prefs.animationSpeed
+    if (prefs.animationSpeed !== 'normal') {
+      document.documentElement.dataset.animSpeed = prefs.animationSpeed
+    }
+    applyPrefs()
   }
 
   return {
     theme,
     themeLabel,
     accentHue,
+    glassOpacity,
+    animationSpeed,
     applyTheme,
     toggleTheme,
     setAccent,
+    setGlassOpacity,
+    setAnimationSpeed,
     initializeTheme,
   }
 }

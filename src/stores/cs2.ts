@@ -217,12 +217,12 @@ export const useCs2Store = defineStore('cs2', () => {
     return demoDiscovery.value
   }
 
-  async function install(variant?: string) {
+  async function install() {
     if (!selectedRoot.value) throw new Error(t('store.noRoot'))
 
     busy.value = true
     try {
-      const result = await installBotPackage(selectedRoot.value, variant)
+      const result = await installBotPackage(selectedRoot.value)
       await refreshEnvironment()
       rememberInstalledRoot(selectedRoot.value)
       message.value = result.message

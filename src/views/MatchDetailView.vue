@@ -162,11 +162,11 @@ onMounted(() => {
 }
 
 .match-score .winner {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .match-score-divider {
-  color: var(--text-muted);
+  color: var(--muted-color);
 }
 
 .players-table-wrap {
@@ -187,7 +187,7 @@ onMounted(() => {
   padding: 0.5rem 0.4rem;
   text-align: center;
   font-weight: 600;
-  color: var(--text-muted);
+  color: var(--muted-color);
   border-bottom: 1px solid var(--panel-border);
   white-space: nowrap;
   background: var(--ghost-bg);
@@ -219,7 +219,7 @@ onMounted(() => {
   display: inline-block;
   font-size: 0.65rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--muted-color);
   background: var(--ghost-bg);
   padding: 0.1rem 0.3rem;
   border-radius: 3px;
@@ -236,11 +236,11 @@ onMounted(() => {
 }
 
 .rating-high {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .rating-low {
-  color: var(--text-muted);
+  color: var(--muted-color);
 }
 
 .bar-cell {
@@ -250,7 +250,7 @@ onMounted(() => {
 
 .rating-bar {
   height: 6px;
-  background: var(--accent);
+  background: var(--color-accent);
   border-radius: 3px;
   opacity: 0.4;
   min-width: 2px;
@@ -277,7 +277,7 @@ onMounted(() => {
 }
 
 .summary-value.accent {
-  color: var(--accent);
+  color: var(--color-accent);
 }
 
 .empty-state {

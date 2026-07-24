@@ -4,24 +4,13 @@ import { RouterLink } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 
 import { appConfig } from '@/config/app'
+import { getIcon } from '@/constants/icons'
 import { useCs2Store } from '@/stores/cs2'
 import type { Cs2EnvironmentStatus } from '@/types/cs2'
 
 const { t } = useI18n()
 const store = useCs2Store()
 const openLaunchModal = inject<() => void>('openLaunchGameModal')
-
-const icons: Record<string, string> = {
-  play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>',
-  grid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="8" height="8" rx="1"/><rect x="13" y="3" width="8" height="8" rx="1"/><rect x="3" y="13" width="8" height="8" rx="1"/><rect x="13" y="13" width="8" height="8" rx="1"/></svg>',
-  terminal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 17l6-6-6-6"/><path d="M12 19h8"/></svg>',
-  gear: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v2M12 21v2M1 12h2M21 12h2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" stroke-linecap="round"/></svg>',
-  help: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3" stroke-linecap="round"/><circle cx="12" cy="17" r=".5" fill="currentColor"/></svg>',
-  sliders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><circle cx="4" cy="12" r="2"/><circle cx="12" cy="10" r="2"/><circle cx="20" cy="14" r="2"/></svg>',
-  plugins: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M4 6h3M4 12h3M4 18h3"/><rect x="7" y="4" width="13" height="16" rx="2"/><path d="M12 10h5M12 14h5"/></svg>',
-  history: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
-  news: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-4 0V5"/><line x1="10" y1="8" x2="18" y2="8"/><line x1="10" y1="12" x2="18" y2="12"/><line x1="10" y1="16" x2="14" y2="16"/></svg>',
-}
 
 const cards = computed(() => [
   {
@@ -49,13 +38,6 @@ const cards = computed(() => [
     color: '#22c55e',
   },
   {
-    title: t('nav.configConsole'),
-    desc: t('config.nadeRecovery'),
-    icon: 'gear',
-    to: '/config',
-    color: '#f59e0b',
-  },
-  {
     title: t('nav.guideHelp'),
     desc: t('guide.environmentTitle'),
     icon: 'help',
@@ -77,13 +59,6 @@ const cards = computed(() => [
     color: '#8b5cf6',
   },
   {
-    title: t('nav.news'),
-    desc: t('news.title'),
-    icon: 'news',
-    to: '/news',
-    color: '#f97316',
-  },
-  {
     title: t('nav.matchHistory'),
     desc: t('matchHistory.dashboardDesc'),
     icon: 'history',
@@ -100,14 +75,11 @@ const statusItems = computed(() => [
   { label: t('guide.environmentTitle'), value: envStatus.value ? (envStatus.value.baseEnvironmentReady ? t('guide.environmentReady') : t('guide.environmentIncomplete')) : t('guide.notChecked'), state: envStatus.value?.baseEnvironmentReady ? 'ready' as const : 'warn' as const },
 ])
 
-function getIcon(name: string): string {
-  return icons[name] || ''
-}
 </script>
 
 <template>
   <section class="page-grid dashboard-page">
-    <article class="hero-banner dashboard-hero glass stagger-enter" style="animation: fade-in-up 0.25s ease;">
+    <article class="hero-banner dashboard-hero glass">
       <div>
         <p class="eyebrow">{{ t('app.brandLabel') }}</p>
         <h2>{{ t('app.name') }}</h2>
@@ -163,6 +135,8 @@ function getIcon(name: string): string {
 <style scoped>
 .dashboard-page {
   padding: 1rem;
+  animation: fade-in-up 0.35s var(--ease-out) both;
+  animation-duration: calc(0.35s * var(--anim-speed, 1));
 }
 
 .dashboard-hero {

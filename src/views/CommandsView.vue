@@ -16,7 +16,7 @@ import { useI18n } from 'vue-i18n'
 const { t } = useI18n()
 
 const COMMANDS_HINT_STORAGE_KEY = 'cs2-bot-improver.commands-page-hint-seen'
-type CommandPageTabKey = CommandTabKey
+type CommandPageTabKey = CommandTabKey | 'pinned'
 
 const route = useRoute()
 const router = useRouter()
@@ -38,6 +38,11 @@ const form = reactive({
 let copiedTimer: ReturnType<typeof setTimeout> | null = null
 
 const tabs = computed(() => [
+  ...(preferences.pinnedCommands.length > 0 ? [{
+    key: 'pinned' as const,
+    label: t('commands.pinned'),
+    count: preferences.pinnedCommands.length,
+  }] : []),
   ...commandCenterTabs.map((tab) => ({
     key: tab.key,
     label: t(`commands.tabs.${tab.key}` as `commands.tabs.${typeof tab.key}`),
@@ -51,10 +56,12 @@ const tabs = computed(() => [
 ])
 
 const currentCommandTab = computed(() => commandCenterTabs.find((tab) => tab.key === activeTab.value) ?? commandCenterTabs[0])
+const pinnedItems = computed(() => preferences.pinnedCommands)
 const currentTabLabel = computed(() => activeTab.value && !isCustomTab.value && !isTeamsTab.value ? t(`commands.tabs.${activeTab.value}` as const) : '')
 const currentTabDesc = computed(() => activeTab.value && !isCustomTab.value && !isTeamsTab.value ? t(`commands.tabs.${activeTab.value}.desc` as const) : '')
 const isCustomTab = computed(() => activeTab.value === 'custom')
 const isTeamsTab = computed(() => activeTab.value === 'teams')
+const isPinnedTab = computed(() => activeTab.value === 'pinned')
 const isEditing = computed(() => editingId.value.length > 0)
 const hasCustomItems = computed(() => customStore.items.length > 0)
 
@@ -132,7 +139,11 @@ function editCommand(item: CustomCommandItem) {
 
 function setActiveTab(tab: CommandPageTabKey) {
   activeTab.value = tab
-  router.replace({ path: '/commands', query: tab === 'common' ? {} : { tab } })
+  if (tab === 'pinned' || tab === 'custom') {
+    router.replace({ path: '/commands', query: { tab } })
+  } else {
+    router.replace({ path: '/commands', query: tab === 'common' ? {} : { tab } })
+  }
 }
 
 function markCopied(key: string) {
@@ -236,6 +247,56 @@ function normalizeCustomError(error: unknown) {
   return t('commands.saveFailed')
 }
 
+function exportCommands() {
+  if (customStore.items.length === 0) return
+  const blob = new Blob([JSON.stringify(customStore.items, null, 2)], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `cs2-custom-commands-${new Date().toISOString().slice(0, 10)}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+  localMessage.value = t('commands.exportSuccess', { n: customStore.items.length })
+}
+
+async function importCommands() {
+  const input = document.createElement('input')
+  input.type = 'file'
+  input.accept = '.json'
+  input.onchange = async () => {
+    const file = input.files?.[0]
+    if (!file) return
+    try {
+      const text = await file.text()
+      const data = JSON.parse(text)
+      if (!Array.isArray(data)) throw new Error('Invalid format')
+      const valid = data.filter((item: unknown) =>
+        typeof item === 'object' && item && typeof Reflect.get(item, 'command') === 'string'
+      )
+      if (valid.length === 0) throw new Error('No valid commands found')
+      for (const item of valid) {
+        await customStore.addCommand({
+          title: String(Reflect.get(item, 'title') || ''),
+          description: String(Reflect.get(item, 'description') || ''),
+          command: String(Reflect.get(item, 'command')),
+        })
+      }
+      localMessage.value = t('commands.importSuccess', { n: valid.length })
+    } catch {
+      localMessage.value = t('commands.importFailed')
+    }
+  }
+  input.click()
+}
+
+function togglePinned(command: string) {
+  preferences.togglePinnedCommand(command)
+}
+
+function isPinned(command: string): boolean {
+  return preferences.pinnedCommands.includes(command)
+}
+
 watch(
   () => route.query.tab,
   (tab) => {
@@ -299,6 +360,8 @@ onBeforeUnmount(() => {
           :key="tab.key"
           class="command-tab"
           type="button"
+          role="tab"
+          :aria-selected="activeTab === tab.key"
           :data-active="activeTab === tab.key"
           @click="setActiveTab(tab.key)"
         >
@@ -343,6 +406,27 @@ onBeforeUnmount(() => {
       <EmptyState v-else :title="t('commands.noTeams')" :description="t('commands.noTeamsDesc')" state="warn" />
     </article>
 
+    <article v-else-if="isPinnedTab" class="card command-center-panel glass">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">{{ t('commands.pinned') }}</p>
+          <h3>{{ t('commands.pinnedDesc') }}</h3>
+        </div>
+      </div>
+
+      <div v-if="pinnedItems.length > 0" class="command-card-grid">
+        <article v-for="cmd in pinnedItems" :key="cmd" class="command-card glass" @click="copy(cmd, `pinned:${cmd}`)">
+          <code>{{ cmd }}</code>
+          <span>{{ t('commands.pinnedItem') }}</span>
+          <button class="command-card__copy" type="button" @click.stop="togglePinned(cmd)">
+            {{ t('commands.unpin') }}
+          </button>
+        </article>
+      </div>
+
+      <EmptyState v-else :title="t('commands.noPinned')" description="" state="info" />
+    </article>
+
     <article v-else-if="!isCustomTab" class="card command-center-panel glass">
       <div class="section-head">
         <div>
@@ -363,6 +447,9 @@ onBeforeUnmount(() => {
           <button class="command-card__copy" type="button" @click.stop="copy(item.command, `${activeTab}:${item.command}`, item.copyWithoutSemicolon)">
             {{ copiedKey === `${activeTab}:${item.command}` ? t('commands.copied') : t('commands.copy') }}
           </button>
+          <button class="command-card__pin" type="button" :title="isPinned(item.command) ? t('commands.unpin') : t('commands.pin')" @click.stop="togglePinned(item.command)">
+            {{ isPinned(item.command) ? '★' : '☆' }}
+          </button>
         </article>
       </div>
 
@@ -375,6 +462,14 @@ onBeforeUnmount(() => {
           <div>
             <p class="eyebrow">{{ t('commands.customTab') }}</p>
             <h3>{{ hasCustomItems ? t('commands.customTabTitle') : t('commands.customTabEmpty') }}</h3>
+          </div>
+          <div class="actions-row">
+            <button class="ghost-button" :disabled="customStore.items.length === 0" @click="exportCommands">
+              {{ t('commands.export') }}
+            </button>
+            <button class="ghost-button" @click="importCommands">
+              {{ t('commands.import') }}
+            </button>
           </div>
         </div>
 

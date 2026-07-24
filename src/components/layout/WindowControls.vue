@@ -12,9 +12,7 @@ async function minimizeWindow() {
 
   try {
     await appWindow.minimize()
-  } catch (error) {
-    console.error('minimize window failed', error)
-  }
+  } catch { /* noop */ }
 }
 
 async function toggleMaximizeWindow() {
@@ -24,9 +22,7 @@ async function toggleMaximizeWindow() {
 
   try {
     await appWindow.toggleMaximize()
-  } catch (error) {
-    console.error('toggle maximize window failed', error)
-  }
+  } catch { /* noop */ }
 }
 
 async function closeWindow() {
@@ -36,9 +32,7 @@ async function closeWindow() {
 
   try {
     await appWindow.close()
-  } catch (error) {
-    console.error('close window failed', error)
-  }
+  } catch { /* noop */ }
 }
 </script>
 

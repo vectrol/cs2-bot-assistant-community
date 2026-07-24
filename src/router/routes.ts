@@ -7,11 +7,6 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/DashboardView.vue'),
   },
   {
-    path: '/config',
-    name: 'config',
-    component: () => import('@/views/ConfigView.vue'),
-  },
-  {
     path: '/quick-control',
     name: 'quick-control',
     component: () => import('@/views/QuickControlView.vue'),
@@ -37,19 +32,9 @@ export const routes: RouteRecordRaw[] = [
     component: () => import('@/views/GuideView.vue'),
   },
   {
-    path: '/release-notes',
-    name: 'release-notes',
-    component: () => import('@/views/ReleaseNotesView.vue'),
-  },
-  {
     path: '/plugins',
     name: 'plugins',
     component: () => import('@/views/PluginsView.vue'),
-  },
-  {
-    path: '/news',
-    name: 'news',
-    component: () => import('@/views/NewsView.vue'),
   },
   {
     path: '/match-history',
